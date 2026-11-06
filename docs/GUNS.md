@@ -176,3 +176,206 @@ Each keeps its **breech** size (so ship interiors do not move) and its numbers, 
     - Slug: Slug Gun, Mortar, Rail (long), Chain Slug, Spinal Rail.
     - Point defence: Mk I-III.
     - Broadside: Gun Strip, Battery, Heavy Battery.
+
+## 12. G2 as built (the 39 guns, the bench)
+
+### Chain and charge
+- **Chain** (`chain {steps, cut, decay_s}`, weapons.gd): a volley fired within the last cooldown plus 1.5 s adds a step (up to `steps`), and each step cuts the cooldown by `cut`, one after the other (3 steps at 20%: x0.512). Steps fall away one a second once the gun has been idle `decay_s`. The data cooldown is the first volley's (the template's x1.3); a gun that stays on target averages 0.62 of it.
+- **Charge** (`charge {max, gap_s}`): a gun that is ready and not firing stores a volley each cooldown, up to `max`. A fire order (the player's key, or a turret's or swivel's autofire) fires the volley in the barrel and releases every stored one `gap_s` apart; the cooldown starts after the last. So a full Charge Ion fires 1 + 3 volleys. The pilot AI and the autofire only give the order when the gun holds `max` volleys or the target's shield is down (`Weapons.holds_charge`).
+- **State for the UI and the art:** `chain_steps(arena, ship_idx, uid)`, `chain_max(def)`, `charges(arena, ship_idx, uid)`, `charge_max(def)`. The barrel's `spin` animation turns 1.5 turns a second per step (the `spin` art has 4 frames); the `charge` frame shows the stored count. The weapon bar draws the pips from the same accessors.
+
+### The value model and the bases
+Value = fixed-equivalent damage x shots (x a beam's seconds) / cooldown (a chain gun's mean over a fight, x0.62; a charge gun x0.97) x (range / 900)^0.35 x (1 + 0.06 pierce) x (1 + 0.04 splash) x 1.1 for a gun that passes shields (tests/gun_value.gd). It is read against the base of the gun's family at its tier. The class share is not in the model: a swivel (0.8) and a turret (0.6) pay it in the fight, and the bench shows what that costs.
+
+| family | tier 1 | tier 2 | tier 3 |
+|---|---|---|---|
+| laser | laser_mk1 | laser_mk2 | laser_mk3 (new: 6.75 / 1.55 s, range 1100) |
+| pulse | pulse_mk1 | pulse_mk2 | pulse_mk3 (new: 6.75 / 2.0 s, range 1000) |
+| ion | ion_blast_mk1 | ion_mk2 (new: 2.4 / 4.65 s) | notional: 3.9 / 4.5 s, range 1000 |
+| flak | shrapnel_cannon_scrap | flak_mk2 (new: 2.5 x 6 / 3.1 s) | notional: 3.8 x 6 / 2.7 s |
+| missile | artemis_mk1 | artemis_mk2 (new: 5.8 / 6.0 s) | notional: 9 / 5.5 s |
+| beam | heat_lance_neon | beam_mk2 (new: 6 /s for 1.8 s / 9.3 s) | notional: 8.5 /s for 2 s / 8.7 s |
+| **slug** (new family) | **slug_gun: 4 / 3.0 s, range 850, pierce 1, 650 px/s** | notional: 6.5 / 2.7 s | notional: 10.5 / 2.58 s |
+| **point defence** (new) | pd_mk1: 60%, 1.2 s, intercept 350 px | pd_mk2: 70%, 0.8 s, 400 px | pd_mk3: 80%, 0.5 s, 450 px |
+
+The notional tiers step the laser's way (x1.8, then x3.05). Point defence has no offence value: its numbers are the tier (the intercept rate is 0.5, 0.9 and 1.6 shots a second) and its damage to ships is 0.5 to 1 (a rapid turret, so 0.4 to 0.8 s cooldown for Mk II and III).
+
+### The final numbers
+`damage` is the fixed equivalent (the entry); a swivel deals 0.8 of it and a turret 0.6. `model` is the value model against the base, `bench` the fight value (below) against the same base.
+
+| id | damage | x | every s | range | aim, arc/gimbal | power | tier | model | bench |
+|---|---|---|---|---|---|---|---|---|---|
+| laser_light | 2 | 1 | 1.3 | 900 | turret 270 deg | -1 | 1 | 1.08 | 0.80 |
+| laser_mk3 | 6.75 | 1 | 1.55 | 1100 | fixed +-5 deg | -4 | 3 | 1.00 | 1.00 (base) |
+| laser_burst | 1.95 | 3 | 2.2 | 1000 | fixed +-20 deg | -3 | 2 | 1.03 | 0.99 |
+| laser_chain | 3.6 | 1 | 2.275 | 1000 | fixed +-5 deg chain 3 | -3 | 2 | 0.99 | 1.02 |
+| laser_heavy | 7.7 | 1 | 2.9 | 1000 | fixed +-4 deg | -4 | 2 | 1.09 | 0.96 |
+| laser_long | 4.5 | 1 | 2.1 | 1400 | fixed +-3 deg | -3 | 2 | 0.94 | 1.03 |
+| laser_lance | 11 | 1 | 3.5 | 1650 | fixed +-2 deg | -5 | 3 | 0.93 | 1.18 |
+| pulse_light | 1 | 1 | 0.8 | 700 | turret 270 deg | -1 | 1 | 1.05 | 0.85 |
+| pulse_mk3 | 6.75 | 1 | 2 | 1000 | fixed +-5 deg | -4 | 3 | 1.00 | 1.00 (base) |
+| pulse_battery | 1.95 | 3 | 2.9 | 900 | fixed +-20 deg | -3 | 2 | 1.03 | 1.12 |
+| pulse_chain | 4.2 | 1 | 3 | 900 | swivel 150 deg chain 3 | -3 | 2 | 1.15 | 0.94 |
+| pulse_heavy | 11.5 | 1 | 3.3 | 1000 | fixed +-4 deg | -5 | 3 | 1.09 | 0.94 |
+| ion_needle | 2.6 | 1 | 5.6 | 1330 | fixed +-3 deg | -3 | 2 | 1.01 | 1.04 |
+| ion_mk2 | 2.4 | 1 | 4.65 | 950 | fixed +-5 deg | -3 | 2 | 1.00 | 1.00 (base) |
+| ion_heavy | 6.4 | 1 | 7.3 | 1000 | fixed +-4 deg | -5 | 3 | 1.07 | n/a |
+| ion_charge | 3 | 1 | 5.1 | 950 | swivel 150 deg charge 3 | -3 | 2 | 1.17 | 0.82 |
+| flak_turret | 1.2 | 6 | 2.64 | 510 | turret 270 deg | -1 | 1 | 0.94 | 0.80 |
+| flak_mk2 | 2.5 | 6 | 3.1 | 620 | fixed +-5 deg | -3 | 2 | 1.00 | 1.00 (base) |
+| flak_heavy | 6.2 | 6 | 4.4 | 650 | fixed +-4 deg | -5 | 3 | 1.06 | n/a |
+| flak_battery | 1.85 | 12 | 3.9 | 540 | fixed +-20 deg | -3 | 2 | 1.12 | 0.88 |
+| missile_pod | 2.8 | 1 | 4.4 | 1020 | fixed +-5 deg | -1 | 1 | 1.12 | 0.70 |
+| artemis_mk2 | 5.8 | 1 | 6 | 1250 | fixed +-5 deg | -3 | 2 | 1.00 | 1.00 (base) |
+| swarm_pod | 2.8 | 6 | 7 | 1100 | fixed +-5 deg | -3 | 2 | 2.28 | 0.69 |
+| torpedo | 14.5 | 1 | 8.8 | 1300 | fixed +-4 deg | -5 | 3 | 1.08 | n/a |
+| beam_light | 3.2 | 1 | 6.3 | 595 | swivel 150 deg | -2 | 1 | 1.12 | 0.77 |
+| beam_mk2 | 6 | 1 | 9.3 | 800 | fixed +-5 deg | -4 | 2 | 1.00 | 1.00 (base) |
+| beam_long | 5.3 | 1 | 11.2 | 1120 | fixed +-3 deg | -4 | 2 | 0.83 | 0.98 |
+| beam_spinal | 13 | 1 | 15 | 1350 | fixed +-2 deg | -6 | 3 | 1.14 | n/a |
+| slug_gun | 4 | 1 | 3 | 850 | fixed +-5 deg | -2 | 1 | 1.00 | 1.00 (base) |
+| slug_mortar | 3.6 | 1 | 3.2 | 750 | fixed +-5 deg | -2 | 1 | 0.79 | 1.24 |
+| slug_rail | 7 | 1 | 3.25 | 1330 | fixed +-3 deg | -4 | 2 | 1.01 | n/a |
+| slug_chain | 5.2 | 1 | 3.5 | 950 | swivel 150 deg chain 3 | -3 | 2 | 1.00 | n/a |
+| slug_spinal | 21 | 1 | 5.8 | 1575 | fixed +-2 deg charge 2 | -6 | 3 | 1.18 | n/a |
+| pd_mk1 | 0.5 | 1 | 1.2 | 600 | turret 300 deg | -2 | 1 | - | n/a |
+| pd_mk2 | 1 | 1 | 0.8 | 640 | turret 300 deg | -3 | 2 | - | n/a |
+| pd_mk3 | 1 | 1 | 0.5 | 680 | turret 300 deg | -4 | 3 | - | n/a |
+| gun_strip | 0.5 | 5 | 3.3 | 750 | fixed +-20 deg | -2 | 1 | 0.65 | 1.12 |
+| laser_strip | 1.15 | 5 | 2.2 | 1000 | fixed +-20 deg | -3 | 2 | 1.02 | 1.05 |
+| heavy_battery | 7.5 | 3 | 5.2 | 950 | fixed +-20 deg | -5 | 3 | 1.08 | n/a |
+
+
+"n/a" in the bench column: the base is notional (no gun to fight with), so the gun is held to the model. The guns the model misreads are held to their bench value instead (tests/gun_value.gd, BENCH): the lights (0.7 to 1.0 by design), the swarm pod (six small blasts deal far less than the model says), the mortar (explosive splash does well against scrap plate), the gun strip, the Pulse Chain, the Charge Ion and the Long Beam.
+
+### The bench (tests/tool_gun_bench.gd)
+- **solo:** each gun (3 copies) fires for 60 s at stationary generated enemies of its tier, 6 plain and 6 shielded, from 0.65 x its range, the shooter sweeping its aim across the hull; the damage dealt to hull and parts is compared with its family base's. Ion does no hull damage, so its value is the share of the target's shield layers it keeps down. 60 s is long enough to strip the facing hull, so the figure saturates for strong guns: read it as a coarse check (about +-10%), not a dps.
+- **pairs:** each version against its family base on identical hulls, 3 copies each, 60 s, the hull with more structure left wins (a margin under 5% is a draw). A deterministic race exaggerates small edges (a gun 5% better wins nearly always).
+- **counters:** 3 point-defence guns of the tier on the target hull, shielded hulls against plain, and the plating table.
+
+| tier | gun | against | win rate (a margin under 5% of the hull is a draw) |
+|---|---|---|---|
+| 1 | beam_light | heat_lance_neon | 4% |
+| 1 | flak_turret | shrapnel_cannon_scrap | 0% |
+| 1 | gun_strip | pulse_mk1 | 46% |
+| 1 | laser_light | laser_mk1 | 50% |
+| 1 | missile_pod | artemis_mk1 | 0% |
+| 1 | pulse_light | pulse_mk1 | 0% |
+| 1 | slug_mortar | slug_gun | 8% |
+| 2 | beam_long | beam_mk2 | 79% |
+| 2 | flak_battery | flak_mk2 | 0% |
+| 2 | laser_burst | laser_mk2 | 50% |
+| 2 | laser_chain | laser_mk2 | 50% |
+| 2 | laser_heavy | laser_mk2 | 42% |
+| 2 | laser_long | laser_mk2 | 100% |
+| 2 | laser_strip | laser_mk2 | 50% |
+| 2 | pulse_battery | pulse_mk2 | 54% |
+| 2 | pulse_chain | pulse_mk2 | 50% |
+| 2 | swarm_pod | artemis_mk2 | 8% |
+| 3 | laser_lance | laser_mk3 | 62% |
+| 3 | pulse_heavy | pulse_mk3 | 50% |
+
+**Dominance.** Within a family no version is a dominant pick: the fight values lie between 0.7 and 1.25 of the base (the lances at 1.18), and head to head the versions win between 0% and 62% (a draw band of 5%), except Laser Long and Long Beam, which win their duels (their range does not show in a duel at one distance but their pierce and fire chance do; in solo they are at 1.03 and 0.98). Across families the existing guns decide: at every tier the Laser (laser_mk1/2/3) deals the most (about 135, 216 and 425 hp in 60 s against 70 to 105 for the other families at tier 1, 115 to 167 at tier 2 and 220 to 360 at tier 3), so "the best gun wins at most 60% against the median gun" does not hold across families and cannot be tuned here without changing existing guns. The new guns are tuned to their own families.
+
+**Counters** (damage with 3 point-defence guns of the tier on the target, and on shielded hulls, as a share of the undefended plain hull):
+
+| gun | family | no counter (hp) | with 3 PD Mk of its tier | share left | on shielded hulls vs plain |
+|---|---|---|---|---|---|
+| artemis_mk1 | missile | 97.5 | 52.2 | 54% | 89% |
+| beam_light | beam | 59.5 | 59.5 | 100% | 66% |
+| flak_turret | flak | 68.9 | 68.9 | 100% | 55% |
+| gun_strip | pulse | 106.4 | 106.4 | 100% | 73% |
+| heat_lance_neon | beam | 81.8 | 81.8 | 100% | 57% |
+| ion_blast_mk1 | ion | 0.0 | 0.0 | 0% | 0% |
+| laser_light | laser | 120.4 | 120.4 | 100% | 80% |
+| laser_mk1 | laser | 142.7 | 142.7 | 100% | 90% |
+| missile_pod | missile | 70.2 | 52.5 | 75% | 83% |
+| pulse_light | pulse | 82.6 | 82.6 | 100% | 68% |
+| pulse_mk1 | pulse | 99.3 | 99.3 | 100% | 65% |
+| shrapnel_cannon_scrap | flak | 86.4 | 86.4 | 100% | 54% |
+| slug_gun | slug | 100.6 | 100.6 | 100% | 76% |
+| slug_mortar | slug | 132.0 | 88.2 | 67% | 68% |
+| artemis_mk2 | missile | 149.6 | 2.9 | 2% | 100% |
+| beam_long | beam | 155.3 | 155.3 | 100% | 92% |
+| beam_mk2 | beam | 146.7 | 146.7 | 100% | 87% |
+| flak_battery | flak | 104.9 | 104.9 | 100% | 93% |
+| flak_mk2 | flak | 118.9 | 118.9 | 100% | 94% |
+| ion_charge | ion | 0.0 | 0.0 | 0% | 0% |
+| ion_mk2 | ion | 0.0 | 0.0 | 0% | 0% |
+| ion_needle | ion | 0.0 | 0.0 | 0% | 0% |
+| laser_burst | laser | 211.8 | 211.8 | 100% | 103% |
+| laser_chain | laser | 220.5 | 220.5 | 100% | 99% |
+| laser_heavy | laser | 211.2 | 211.2 | 100% | 97% |
+| laser_long | laser | 237.0 | 237.0 | 100% | 89% |
+| laser_mk2 | laser | 218.3 | 218.3 | 100% | 98% |
+| laser_strip | laser | 222.8 | 222.8 | 100% | 104% |
+| pulse_battery | pulse | 189.2 | 189.2 | 100% | 97% |
+| pulse_chain | pulse | 165.1 | 165.1 | 100% | 89% |
+| pulse_mk2 | pulse | 171.8 | 171.8 | 100% | 94% |
+| slug_chain | slug | 163.2 | 163.2 | 100% | 92% |
+| slug_rail | slug | 174.8 | 174.8 | 100% | 88% |
+| swarm_pod | missile | 97.9 | 99.4 | 101% | 96% |
+| beam_spinal | beam | 312.0 | 312.0 | 100% | 85% |
+| flak_heavy | flak | 427.3 | 427.3 | 100% | 68% |
+| heavy_battery | slug | 344.3 | 193.9 | 56% | 72% |
+| ion_heavy | ion | 0.0 | 0.0 | 0% | 0% |
+| laser_lance | laser | 567.1 | 567.1 | 100% | 77% |
+| laser_mk3 | laser | 479.3 | 479.3 | 100% | 77% |
+| pulse_heavy | pulse | 248.2 | 248.2 | 100% | 69% |
+| pulse_mk3 | pulse | 259.3 | 259.3 | 100% | 72% |
+| slug_spinal | slug | 137.6 | 137.6 | 100% | 60% |
+| torpedo | missile | 332.4 | 0.0 | 0% | 80% |
+
+- **Point defence** takes the missiles: Artemis Mk II 0%, Torpedo about 30%, Artemis Mk I about 50% of their damage get through at tiers 1 to 3, the slow shells less (Mortar 73%, Heavy Battery 55%), and a fast bolt or laser not at all. The Swarm Pod keeps its damage (98%): six missiles outrun a point defence that has to pick them one at a time.
+- **Shields** take the beams and lasers at tier 1 (beam 46 to 66%, laser 59 to 67%) and the heavy lasers, pulses and slugs at tier 3 (60 to 76%); missiles pass them (80 to 100%).
+- **Armour** (data/tiles.json): heavy armour lets 60% of kinetic through (flak, slug, harpoons), titanium 80%, ram plating 40%; ablative plating 50% of energy (laser, pulse, beam); scrap plate takes 1.5x explosive.
+
+### Where the guns come from
+- Known from the start: `slug_gun` and `pd_mk1` (the pack recipes' `start_known`).
+- Blueprints: scans and boarding loot offer the recipe of a part an enemy carries (they rank with the core weapons; tier 3 asks fab level 3, so they come late); sold at the stations of the family's regions (Concord: human_core, grundl_barges, mire_fens; the Clans: kett_hives, gauntling_scrapyards, basalt_quarries, fenn_bazaar; Lumen: emberkin_forges, prismatic_choir, sporeling_groves; the Boneyard: missiles), as `bp:` in the small shops (tier 2 at 360, tier 3 at 640), and in twelve events (`guns_2/events/guns.json`, weight 4 for tier 3 at stage 5 or later).
+
+### Enemy use (200 generated ships per stage, tests/tool_gun_census.gd)
+The share of ships that carry each gun. Ships of the race styles weight the versions: Kett burst and swarm (gun strip, flak battery, swarm pod, missile pod), Basalt heavy (mortar, heavy laser, heavy pulse, heavy flak, torpedo), Grundl broadside (flak battery, pulse battery, laser burst, heavy battery), Prismatic charge (charge ion, needle, long beam, spinal rail), Fenn chain (chain laser, pulse and slug), Human long and point defence.
+
+| gun | stage 1 | stage 2 | stage 3 | stage 4 | stage 5 | stage 6 |
+|---|---|---|---|---|---|---|
+| artemis_mk2 | 0.0% | 0.0% | 2.0% | 3.5% | 2.0% | 2.0% |
+| beam_light | 1.0% | 1.5% | 4.0% | 6.0% | 8.0% | 6.0% |
+| beam_long | 0.0% | 0.0% | 0.5% | 1.0% | 1.0% | 0.0% |
+| beam_mk2 | 0.0% | 0.0% | 1.0% | 1.0% | 0.0% | 0.0% |
+| beam_spinal | 0.0% | 0.0% | 0.0% | 0.5% | 0.5% | 0.5% |
+| flak_battery | 0.0% | 0.5% | 5.5% | 7.5% | 8.5% | 14.0% |
+| flak_heavy | 0.0% | 0.0% | 1.5% | 3.5% | 4.5% | 3.0% |
+| flak_mk2 | 0.0% | 0.0% | 2.5% | 3.0% | 4.0% | 5.5% |
+| flak_turret | 0.0% | 1.5% | 5.5% | 3.0% | 5.5% | 8.5% |
+| gun_strip | 0.0% | 0.0% | 1.5% | 4.5% | 3.0% | 5.0% |
+| heavy_battery | 0.0% | 0.0% | 0.5% | 2.5% | 2.5% | 5.5% |
+| ion_charge | 0.0% | 3.5% | 6.5% | 13.0% | 17.0% | 16.5% |
+| ion_heavy | 0.0% | 0.0% | 0.0% | 1.5% | 0.5% | 1.0% |
+| ion_mk2 | 0.0% | 0.0% | 0.0% | 1.0% | 1.0% | 0.0% |
+| ion_needle | 0.0% | 1.0% | 7.5% | 6.0% | 10.0% | 6.5% |
+| laser_burst | 0.0% | 0.0% | 0.0% | 4.0% | 4.5% | 6.0% |
+| laser_chain | 0.0% | 0.0% | 0.5% | 2.0% | 3.0% | 0.5% |
+| laser_heavy | 0.0% | 0.0% | 0.0% | 1.5% | 1.5% | 2.5% |
+| laser_lance | 0.0% | 0.0% | 2.5% | 2.0% | 1.5% | 0.5% |
+| laser_light | 0.0% | 0.5% | 2.5% | 6.5% | 7.0% | 6.5% |
+| laser_long | 0.0% | 0.0% | 0.0% | 1.0% | 0.5% | 2.5% |
+| laser_mk3 | 0.0% | 0.0% | 0.5% | 0.5% | 2.0% | 1.5% |
+| laser_strip | 0.0% | 0.0% | 0.0% | 0.0% | 0.5% | 1.0% |
+| missile_pod | 0.0% | 1.0% | 7.0% | 5.5% | 8.0% | 8.0% |
+| pd_mk1 | 0.0% | 0.5% | 1.0% | 3.5% | 5.0% | 3.5% |
+| pd_mk2 | 0.0% | 0.0% | 3.0% | 8.5% | 8.0% | 7.5% |
+| pd_mk3 | 0.0% | 0.0% | 1.5% | 4.0% | 4.0% | 7.5% |
+| pulse_battery | 0.0% | 0.0% | 0.5% | 0.5% | 2.0% | 2.5% |
+| pulse_chain | 0.0% | 0.0% | 0.0% | 1.5% | 1.5% | 2.0% |
+| pulse_heavy | 0.0% | 0.0% | 0.5% | 0.0% | 1.0% | 0.5% |
+| pulse_light | 0.0% | 5.0% | 4.0% | 4.5% | 5.0% | 3.5% |
+| pulse_mk3 | 0.0% | 0.0% | 0.5% | 1.0% | 0.0% | 0.0% |
+| slug_chain | 0.0% | 0.0% | 5.5% | 7.5% | 9.0% | 8.5% |
+| slug_gun | 0.0% | 0.0% | 1.5% | 3.0% | 3.0% | 7.0% |
+| slug_mortar | 0.0% | 0.0% | 1.5% | 8.0% | 5.0% | 3.5% |
+| slug_rail | 0.0% | 0.0% | 2.0% | 2.0% | 1.0% | 2.5% |
+| slug_spinal | 0.0% | 0.0% | 0.5% | 1.0% | 1.0% | 0.5% |
+| swarm_pod | 0.0% | 0.0% | 1.0% | 3.0% | 2.5% | 2.5% |
+| torpedo | 0.0% | 0.0% | 0.5% | 0.0% | 0.5% | 1.0% |
+| ships with any new gun | 1% | 15% | 57% | 70% | 80% | 80% |

@@ -29,6 +29,7 @@ const Art = preload("res://scripts/view/art.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
 const Arms = preload("res://scripts/board/arms.gd")
 const Party = preload("res://scripts/board/party.gd")
+const Orders = preload("res://scripts/board/orders.gd")
 const Themes = preload("res://scripts/board/themes.gd")
 const BoardFx = preload("res://scripts/board/board_fx.gd")
 const Bolts = preload("res://scripts/board/bolts.gd")
@@ -54,6 +55,7 @@ const HOLLOW_FLICKER_S := 3.5
 const ZOOM_MIN := 0.12
 const ZOOM_MAX := 2.5
 const AIM_DEAD_ZONE := 0.3  ## cells: with the mouse this close to the soldier, the aim stays where it was
+const ORDER_SELF := 1.4  ## cells: a right click this close to the soldier calls the squad back
 const FLASH_RANGE := 12.0  ## cells the flashlight reaches
 const SELF_RANGE := 3.4  ## cells the small light round the soldier reaches
 const SPACE := Color("#04060a")  ## outside the hull
@@ -1065,6 +1067,8 @@ func find_target() -> Dictionary:
 	for id in s.opened:
 		if not s.left.has(id):
 			skip[id] = true
+	for id in Orders.busy(s):  # (a follower is looting it)
+		skip[id] = true
 	var cid: int = s.site.nearest_container(p, reach, skip)
 	if cid >= 0:
 		var d: float = s.site.centre_of(s.site.props[cid]).distance_to(p)
@@ -1154,6 +1158,7 @@ func _interact(dt: float) -> void:
 		_hold_key = key
 		hold = 0.0
 	target = t
+	s.soldier_claim = panel if panel >= 0 else (int(t["id"]) if str(t.get("type", "")) == "container" and hold > 0.0 else -1)  # (no follower loots what he is at)
 	var need := _hold_need(t)
 	var hacking := false
 	if down and need > 0.0 and panel < 0 and shop < 0:
@@ -1380,6 +1385,9 @@ func _unhandled_input(e: InputEvent) -> void:
 				_zoom(1.1)
 			MOUSE_BUTTON_WHEEL_DOWN:
 				_zoom(1.0 / 1.1)
+			MOUSE_BUTTON_RIGHT:
+				if not picking and not talking and panel < 0 and shop < 0 and _go_t < 0.0 and not _ask_leave and not session.downed:
+					order_at(_mouse_world())
 			MOUSE_BUTTON_LEFT:
 				_fire_wait = picking or panel >= 0 or shop >= 0
 				if hud != null and not picking and hud.leave_rect().has_point(e.position):
@@ -1391,6 +1399,9 @@ func _unhandled_input(e: InputEvent) -> void:
 					buy_row(hud.shop_row_at(e.position))
 				elif hud != null and picking:
 					_loadout_click(hud.loadout_at(e.position))
+				elif hud != null and not talking and hud.loadout_at(e.position).has("squad"):
+					_fire_wait = true
+					Orders.select(session, int(hud.loadout_at(e.position)["squad"]), e.shift_pressed)
 				elif hud != null and panel >= 0:
 					var row: int = hud.row_at(e.position)
 					if row >= 0:
@@ -1433,6 +1444,8 @@ func _unhandled_input(e: InputEvent) -> void:
 			session.swap()
 		elif e.keycode == KEY_F:
 			toggle_light()
+		elif e.keycode == KEY_B and not talking:  # call the squad back
+			recall_squad()
 		elif e.keycode == KEY_G:  # the active of the gear he wears (gear_active.gd)
 			use_active()
 		elif e.keycode == KEY_ESCAPE:
@@ -1449,6 +1462,33 @@ func _unhandled_input(e: InputEvent) -> void:
 			take_row(e.keycode - KEY_1)
 		elif e.keycode >= KEY_1 and e.keycode <= KEY_9 and shop >= 0:
 			buy_row(e.keycode - KEY_1)
+		elif (e.keycode == KEY_1 or e.keycode == KEY_2) and not talking:  # select follower 1 or 2 (the number keys are free here)
+			Orders.select(session, e.keycode - KEY_1, e.shift_pressed)
+
+
+## Right click at `world` (pixels): on the soldier, the squad follows again; in a room, the selected followers (else all) go there.
+func order_at(world: Variant) -> void:
+	if world == null or session == null or session.party.is_empty():
+		return
+	var cell: Vector2 = world / CELL
+	if cell.distance_to(session.soldier.pos) <= ORDER_SELF:
+		recall_squad()
+		return
+	var why: String = Orders.send(session, session.site.room_at(cell))
+	if why == "":
+		say("Right-click a room to send the squad there.")
+		Audio.fx(self, "error")
+	else:
+		say(why)
+		Audio.fx(self, "click")
+
+
+## B: the squad (the selected followers, else all) follows him again.
+func recall_squad() -> void:
+	var why: String = Orders.recall(session)
+	if why != "":
+		say(why)
+		Audio.fx(self, "click")
 
 
 ## G: the active of the soldier's body gear toward the aim. The view says what happened.

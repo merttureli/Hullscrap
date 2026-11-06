@@ -274,8 +274,22 @@ func _weapon_opts(uid: int) -> Dictionary:
 		w["shot"] = _clock
 		w["peak"] = left
 	w["left"] = left
+	var out := {"charge": 1.0 if left <= 0.0 or w["peak"] <= 0.0 else 1.0 - left / w["peak"], "fired_ago": _clock - w["shot"]}
+	var m: Dictionary = arena.ships[index].mounts[uid]
+	var def: Dictionary = arena.weapons.def(m["id"])
+	if def.has("chain"):  # the rotary barrel spins faster with each step (turns per second: SPIN_TURNS x steps)
+		var steps: int = arena.weapons.chain_steps(arena, index, uid)
+		w["spin"] = float(w.get("spin", 0.0)) + float(steps) * SPIN_TURNS * 4.0 * maxf(_clock - float(w.get("clk", _clock)), 0.0)
+		out["chain"] = steps
+		out["spin"] = float(w["spin"])
+	if def.has("charge"):  # the capacitor rings: one lit per stored volley
+		out["stored"] = arena.weapons.charges(arena, index, uid)
+	w["clk"] = _clock
 	_weapons[uid] = w
-	return {"charge": 1.0 if left <= 0.0 or w["peak"] <= 0.0 else 1.0 - left / w["peak"], "fired_ago": _clock - w["shot"]}
+	return out
+
+
+const SPIN_TURNS := 1.5  ## a chain gun's barrel turns this often a second per step
 
 
 func _draw_tile(grid, c: Vector2i, id: String) -> void:

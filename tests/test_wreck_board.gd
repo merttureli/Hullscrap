@@ -88,7 +88,7 @@ func test_a_beaten_ships_site_keeps_her_rooms_holes_parts_and_hatch() -> void:
 
 
 func test_a_destroyed_part_is_wreckage() -> void:
-	var ship = WreckSite.load_ship(_enemy(4))
+	var ship = WreckSite.load_ship(_enemy(7))
 	var uid: int = ship.components.instances.keys()[2]
 	var cells: Array = ship.components.instances[uid]["cells"].duplicate()
 	ship.components.instances.erase(uid)
@@ -98,7 +98,7 @@ func test_a_destroyed_part_is_wreckage() -> void:
 
 
 func test_a_ship_drained_of_air_boards_airless_with_no_foes_and_bodies() -> void:
-	var s = _visit(_enemy(3, "concord", 0.0, 99))
+	var s = _visit(_enemy(6, "concord", 0.0, 99))
 	for r in s.site.rooms:
 		check(Air.bad(s.site.air_of(r["id"])), "room %d has no air" % r["id"])
 	eq(s.foes.live().size(), 0, "nobody is left standing")
@@ -108,7 +108,7 @@ func test_a_ship_drained_of_air_boards_airless_with_no_foes_and_bodies() -> void
 
 
 func test_a_captured_ship_has_no_foes_and_a_won_one_has_her_crew_standing() -> void:
-	var e := _enemy(3, "concord", 1.0, 0)
+	var e := _enemy(6, "concord", 1.0, 0)
 	var won = _visit(e, "won")
 	check(won.foes.live().size() > 0, "after a win her crew on their feet are foes")
 	for f in won.foes.live():
@@ -135,7 +135,7 @@ func test_an_edge_room_with_air_is_the_airlock() -> void:
 
 
 func test_suffocation_on_foot_and_a_sealed_suit_stops_it() -> void:
-	var s = _visit(_enemy(3, "concord", 0.0, 3))
+	var s = _visit(_enemy(6, "concord", 0.0, 3))
 	var hp: float = s.soldier.hp
 	s.tick(2.0)
 	check(s.soldier.hp < hp, "the soldier loses hp in a room with no air")
@@ -154,7 +154,7 @@ func test_suffocation_on_foot_and_a_sealed_suit_stops_it() -> void:
 
 
 func test_a_door_into_a_room_with_no_air_is_shut_to_the_unsuited_soldier() -> void:
-	var s = _visit(_enemy(3, "concord", 0.0, 1))
+	var s = _visit(_enemy(6, "concord", 0.0, 1))
 	var d: Dictionary = s.site.doors[0]
 	var cell: Vector2i = d["cells"][0]
 	check(not s.soldier_passable().call(cell), "the door will not let him through")
@@ -172,7 +172,7 @@ func test_a_door_into_a_room_with_no_air_is_shut_to_the_unsuited_soldier() -> vo
 
 
 func test_a_follower_without_a_suit_waits_at_the_door_of_an_airless_room() -> void:
-	var s = _visit(_enemy(3, "concord", 1.0, 0))
+	var s = _visit(_enemy(6, "concord", 1.0, 0))
 	s.join_party(["Bram"])
 	check(not s.party.is_empty(), "Bram came along")
 	var p: Dictionary = s.party[0]
@@ -237,7 +237,7 @@ func test_go_aboard_is_refused_until_the_soldier_wears_a_sealed_suit() -> void:
 	var ship := _ship()
 	ship.inventory.add("eva_suit", 1)
 	var s = Boarding.start(null, null, "w1", {"kind": "wreck"}, ship)
-	s.site = WreckSite.make(77, _enemy(3, "concord", 0.0, 1), {})
+	s.site = WreckSite.make(77, _enemy(6, "concord", 0.0, 1), {})
 	var v = BoardView.new()
 	v.session = s
 	v.picking = true
@@ -252,7 +252,7 @@ func test_go_aboard_is_refused_until_the_soldier_wears_a_sealed_suit() -> void:
 
 
 func test_a_beaten_foe_leaves_a_body_with_ammo_and_credits() -> void:
-	var s = _visit(_enemy(3, "concord", 1.0, 0))
+	var s = _visit(_enemy(6, "concord", 1.0, 0))
 	var site = s.site
 	var before: int = site.containers().size()
 	var f: Dictionary = s.foes.add("pirate", site.airlock["spawn"] + Vector2(4, 0), 0, true)

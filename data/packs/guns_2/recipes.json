@@ -1,0 +1,713 @@
+{
+  "start_known": [
+    "slug_gun",
+    "pd_mk1"
+  ],
+  "recipes": [
+    {
+      "id": "laser_light",
+      "output": {
+        "item": "laser_light",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 18,
+        "copper": 11
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 18,
+      "category": "system"
+    },
+    {
+      "id": "laser_mk3",
+      "output": {
+        "item": "laser_mk3",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 24,
+        "copper": 8,
+        "titanium": 10,
+        "silicon": 8,
+        "military_circuit": 1,
+        "crystal": 3
+      },
+      "fab_level": 3,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 55,
+      "category": "system"
+    },
+    {
+      "id": "laser_burst",
+      "output": {
+        "item": "laser_burst",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 28,
+        "copper": 14,
+        "titanium": 6,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 36,
+      "category": "system"
+    },
+    {
+      "id": "laser_chain",
+      "output": {
+        "item": "laser_chain",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 20,
+        "copper": 10,
+        "titanium": 6,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "laser_heavy",
+      "output": {
+        "item": "laser_heavy",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 28,
+        "copper": 14,
+        "titanium": 6,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 36,
+      "category": "system"
+    },
+    {
+      "id": "laser_long",
+      "output": {
+        "item": "laser_long",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 23,
+        "copper": 12,
+        "titanium": 6,
+        "silicon": 4,
+        "crystal": 3
+      },
+      "fab_level": 3,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "laser_lance",
+      "output": {
+        "item": "laser_lance",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 38,
+        "copper": 13,
+        "titanium": 10,
+        "silicon": 8,
+        "military_circuit": 1,
+        "crystal": 3
+      },
+      "fab_level": 3,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 61,
+      "category": "system"
+    },
+    {
+      "id": "pulse_light",
+      "output": {
+        "item": "pulse_light",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 24,
+        "copper": 9,
+        "polymer": 2
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 18,
+      "category": "system"
+    },
+    {
+      "id": "pulse_mk3",
+      "output": {
+        "item": "pulse_mk3",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 24,
+        "copper": 8,
+        "titanium": 10,
+        "silicon": 8,
+        "military_circuit": 1
+      },
+      "fab_level": 3,
+      "tools": [],
+      "time": 55,
+      "category": "system"
+    },
+    {
+      "id": "pulse_battery",
+      "output": {
+        "item": "pulse_battery",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 28,
+        "copper": 14,
+        "titanium": 6,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 36,
+      "category": "system"
+    },
+    {
+      "id": "pulse_chain",
+      "output": {
+        "item": "pulse_chain",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 22,
+        "copper": 11,
+        "titanium": 6,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "pulse_heavy",
+      "output": {
+        "item": "pulse_heavy",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 34,
+        "copper": 11,
+        "titanium": 10,
+        "silicon": 8,
+        "military_circuit": 1
+      },
+      "fab_level": 3,
+      "tools": [],
+      "time": 61,
+      "category": "system"
+    },
+    {
+      "id": "ion_needle",
+      "output": {
+        "item": "ion_needle",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 23,
+        "copper": 12,
+        "titanium": 6,
+        "silicon": 6,
+        "crystal": 3
+      },
+      "fab_level": 3,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "ion_mk2",
+      "output": {
+        "item": "ion_mk2",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 20,
+        "copper": 10,
+        "titanium": 6,
+        "silicon": 6
+      },
+      "fab_level": 2,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "ion_heavy",
+      "output": {
+        "item": "ion_heavy",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 34,
+        "copper": 11,
+        "titanium": 10,
+        "silicon": 8,
+        "military_circuit": 1,
+        "crystal": 3
+      },
+      "fab_level": 3,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 61,
+      "category": "system"
+    },
+    {
+      "id": "ion_charge",
+      "output": {
+        "item": "ion_charge",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 22,
+        "copper": 11,
+        "titanium": 6,
+        "silicon": 6,
+        "crystal": 3
+      },
+      "fab_level": 3,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "flak_turret",
+      "output": {
+        "item": "flak_turret",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 26,
+        "copper": 10,
+        "polymer": 2
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 18,
+      "category": "system"
+    },
+    {
+      "id": "flak_mk2",
+      "output": {
+        "item": "flak_mk2",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 20,
+        "copper": 10,
+        "titanium": 6,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "flak_heavy",
+      "output": {
+        "item": "flak_heavy",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 34,
+        "copper": 11,
+        "titanium": 10,
+        "silicon": 8,
+        "military_circuit": 1
+      },
+      "fab_level": 3,
+      "tools": [],
+      "time": 61,
+      "category": "system"
+    },
+    {
+      "id": "flak_battery",
+      "output": {
+        "item": "flak_battery",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 42,
+        "copper": 11,
+        "titanium": 6,
+        "silicon": 4
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 36,
+      "category": "system"
+    },
+    {
+      "id": "missile_pod",
+      "output": {
+        "item": "missile_pod",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 16,
+        "copper": 10,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 18,
+      "category": "system"
+    },
+    {
+      "id": "artemis_mk2",
+      "output": {
+        "item": "artemis_mk2",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 20,
+        "copper": 10,
+        "titanium": 6,
+        "silicon": 6
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "swarm_pod",
+      "output": {
+        "item": "swarm_pod",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 20,
+        "copper": 10,
+        "titanium": 6,
+        "silicon": 6
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "torpedo",
+      "output": {
+        "item": "torpedo",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 34,
+        "copper": 11,
+        "titanium": 10,
+        "silicon": 8,
+        "military_circuit": 1
+      },
+      "fab_level": 3,
+      "tools": [],
+      "time": 61,
+      "category": "system"
+    },
+    {
+      "id": "beam_light",
+      "output": {
+        "item": "beam_light",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 18,
+        "copper": 11,
+        "silicon": 4,
+        "crystal": 3
+      },
+      "fab_level": 3,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 18,
+      "category": "system"
+    },
+    {
+      "id": "beam_mk2",
+      "output": {
+        "item": "beam_mk2",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 20,
+        "copper": 10,
+        "titanium": 6,
+        "silicon": 6
+      },
+      "fab_level": 2,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "beam_long",
+      "output": {
+        "item": "beam_long",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 23,
+        "copper": 12,
+        "titanium": 6,
+        "silicon": 6,
+        "crystal": 3
+      },
+      "fab_level": 3,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "beam_spinal",
+      "output": {
+        "item": "beam_spinal",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 38,
+        "copper": 13,
+        "titanium": 10,
+        "silicon": 8,
+        "military_circuit": 1,
+        "crystal": 4
+      },
+      "fab_level": 3,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 61,
+      "category": "system"
+    },
+    {
+      "id": "slug_gun",
+      "output": {
+        "item": "slug_gun",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 22,
+        "copper": 8,
+        "polymer": 2
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 18,
+      "category": "system"
+    },
+    {
+      "id": "slug_mortar",
+      "output": {
+        "item": "slug_mortar",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 22,
+        "copper": 8,
+        "polymer": 2
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 18,
+      "category": "system"
+    },
+    {
+      "id": "slug_rail",
+      "output": {
+        "item": "slug_rail",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 23,
+        "copper": 12,
+        "titanium": 6,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "slug_chain",
+      "output": {
+        "item": "slug_chain",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 33,
+        "copper": 9,
+        "titanium": 6,
+        "silicon": 4
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "slug_spinal",
+      "output": {
+        "item": "slug_spinal",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 38,
+        "copper": 13,
+        "titanium": 10,
+        "silicon": 8,
+        "military_circuit": 1
+      },
+      "fab_level": 3,
+      "tools": [],
+      "time": 61,
+      "category": "system"
+    },
+    {
+      "id": "pd_mk1",
+      "output": {
+        "item": "pd_mk1",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 18,
+        "copper": 11,
+        "polymer": 2
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 18,
+      "category": "system"
+    },
+    {
+      "id": "pd_mk2",
+      "output": {
+        "item": "pd_mk2",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 22,
+        "copper": 11,
+        "titanium": 6,
+        "silicon": 4
+      },
+      "fab_level": 2,
+      "tools": [],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "pd_mk3",
+      "output": {
+        "item": "pd_mk3",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 26,
+        "copper": 9,
+        "titanium": 10,
+        "silicon": 8,
+        "military_circuit": 1,
+        "crystal": 3
+      },
+      "fab_level": 3,
+      "tools": [],
+      "time": 55,
+      "category": "system"
+    },
+    {
+      "id": "gun_strip",
+      "output": {
+        "item": "gun_strip",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 29,
+        "copper": 10,
+        "polymer": 2
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 18,
+      "category": "system"
+    },
+    {
+      "id": "laser_strip",
+      "output": {
+        "item": "laser_strip",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 26,
+        "copper": 13,
+        "titanium": 6,
+        "silicon": 4,
+        "crystal": 3
+      },
+      "fab_level": 3,
+      "tools": [
+        "laser_cutter"
+      ],
+      "time": 30,
+      "category": "system"
+    },
+    {
+      "id": "heavy_battery",
+      "output": {
+        "item": "heavy_battery",
+        "count": 1
+      },
+      "materials": {
+        "scrap": 34,
+        "copper": 11,
+        "titanium": 10,
+        "silicon": 8,
+        "military_circuit": 1
+      },
+      "fab_level": 3,
+      "tools": [],
+      "time": 61,
+      "category": "system"
+    }
+  ]
+}

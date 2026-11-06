@@ -197,6 +197,7 @@ func _substep() -> void:
 				weapons.point_barrel(self, i, uid, aim_points[i])
 	Collisions.step(self, SUBSTEP)
 	weapons.tick_turrets(self)
+	weapons.tick_charge(self)
 	weapons.tick_beams(self)
 	Drones.step(self, SUBSTEP)
 	Projectiles.step(self, SUBSTEP)

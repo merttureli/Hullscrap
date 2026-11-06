@@ -13,6 +13,7 @@ const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
 const GearActive = preload("res://scripts/board/gear_active.gd")
 const Mods = preload("res://scripts/board/mods.gd")
 const Party = preload("res://scripts/board/party.gd")
+const Orders = preload("res://scripts/board/orders.gd")
 const Air = preload("res://scripts/board/air.gd")
 const HeatFoot = preload("res://scripts/board/heat_foot.gd")
 const ShipView = preload("res://scripts/view/ship_view.gd")
@@ -22,6 +23,7 @@ const H := 68.0
 const GAP := 6.0
 const PAD := 16.0
 const BOTTOM := 14.0
+const STATE_H := 16.0  ## the state line under a follower's card (orders.gd)
 const BODY_COLORS := {"basic_armor": "#8aa0bd", "eva_suit": "#dfe8f2", "exosuit": "#e6893a", "salamander_suit": "#e0553a", "heat_suit": "#e8c040"}
 
 static var _tex := {}  # art name -> Texture2D or null
@@ -30,7 +32,7 @@ static var _crops := {}  # head frame -> the rectangle of it that is drawn
 
 ## The top of the first card for a party of `n` people.
 static func top(size: Vector2, n: int) -> float:
-	return size.y - BOTTOM - float(n) * (H + GAP) + GAP
+	return size.y - BOTTOM - float(n) * (H + GAP) - float(maxi(n - 1, 0)) * STATE_H + GAP
 
 
 # --- the cards ---------------------------------------------------------------------------------------------------------
@@ -41,8 +43,14 @@ static func draw_cards(h, size: Vector2) -> void:
 	for p in s.party:
 		who.append({"m": p["m"], "p": p})
 	var y0 := top(size, who.size())
+	var y := y0
 	for i in who.size():
-		_card(h, Rect2(PAD, y0 + float(i) * (H + GAP), W, H), who[i], i)
+		var r := Rect2(PAD, y, W, H)
+		_card(h, r, who[i], i)
+		y += H + GAP
+		if i > 0:
+			_squad(h, r, who[i]["p"], i - 1)
+			y += STATE_H
 
 
 static func _card(h, r: Rect2, e: Dictionary, index: int) -> void:
@@ -71,7 +79,7 @@ static func _card(h, r: Rect2, e: Dictionary, index: int) -> void:
 		var n := "%d/%d" % [ceili(m.hp), roundi(m.max_hp)]
 		var w2: float = h._font().get_string_size(n, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
 		h._text(n, Vector2(r.end.x - w2 - 10.0, r.position.y + 22.0), 13, h.DIM_TEXT)
-	_air(h, r, m)
+	_air(h, r, m, down)
 	_heat(h, r, m)
 	# the gear: the weapon, the body, the mods
 	var art: String = str(s.gun()["w"]["art"]) if e["p"] == null else str(e["p"]["gun"]["w"]["art"])
@@ -97,6 +105,19 @@ static func _card(h, r: Rect2, e: Dictionary, index: int) -> void:
 		_active(h, Rect2(gx + 28.0 * float(kit["mods"].size() + 1), r.position.y + 40.0, r.end.x - 10.0 - (gx + 28.0 * float(kit["mods"].size() + 1)), 22.0), s, down)
 	if e["p"] != null:
 		_rounds(h, Rect2(gx + 28.0 * float(kit["mods"].size() + 1), r.position.y + 40.0, r.end.x - 10.0 - (gx + 28.0 * float(kit["mods"].size() + 1)), 22.0), e["p"], down)
+
+
+## A follower's squad marks: its colour stripe on the card, a lit edge when selected (click the card to select), and the state line under it.
+static func _squad(h, r: Rect2, p: Dictionary, i: int) -> void:
+	var col := Orders.colour(i)
+	h.draw_rect(Rect2(r.position, Vector2(4.0, r.size.y)), col)
+	if bool(p.get("sel", false)):
+		h.draw_rect(r.grow(2.0), col, false, 2.0)
+	h.hit_add(r, {"squad": i})
+	h.hover_add(r, ["Click: select (Shift adds). Key %d." % (i + 1), "Right-click a room to send the selected (else all); B calls them back."], col)
+	var t := Orders.state(h.view.session, p)
+	var bad := t.begins_with("Can't") or t == "Falling back"
+	h._text(t, r.position + Vector2(8.0, r.size.y + 13.0), 13, h.AMBER if bad else (col if t.begins_with("Fighting") else h.DIM_TEXT))
 
 
 ## The soldier's gear active: "G Dash" lit when it is ready, with the seconds and a fill that drains while it cools down. Nothing when his gear has none.
@@ -132,7 +153,7 @@ static func _rounds(h, r: Rect2, p: Dictionary, down: bool) -> void:
 
 
 ## The AIR line: OK, THIN or NONE where the person stands, the seconds they have left in that air (or "suit" when a seal keeps them safe).
-static func _air(h, r: Rect2, m) -> void:
+static func _air(h, r: Rect2, m, down: bool) -> void:
 	var a: Dictionary = Air.line(h.view.session.site, m, m.pos)
 	var t := "AIR " + str(a["word"])
 	var col: Color = h.GOOD
@@ -140,7 +161,8 @@ static func _air(h, r: Rect2, m) -> void:
 		col = h.AMBER if str(a["word"]) == "THIN" else h.BAD
 		t += " suit" if bool(a["sealed"]) else (" %ds" % ceili(float(a["secs"])) if float(a["secs"]) >= 0.0 else "")
 	var w: float = h._font().get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
-	h._text(t, Vector2(r.end.x - w - 8.0, r.position.y + 58.0), 12, col)
+	var hp_w: float = h._font().get_string_size("DOWN, hold E" if down else "%d/%d" % [ceili(m.hp), roundi(m.max_hp)], HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+	h._text(t, Vector2(r.end.x - hp_w - 18.0 - w, r.position.y + 21.0), 12, col)  # (in the name row, left of the health number: the rounds box takes the row below)
 
 
 ## The HOT line: where the heat of the room hurts or slows this person (heat_foot.gd), beside the AIR line.
