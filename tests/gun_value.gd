@@ -23,11 +23,11 @@ const EXCEPT := {"laser_lance": 0.2, "beam_spinal": 0.2, "slug_spinal": 0.2, "to
 const BASES := {
 	"laser": {1: "laser_mk1", 2: "laser_mk2", 3: "laser_mk3"},
 	"pulse": {1: "pulse_mk1", 2: "pulse_mk2", 3: "pulse_mk3"},
-	"ion": {1: "ion_blast_mk1", 2: "ion_mk2", 3: {"kind": "laser", "damage": 3.9, "cooldown": 4.5, "range": 1000.0}},
-	"flak": {1: "shrapnel_cannon_scrap", 2: "flak_mk2", 3: {"kind": "flak", "damage": 3.8, "cooldown": 2.7, "range": 650.0, "shots": 6}},
-	"missile": {1: "artemis_mk1", 2: "artemis_mk2", 3: {"kind": "missile", "damage": 9.0, "cooldown": 5.5, "range": 1300.0, "pierce": 1, "splash": 2.5}},
-	"beam": {1: "heat_lance_neon", 2: "beam_mk2", 3: {"kind": "beam", "damage": 8.5, "cooldown": 8.7, "range": 900.0, "duration": 2.0}},
-	"slug": {1: "slug_gun", 2: {"kind": "bolt", "damage": 6.5, "cooldown": 2.7, "range": 950.0, "pierce": 1}, 3: {"kind": "bolt", "damage": 10.5, "cooldown": 2.58, "range": 1050.0, "pierce": 1}},
+	"ion": {1: "ion_blast_mk1", 2: "ion_mk2", 3: {"kind": "laser", "damage": 3.9, "cooldown": 4.5, "range": 1400.0}},
+	"flak": {1: "shrapnel_cannon_scrap", 2: "flak_mk2", 3: {"kind": "flak", "damage": 3.8, "cooldown": 2.7, "range": 910.0, "shots": 6}},
+	"missile": {1: "artemis_mk1", 2: "artemis_mk2", 3: {"kind": "missile", "damage": 9.0, "cooldown": 5.5, "range": 1820.0, "pierce": 1, "splash": 2.5}},
+	"beam": {1: "heat_lance_neon", 2: "beam_mk2", 3: {"kind": "beam", "damage": 8.5, "cooldown": 8.7, "range": 1260.0, "duration": 2.0}},
+	"slug": {1: "slug_gun", 2: {"kind": "bolt", "damage": 6.5, "cooldown": 2.7, "range": 1330.0, "pierce": 1}, 3: {"kind": "bolt", "damage": 10.5, "cooldown": 2.58, "range": 1470.0, "pierce": 1}},
 }
 
 
@@ -44,7 +44,7 @@ static func value(w: Dictionary) -> float:
 	var secs := float(w.get("duration", 2.0 if str(w["kind"]) == "beam" else 1.0)) if str(w["kind"]) == "beam" else 1.0
 	var dps := float(w["damage"]) / share * float(w.get("shots", 1)) * secs / cd
 	var passes := 1.1 if (bool(w.get("pass_shields", false)) or str(w["kind"]) == "missile") else 1.0
-	return dps * pow(float(w["range"]) / 900.0, 0.35) * (1.0 + 0.06 * float(w.get("pierce", 0))) * (1.0 + 0.04 * float(w.get("splash", 0))) * passes
+	return dps * pow(float(w["range"]) / 1260.0, 0.35) * (1.0 + 0.06 * float(w.get("pierce", 0))) * (1.0 + 0.04 * float(w.get("splash", 0))) * passes
 
 
 ## The base entry of weapon `id` (Weapons instance `weapons`): its family's at its tier.

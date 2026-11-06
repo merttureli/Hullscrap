@@ -2,7 +2,7 @@ extends RefCounted
 ## The enemy pilot: flies one ship of the arena against another and shoots. Deterministic: its few
 ## random choices (aim jitter, which way it strafes) come from its own generator, seeded from the
 ## arena's seed, and it only reads the arena. Call think(dt) once per arena substep, before stepping.
-## - Range: it keeps a gap of RANGE_FRACTION of its shortest weapon range (at least HULL_MARGIN) between the two hulls,
+## - Range: it keeps a gap of RANGE_FRACTION of the range most of its dps reaches (REACH_SHARE of it, so one short gun does not pull a many-gun ship in; at least HULL_MARGIN) between the two hulls,
 ##   measured along the line between the centres from each hull's reach that way (extent()), since muzzles and the parts
 ##   it aims at sit on the hull's edge. (It used to hold that between the centres, and later at least both bounding circles
 ##   apart: a large hull, or a starter's frame round a small core, then kept it out of its own guns' range.)
@@ -43,13 +43,14 @@ const Hazards = preload("res://scripts/combat/hazards.gd")
 const Drones = preload("res://scripts/combat/drones.gd")
 
 const RANGE_FRACTION := 0.7  ## of a gun's range: the gap it keeps for it
+const REACH_SHARE := 0.6  ## it holds the longest gap at which guns of this share of its dps (or more) reach
 const HULL_MARGIN := 96.0  ## px kept between the two hulls, at least (three cells: an orbit at less clips the foe's hull)
-const DEFAULT_RANGE := 600.0
+const DEFAULT_RANGE := 840.0
 const SNIPE_SKILL := 0.8  ## a pilot of this aim_skill or better aims at the foe's weapons first; a worse one at its hull
 const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
 const GUN_CLEARANCE := 2  ## cells: the point of the hull it aims at keeps this far from a weapon's outside half
 const DEFAULT_AIM_SKILL := 0.6
-const AIM_ERROR_DEG := 12.0  ## aim error either way of a pilot with no skill; a pilot of skill s is off by up to (1 - s) of it
+const AIM_ERROR_DEG := 8.5  ## (12 before the guns reached 1.4x as far: the same miss in px at the longer hold) aim error either way of a pilot with no skill; a pilot of skill s is off by up to (1 - s) of it
 const ABEAM_LEAN_MAX_DEG := 30.0  ## the most the nose leans off the beam to open or close the range while a flank is presented
 const ABEAM_LEAN_MIN_DEG := 10.0
 const ABEAM_CRUISE := 0.5  ## throttle while a flank is presented (the pass along the foe)
@@ -301,16 +302,29 @@ static func pick_facing(groups: Dictionary, foe_angle: float, now := 0) -> int:
 func hold_distance(u: Vector2, armed: Dictionary) -> float:
 	var co = arena.ships[me]
 	var ext := extent(me, u)
-	var gap := INF
+	# Per gun the gap at which it reaches (a short gun gives a small one); it holds the largest gap at which guns of REACH_SHARE of the dps fire.
+	var reach: Array = []  # [gap, dps]
+	var total := 0.0
 	for uid in armed:
 		var m: Dictionary = armed[uid]
-		var r := RANGE_FRACTION * float(arena.weapons.def(m["id"])["range"])
+		var w: Dictionary = arena.weapons.def(m["id"])
+		var dps := float(w["damage"]) * float(w["shots"]) / maxf(float(w["cooldown"]), 0.1)
+		var r := RANGE_FRACTION * float(w["range"])
 		var mo: Vector2 = arena.local_to_world(me, m["pos"]) - co.flight.pos
 		var off := absf(mo.cross(u))
+		total += dps
 		if off < r:
-			gap = minf(gap, mo.dot(u) + sqrt(r * r - off * off) - ext)
+			reach.append([mo.dot(u) + sqrt(r * r - off * off) - ext, dps])
+	reach.sort_custom(func(a, b): return a[0] > b[0])
+	var gap := INF
+	var acc := 0.0
+	for e in reach:
+		acc += e[1]
+		if acc >= REACH_SHARE * total:
+			gap = e[0]
+			break
 	if gap == INF:
-		gap = RANGE_FRACTION * DEFAULT_RANGE
+		gap = RANGE_FRACTION * DEFAULT_RANGE if reach.is_empty() else reach[-1][0]
 	return ext + extent(foe, -u) + maxf(HULL_MARGIN, gap)
 
 

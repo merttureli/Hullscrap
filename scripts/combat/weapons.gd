@@ -38,9 +38,9 @@ const BASE := {"damage_type": "energy", "damage": 1.0, "cooldown": 1.0, "range":
 const GROUPS := {"laser": 1, "bolt": 1, "beam": 1, "missile": 2, "flak": 2}
 const KIND_DEFAULTS := {
 	"laser": {},
-	"bolt": {"speed": 700.0},
-	"flak": {"speed": 600.0, "shots": 5, "spread": 12.0},
-	"missile": {"speed": 300.0, "turn": 1.5, "splash": 2.0, "pass_shields": true},
+	"bolt": {"speed": 840.0},
+	"flak": {"speed": 720.0, "shots": 5, "spread": 12.0},
+	"missile": {"speed": 360.0, "turn": 1.5, "splash": 2.0, "pass_shields": true},
 	"beam": {"duration": 2.0, "tick": 0.25},  # damage is per second, dealt every `tick` seconds
 }
 

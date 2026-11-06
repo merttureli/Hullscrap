@@ -172,7 +172,7 @@ func test_every_new_gun_loads_has_art_a_recipe_or_a_start_and_an_enemy_that_carr
 
 func test_point_defence_follows_the_tiers() -> void:
 	var w := Weapons.new()
-	var want := {"pd_mk1": [0.6, 1.2, 350.0], "pd_mk2": [0.7, 0.8, 400.0], "pd_mk3": [0.8, 0.5, 450.0]}
+	var want := {"pd_mk1": [0.6, 1.2, 400.0], "pd_mk2": [0.7, 0.8, 460.0], "pd_mk3": [0.8, 0.5, 520.0]}
 	for id in want:
 		var d := w.def(id)
 		near(float(d["accuracy"]), want[id][0], id + " hit chance")

@@ -23,6 +23,8 @@ var linear_damping := 0.25  ## per second
 var angular_damping := 1.5  ## per second
 var thrust_to_accel := 40.0  ## px/s^2 per thrust unit per mass unit
 var turn_factor := 0.6  ## rad/s^2 per thrust unit per mass unit
+var turn_heavy_mass := 1.0e9  ## a hull heavier than this turns slower than thrust / mass says: x (this / mass) ^ turn_heavy_exp (so a big hull can be flanked)
+var turn_heavy_exp := 0.0
 var max_speed := 600.0  ## px/s
 var side_share := 0.3  ## the share of an engine's thrust it also gives sideways (to the left and to the right), whatever way it points
 var turn_mult := 1.0  ## a factor on the turn rate (Abilities.turn_mult: a Gravity Anchor); the arena sets it
@@ -74,7 +76,7 @@ func load_config(path: String) -> bool:
 		component_mass = masses
 	if data.get("controls") is Dictionary and str(data["controls"].get("steer", "")) in ["mouse", "keys"]:
 		steer = str(data["controls"]["steer"])
-	for k in ["component_mass_per_cell", "cable_mass_per_cell", "linear_damping", "angular_damping", "thrust_to_accel", "turn_factor", "max_speed", "side_share"]:
+	for k in ["component_mass_per_cell", "cable_mass_per_cell", "linear_damping", "angular_damping", "thrust_to_accel", "turn_factor", "turn_heavy_mass", "turn_heavy_exp", "max_speed", "side_share"]:
 		if _is_num(data.get(k)):
 			set(k, maxf(0.0, float(data[k])))
 	return true
@@ -205,11 +207,17 @@ static func split(t: float, push: Vector2) -> Vector2:
 	return Vector2(t * push.x, t * push.dot(Vector2.UP))
 
 
+## Angular acceleration (rad/s^2) at full turn: thrust x turn_factor x turn_mult / mass, less for a hull heavier than turn_heavy_mass.
+func turn_accel(mass: float, thrust: float) -> float:
+	mass = maxf(mass, MIN_MASS)
+	return thrust * turn_factor * turn_mult / mass * pow(minf(1.0, turn_heavy_mass / mass), turn_heavy_exp)
+
+
 ## The helm turn (-1..1) that swings the heading toward `target` (an `angle`, radians) and stops it
 ## there: it asks for the fastest turn it can still brake from. Mouse steering and the pilot AI use it.
 func steer_toward(target: float, mass: float, thrust: float) -> float:
 	var err := wrapf(target - angle, -PI, PI)
-	var alpha := thrust * turn_factor * turn_mult / maxf(mass, MIN_MASS)  # rad/s^2 at full turn
+	var alpha := turn_accel(mass, thrust)  # rad/s^2 at full turn
 	if alpha <= 1e-4:
 		return 0.0
 	var w_cap := alpha / maxf(angular_damping, 0.1) * 0.8
@@ -233,7 +241,7 @@ func step(dt: float, input: Dictionary, mass: float, thrust: float, thrusts := {
 	vel += Vector2.UP.rotated(angle) * (throttle * float(thrusts.get("fwd", thrust)) * thrust_to_accel / mass * dt)
 	var side := float(thrusts.get("right", 0.0)) if strafe > 0.0 else float(thrusts.get("left", 0.0))
 	vel += Vector2.RIGHT.rotated(angle) * (strafe * side * thrust_to_accel / mass * dt)
-	ang_vel += turn * thrust * turn_factor * turn_mult / mass * dt
+	ang_vel += turn * turn_accel(mass, thrust) * dt
 	vel = (vel * exp(-linear_damping * dt)).limit_length(max_speed)
 	ang_vel *= exp(-angular_damping * dt)
 	pos += vel * dt

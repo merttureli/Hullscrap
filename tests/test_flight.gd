@@ -255,6 +255,18 @@ func test_turning_changes_the_angle_and_damping_stops_the_spin() -> void:
 	check(g.angle < 0.0 and g.ang_vel < 0.0, "negative turn is counter-clockwise")
 
 
+func test_a_heavy_hull_turns_slower_than_thrust_over_mass() -> void:
+	var f := Flight.new()
+	f.turn_heavy_exp = 0.0
+	near(f.turn_accel(2000.0, 30.0), 30.0 * f.turn_factor / 2000.0, "with exponent 0: thrust x factor / mass")
+	f.turn_heavy_mass = 1000.0
+	f.turn_heavy_exp = 2.0
+	near(f.turn_accel(800.0, 30.0), 30.0 * f.turn_factor / 800.0, "a light hull is not touched")
+	near(f.turn_accel(2000.0, 30.0), 30.0 * f.turn_factor / 2000.0 * 0.25, "twice the mass: a quarter of the turn")
+	var data := Flight.new()
+	check(data.load_config("res://data/flight.json") and data.turn_heavy_mass <= 1000.0 and data.turn_heavy_exp > 1.0, "the data file sets it")
+
+
 func test_the_angle_stays_in_range() -> void:
 	var f := Flight.new()
 	f.angle = PI - 0.01
