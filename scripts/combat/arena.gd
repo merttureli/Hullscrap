@@ -51,7 +51,8 @@ class Combatant extends RefCounted:
 	var sectors := 1  ## the bubble's sectors (the best powered generator's stats.sectors: 1, 2, 4 or 8)
 	var weights: Array = [1.0]  ## the balance: one weight per sector, 0..2 in steps of 0.5, adding up to `sectors` (shield_balance.gd)
 	var sector_layers: Array = [0.0]  ## layers up in each sector now
-	var sector_timers: Array = [[]]  ## per sector: Vector2(seconds left, layers) for each used or newly gained layer on its way back
+	var sector_wait: Array = [0.0]  ## per sector: seconds until it regens (regen_delay after a hit, break_delay after it was knocked to 0)
+	var shield_hp := {"layer_hp": 4.0, "regen_delay": 3.0, "regen_rate": 1.0, "break_delay": 5.0}  ## the powered shield parts' numbers (Shields.params_of_ship)
 	var sector_hit: Array = [-1000000]  ## per sector: the tick a shot last hit it (the view flashes it)
 	var ion_lock := 0.0  ## seconds the shields stay offline
 	var sector_open := {}  ## sector -> Vector2i(first tick, last tick) it is open: shots pass, no layer used (after this ship fired through it)

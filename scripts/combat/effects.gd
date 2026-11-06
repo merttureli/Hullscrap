@@ -29,6 +29,7 @@ extends RefCounted
 ## ({kind, weapon, ...}) that effect_fx.gd turns into pictures.
 
 const Damage = preload("res://scripts/combat/damage.gd")
+const Shields = preload("res://scripts/combat/shields.gd")
 const Fire = preload("res://scripts/sim/fire.gd")
 const TraitSet = preload("res://scripts/crew/traits.gd")
 
@@ -531,9 +532,8 @@ static func _tick_frost(arena, co, e: Dictionary, step: float) -> bool:
 		co.cooldowns[uid] = int(co.cooldowns[uid]) + whole
 	if str(co.ship.components.def(inst["id"]).get("family", "")) == "shield" and co.ion_lock <= 0.0:
 		for s in co.sectors:
-			var timers: Array = co.sector_timers[s]
-			if not timers.is_empty():  # only the first layer in the queue is counting down
-				timers[0] = Vector2(timers[0].x + e["slow"] * step, timers[0].y)
+			if float(co.sector_layers[s]) < Shields.cap_of(co, s) - Shields.EPS:  # a sector that is regenerating (or waiting to) is held back
+				co.sector_wait[s] = float(co.sector_wait[s]) + e["slow"] * step
 	for k in co.ship.ability_state["slots"]:
 		var st: Dictionary = co.ship.ability_state["slots"][k]
 		if st["uid"] == uid and st["active"] <= 0.0 and st["cd"] > 0.0:

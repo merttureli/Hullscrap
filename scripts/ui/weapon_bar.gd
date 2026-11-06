@@ -546,8 +546,8 @@ func _shield_diagram(at: Vector2, parts: Array) -> void:
 		var mid := -PI / 2.0 + k * width
 		var a0 := mid - width / 2.0 + gap
 		var a1 := mid + width / 2.0 - gap
-		var up: float = 0.0 if ion else minf(float(st["layers"]), 4.0)
-		var frac := clampf(float(st["layers"]) / maxf(float(st["cap"]), 1.0), 0.0, 1.0)
+		var frac := clampf(float(st["layers"]) / maxf(float(st["cap"]), 0.001), 0.0, 1.0)  # the sector's HP over its capacity
+		var up: float = 0.0 if ion or float(st["layers"]) <= 1e-6 else 1.0 + 3.0 * frac
 		if st["open"]:
 			draw_arc(c, DIAG_RING, a0, a1, 12, Color("#243242"), 5.0, true)
 		elif ion:
@@ -561,8 +561,7 @@ func _shield_diagram(at: Vector2, parts: Array) -> void:
 			draw_arc(c, DIAG_RING, a0, a1, 12, Color(PIP, 0.3 + 0.65 * frac), 3.0 + 1.6 * up, true)
 		if st["filling"] and not ion:  # layers on their way back
 			draw_arc(c, DIAG_RING + 8.0, a0, a1, 12, Color(PIP, 0.25 + 0.5 * pulse), 1.5, true)
-		var shown := float(st["layers"])
-		var label := "%d" % floori(shown + 1e-6) if is_equal_approx(shown, roundf(shown)) else "%.1f" % shown
+		var label := "%d" % roundi(float(st["hp"]))  # shield HP of the sector
 		var tp := c + Vector2.from_angle(mid) * (DIAG_RING + 15.0) if n > 1 else c + Vector2(0.0, 24.0)
 		_text(label, tp + Vector2(-4.0 * label.length(), 4.0), 12, Color(TEXT, 0.35 if st["open"] else 1.0), -1.0)
 	var bow := PackedVector2Array([c + Vector2(0.0, -11.0), c + Vector2(7.0, 9.0), c + Vector2(0.0, 5.0), c + Vector2(-7.0, 9.0)])

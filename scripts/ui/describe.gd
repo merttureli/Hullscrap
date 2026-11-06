@@ -158,8 +158,9 @@ static func glance(id: String, ship) -> Dictionary:
 				rows.append({"icon": "st_range", "text": num(float(w["range"])), "what": "Range"})
 				out["aim"] = str(w.get("aim", "turret" if w["turret"] else "fixed"))
 		"shield":
-			rows.append({"icon": "st_layers", "text": num(float(st.get("layers", 1.0))), "what": "Layers"})
-			rows.append({"icon": "st_recharge", "text": num(float(st.get("recharge", Abilities.shield_base()))) + "s", "what": "Recharge"})
+			var row := Abilities.shield_row(def)
+			rows.append({"icon": "st_layers", "text": num(float(st.get("layers", 1.0)) * float(row["layer_hp"])), "what": "Shield HP"})
+			rows.append({"icon": "st_recharge", "text": num(float(row["regen_rate"])) + "/s", "what": "Regen"})
 		"engine":
 			rows.append({"icon": "st_thrust", "text": num(float(st.get("thrust", 0.0))), "what": "Thrust"})
 		_:
@@ -256,8 +257,10 @@ static func _stats(def: Dictionary, eff: Dictionary, fam: String, rot: int, rows
 			rows.append(["Push", _pushes(v, rot, angle)])
 	match fam:
 		"shield":
-			if not st.has("recharge"):
-				rows.append(["Recharge", str(table["recharge"][1]).replace("{v}", num(Abilities.shield_base()))])
+			var hp := Abilities.shield_row(def)
+			rows.append(["Layer HP", num(float(hp["layer_hp"]))])
+			rows.append(["Regen", "%s HP/s after %s s" % [num(float(hp["regen_rate"])), num(float(hp["regen_delay"]))]])
+			rows.append(["Broken", "%s s down" % num(float(hp["break_delay"]))])
 		"medbay":
 			rows.append(["Heals", "%s hp/s" % num(float(CrewMember.config()["heal_per_s"]["medbay"]) * float(st.get("heal", 1.0)))])
 		"bed":

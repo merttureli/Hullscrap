@@ -369,6 +369,17 @@ static func shield_config() -> Dictionary:
 	return _shield_cfg
 
 
+## The shield HP numbers of a shield part def: {layer_hp, regen_delay, regen_rate, break_delay} from the row of its tier in
+## weapons.json `shields.tiers` (tier 1 for a def with none), each overridden by the part's own stats of that name.
+static func shield_row(def: Dictionary) -> Dictionary:
+	var tiers: Dictionary = shield_config().get("tiers", {})
+	var row: Dictionary = tiers.get(str(int(def.get("tier", 1))), tiers.get("1", {"layer_hp": 4.0, "regen_delay": 3.0, "regen_rate": 1.0, "break_delay": 5.0}))
+	var out := {}
+	for k in ["layer_hp", "regen_delay", "regen_rate", "break_delay"]:
+		out[k] = float(def.get("stats", {}).get(k, row[k]))
+	return out
+
+
 ## Seconds a used shield layer takes to come back at normal speed (a part's stats.recharge scales it).
 static func shield_base() -> float:
 	return float(shield_config().get("recharge", 7.0))
