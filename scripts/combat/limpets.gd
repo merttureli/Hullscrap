@@ -21,6 +21,7 @@ const MAX_FLIGHT_S := 8.0  ## a flight longer than this is lost
 const LOST_DIST := 3600.0  ## px from the target's middle: past it with the pull no longer closing, it is lost
 const FALL_S := 1.1  ## the husk falls away this long
 const ROOM_DEPTH := 6  ## cells of wall a limpet's room behind is looked for through
+const FIRE_NEAR := 7  ## a fire pulse lights one of this many room cells nearest the limpet
 const FIRST_PULSE_S := 0.6
 const PREDICT_S := 3.0
 const SIDES: Array[Vector2i] = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
@@ -284,7 +285,7 @@ static func _work(arena, d: Dictionary, dt: float) -> bool:
 	if co.wrecked:
 		co.ship.stuck.erase(d)
 		return false
-	if not _cell_holds(co, d["cell"]):
+	if not Collisions.hit_cells(arena, t)["info"].has(d["cell"]):
 		_fall(arena, d, "cell destroyed")
 		return true
 	if bool(d.get("scraped", false)):
@@ -305,9 +306,11 @@ static func _work(arena, d: Dictionary, dt: float) -> bool:
 		"fire":
 			if arena.tick >= int(d["next"]):
 				d["next"] = arena.tick + int(float(eff["every"]) / arena.SUBSTEP)
-				var cells: Array = ship.atmosphere.rooms[room]["cells"]
-				for i in int(eff.get("cells", 1)):
-					Fire.ignite(ship, cells[arena.rng.randi_range(0, cells.size() - 1)])
+				var cells: Array = ship.atmosphere.rooms[room]["cells"].duplicate()
+				var rc: Vector2i = d["rcell"]
+				cells.sort_custom(func(x, y): return (x - rc).length_squared() < (y - rc).length_squared() or ((x - rc).length_squared() == (y - rc).length_squared() and (x.y < y.y or (x.y == y.y and x.x < y.x))))
+				for i in int(eff.get("cells", 1)):  # on the cells nearest the limpet
+					Fire.ignite(ship, cells[arena.rng.randi_range(0, mini(cells.size(), FIRE_NEAR) - 1)])
 		"poison":
 			_poison(ship, room, eff, dt)
 		"heat":
@@ -315,11 +318,6 @@ static func _work(arena, d: Dictionary, dt: float) -> bool:
 	if arena.tick >= int(d["until"]):
 		_fall(arena, d, "spent")
 	return true
-
-
-## Is hull cell `c` of `co` still solid (not breached, not wrecked away)?
-static func _cell_holds(co, c: Vector2i) -> bool:
-	return co.ship.grid.tiles.has(c) or co.ship.components.at(c) >= 0
 
 
 ## Poison: the crew in room `room` take dps hp a second (a suit, a species that needs no air and its poison factor stop it) and the room's air drains.

@@ -8,7 +8,7 @@ const Drones = preload("res://scripts/combat/drones.gd")
 const TileArt = preload("res://scripts/view/tile_art.gd")
 
 const SRC := 2.0  ## world px per source px at 1x
-const BOOST := 1.15
+const BOOST := 1.4
 const MIN_SCREEN := 1.2  ## fewest screen px per source px
 const GLOW_MAX := 0.55
 const BAR_S := 2.0  ## seconds a hurt one's hp bar shows
@@ -122,10 +122,10 @@ static func draw_path(c: CanvasItem, pred: Dictionary, px: float, tint: Color) -
 		return
 	for i in n:
 		var f := float(i) / float(n)
-		c.draw_circle(path[i], (1.7 - 0.6 * f) * px * 1.3, Color(tint, 0.62 - 0.4 * f))
+		c.draw_circle(path[i], (3.4 - 1.0 * f) * maxf(px, 1.0), Color(tint, 0.9 - 0.4 * f))
 	var end: Vector2 = path[n - 1]
 	if str(pred["end"]) == "hit":
-		c.draw_arc(end, 7.0 * px, 0.0, TAU, 20, Color(tint, 0.8), 1.5 * px, true)
+		c.draw_arc(end, 9.0 * px, 0.0, TAU, 24, Color(tint, 0.9), 2.0 * px, true)
 	elif str(pred["end"]) == "lost":
 		for s in [Vector2(1, 1), Vector2(1, -1)]:
 			c.draw_line(end - s * 4.0 * px, end + s * 4.0 * px, Color(1.0, 0.5, 0.4, 0.6), 1.5 * px, true)
