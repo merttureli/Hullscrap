@@ -83,7 +83,7 @@
   "thrust_to_accel": 3000.0,
   "turn_factor": 72.0,
   "turn_heavy_mass": 1000,
-  "turn_heavy_exp": 1.75,
+  "turn_heavy_exp": 1.0,
   "max_speed": 900.0,
   "side_share": 0.3,
   "controls": {
