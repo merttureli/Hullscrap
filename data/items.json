@@ -4,6 +4,7 @@
     {"id": "fuel", "name": "Fuel", "kind": "special", "blurb": "One jump's worth. Every Rusthold sells it by the can, and every can costs more than the last."},
     {"id": "hand_ammo", "name": "Rounds", "kind": "ammo", "blurb": "Loose rounds for the hand weapons. Boarding parties never carry enough."},
     {"id": "missile", "name": "Missile", "kind": "ammo", "explosive": true, "blurb": "Slow, guided and loud about it. Artemis launchers eat these."},
+    {"id": "piercing_rounds", "name": "Piercing Rounds", "kind": "ammo", "blurb": "Hard-core slugs for the fast kinetic guns. They pass a shield, but hit at 60% and armour blunts them. One round a shot."},
     {"id": "pistol", "name": "Pistol", "kind": "gear", "blurb": "Loud enough, reliable enough. The crew's first argument-settler."},
     {"id": "rifle", "name": "Rifle", "kind": "gear", "blurb": "Longer reach, steadier hands. Boarding parties love it."},
     {"id": "basic_armor", "name": "Basic Armour", "kind": "gear", "blurb": "Polymer plates stitched over a flight suit. Stops a bruise, not a bullet."},

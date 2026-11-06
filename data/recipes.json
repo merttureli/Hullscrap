@@ -26,7 +26,8 @@
     "net_mouth_scrap",
     "ammo_rack",
     "laser_cutter",
-    "titanium"
+    "titanium",
+    "piercing_rounds"
   ],
   "recipes": [
     {
@@ -324,6 +325,21 @@
       "fab_level": 1,
       "tools": [],
       "time": 6,
+      "category": "gear"
+    },
+    {
+      "id": "piercing_rounds",
+      "output": {
+        "item": "piercing_rounds",
+        "count": 10
+      },
+      "materials": {
+        "scrap": 4,
+        "titanium": 2
+      },
+      "fab_level": 1,
+      "tools": [],
+      "time": 8,
       "category": "gear"
     },
     {

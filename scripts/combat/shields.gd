@@ -293,7 +293,7 @@ static func open_sectors(co, tick: int) -> Array:
 ## entry has it, else the beam's duration or the DROP default of the kind (ion damage counts as ion).
 static func drop_seconds(w: Dictionary) -> float:
 	var kind := str(w.get("kind", "laser"))
-	if kind == "missile":
+	if kind == "missile" or bool(w.get("ap", false)) or (w.get("effects") is Dictionary and w["effects"].has("intercept")):  # a piercing round and point defence never open the sector
 		return 0.0
 	if w.has("drops_shield_s"):
 		return maxf(0.0, float(w["drops_shield_s"]))

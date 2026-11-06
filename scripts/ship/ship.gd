@@ -74,6 +74,8 @@ var build_first := false  ## the design asks for a build-your-own start (from_de
 var crew_plan: Array = []  ## the design's crew list [{name, species}] (from_design); Jobs.spawn_crew and spawn_enemy_crew use it; empty = the default crew
 var skin := ""  ## the hull skin of the exterior plating (a skin unlock's payload `skin`, unlocks.gd skin_paint); "" = the plain hull; saved when set
 var shield_balance := ShieldBalance.fresh()  ## {weights: the chosen sector weights ([] = even), presets: 2 custom slots (lists, [] = empty)}; every fight starts with it (Shields.start); saved when set
+var volley_groups := {}  ## fire group (1 LMB, 2 RMB, 3 Q, 0 AUTO) -> true when the group fires in Volley mode (volley.gd); a group not listed Ripples. Saved in the optional "fire_opts"
+var ap_guns := {}  ## gun uid -> true when it loads Piercing rounds (weapons.gd can_pierce); saved in "fire_opts"
 var fires := {}  ## Vector2i -> intensity (0..1) of the cells on fire (scripts/sim/fire.gd); saved as the optional "fires" list
 var abandoned: Array[Vector2i] = []  ## the key cells (Rooms.key_of) of the rooms the player gave up (Evacuate, K2); saved as the optional "abandoned" list
 var lost_rooms: Array = []  ## ids of the rooms that are lost in the fight on now (Evacuate.lost_rooms, set by Jobs.build_board; empty out of a fight). Not saved
@@ -273,6 +275,12 @@ func to_dict() -> Dictionary:
 	d["oxygen"] = atmosphere.pressure.duplicate()
 	if not ShieldBalance.is_fresh(shield_balance):  # optional: only written when the player set something
 		d["shield_balance"] = shield_balance.duplicate(true)
+	if not volley_groups.is_empty() or not ap_guns.is_empty():  # optional: the Volley groups and Piercing guns the player set
+		var vg: Array = volley_groups.keys()
+		var ap: Array = ap_guns.keys()
+		vg.sort()
+		ap.sort()
+		d["fire_opts"] = {"volley": vg, "ap": ap}
 	if skin != "":
 		d["skin"] = skin
 	if not layout.is_empty():
@@ -369,6 +377,16 @@ func load_dict(d: Dictionary) -> String:
 		dead_at = d["dead_at"].duplicate(true) if d.get("dead_at") is Dictionary else {}
 		crew_plan = people["plan"]
 	shield_balance = ShieldBalance.sanitize(d.get("shield_balance"))
+	volley_groups = {}
+	ap_guns = {}
+	var fo = d.get("fire_opts")  # an older save has none: every group Ripples and every gun fires Standard
+	if fo is Dictionary:
+		for g in fo.get("volley", []) if fo.get("volley") is Array else []:
+			if (g is float or g is int) and int(g) in [0, 1, 2, 3]:
+				volley_groups[int(g)] = true
+		for u in fo.get("ap", []) if fo.get("ap") is Array else []:
+			if (u is float or u is int) and int(u) > 0:
+				ap_guns[int(u)] = true
 	skin = str(d.get("skin", ""))
 	layout = d["layout"].duplicate(true) if d.get("layout") is Dictionary else {}
 	manned = {}

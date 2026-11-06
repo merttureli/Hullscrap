@@ -96,6 +96,7 @@ func start(player: Ship, enemy: Ship, seed_value := 1, place := {}) -> void:
 	arena.ships[PLAYER].flight.ang_vel = float(place.get("player_ang_vel", 0.0))
 	var foe: Vector2 = place.get("enemy_pos", at + Vector2(0.0, -SPAWN_DISTANCE))
 	arena.add_ship(enemy, foe, (at - foe).angle() + PI / 2.0)
+	arena.ships[ENEMY].ai_volley = true  # the enemy's non-rapid guns fire in volleys
 	ai = PilotAI.new(arena, ENEMY, PLAYER, enemy.get_meta("ai", {}))
 	morale = Morale.new(arena, ENEMY, PLAYER, str(enemy.get_meta("ai", {}).get("morale", "default")))
 	ai.morale = morale
@@ -228,9 +229,37 @@ func weapons() -> Array:
 			name = str(co.ship.components.def(co.ship.components.instances[uid]["id"]).get("name", name))
 			group = arena.weapons.group_in(co.ship.components, uid)
 		var d: Dictionary = arena.weapons.def(m["id"])
-		out.append({"uid": uid, "id": m["id"], "name": name, "group": group, "turret": bool(d["turret"]),
+		var can_ap: bool = arena.weapons.can_pierce(d)
+		out.append({"uid": uid, "id": m["id"], "name": name, "group": group, "turret": bool(d["turret"]), "can_ap": can_ap,
+			"ap": can_ap and arena.weapons.ap_on(arena, PLAYER, uid, m), "rounds": co.ship.inventory.count(arena.weapons.AP_ITEM) if can_ap else 0,
 			"aim": str(d["aim"]), "pd": bool(d["turret"]) and d.get("effects") is Dictionary and d["effects"].has("intercept")})
 	return out
+
+
+## Is fire group `group` of the player's ship in Volley mode (else Ripple)?
+func volley_of(group: int) -> bool:
+	return bool(arena.ships[PLAYER].volley.get(group, false))
+
+
+## Click on a group's header: switch it between Ripple and Volley (kept with the ship). Returns whether it is Volley now.
+func toggle_volley(group: int) -> bool:
+	var co = arena.ships[PLAYER]
+	var on: bool = not bool(co.volley.get(group, false))
+	if on:
+		co.volley[group] = true
+		co.ship.volley_groups[group] = true
+	else:
+		co.volley.erase(group)
+		co.ship.volley_groups.erase(group)
+	return on
+
+
+## Alt+click on a gun: Standard or Piercing rounds. Returns "" when switched, else why not.
+func toggle_ap(uid: int) -> String:
+	var m = arena.ships[PLAYER].mounts.get(uid)
+	if m == null or not arena.weapons.can_pierce(arena.weapons.def(m["id"])):
+		return "That gun cannot load piercing rounds"
+	return "" if arena.weapons.set_ap(arena, PLAYER, uid, not arena.weapons.ap_on(arena, PLAYER, uid, m)) else "That gun cannot load piercing rounds"
 
 
 ## Fire every weapon of fire group `group` (1 LMB, 2 RMB, 3 Q; 0 is the AUTO guns, which fire by themselves) at the world point `aim`. Returns how many fired.
@@ -248,7 +277,7 @@ func fire_slot(slot: int, aim: Vector2) -> bool:
 	if slot > list.size():
 		var b := bays()
 		return slot - list.size() <= b.size() and arena.launch_drone(PLAYER, b[slot - list.size() - 1]["uid"], aim) == ""
-	return slot >= 1 and slot <= list.size() and arena.fire(PLAYER, list[slot - 1]["uid"], aim)
+	return slot >= 1 and slot <= list.size() and arena.fire(PLAYER, list[slot - 1]["uid"], aim, true)
 
 
 ## Is slot `slot` a bay loaded with a limpet or a boarder pod? Those are aimed: the key held shows the path, released it throws (combat_view.gd).
