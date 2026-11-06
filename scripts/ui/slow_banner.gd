@@ -65,7 +65,9 @@ func press() -> bool:
 	return true
 
 
-func _unhandled_input(e: InputEvent) -> void:
+## Read in _input, before the GUI: Tab is Godot's focus-next key, so with any focusable control on screen (the mode bar's buttons)
+## the GUI took every Tab to move the focus and the slow-down never saw it. Outside a fight it is left alone for the GUI and the panels.
+func _input(e: InputEvent) -> void:
 	if e is InputEventKey and e.pressed and not e.echo and e.keycode == KEY_TAB and not (e.ctrl_pressed or e.meta_pressed or e.alt_pressed or e.shift_pressed):
 		if press() and is_inside_tree():
 			get_viewport().set_input_as_handled()
