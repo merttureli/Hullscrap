@@ -65,7 +65,8 @@ func test_fire_groups_follow_the_weapon_kinds() -> void:
 	var aim: Vector2 = arena.ships[Session.ENEMY].flight.pos
 	eq(s.fire_group(2, aim), 1, "the right button: the one missile")
 	eq(arena.projectiles.size(), 1, "launched")
-	eq(s.fire_group(1, aim), 3, "the left button: the laser, the rattle turret and the bolt, not the missile")
+	eq(s.fire_group(1, aim), 2, "the left button: the laser and the bolt, not the missile or the AUTO rattle turret")
+	eq(s.fire_group(0, aim), 1, "the AUTO group: the rattle turret")
 	eq(s.fire_group(1, aim), 0, "all cooling down")
 	arena.ships[Session.PLAYER].cooldowns.clear()
 	check(s.fire_slot(3, aim), "slot 3 is the bolt")

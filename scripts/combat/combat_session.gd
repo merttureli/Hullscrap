@@ -205,7 +205,7 @@ func can_leave() -> bool:
 	return arena.ships[ENEMY].wrecked or morale.end_state() != "fighting" or distance() > LEAVE_DISTANCE or jump_ready()
 
 
-## The player's weapons in slot order: [{uid, id, name, group (the mount's own choice first), turret, aim (fixed, swivel, turret), pd (point defence)}]: placed ones by uid, then virtual mounts as added.
+## The player's weapons in slot order: [{uid, id, name, group (the mount's own choice first: 1 LMB, 2 RMB, 3 Q, 0 AUTO), turret, aim (fixed, swivel, turret), pd (point defence)}]: placed ones by uid, then virtual mounts as added.
 func weapons() -> Array:
 	var co = arena.ships[PLAYER]
 	var uids: Array = co.mounts.keys()
@@ -214,7 +214,7 @@ func weapons() -> Array:
 	for uid in uids:
 		var m: Dictionary = co.mounts[uid]
 		var name := str(m["id"])
-		var choice := 0
+		var choice := -1
 		if not m["virtual"]:
 			name = str(co.ship.components.def(co.ship.components.instances[uid]["id"]).get("name", name))
 			choice = co.ship.components.group_choice(uid)
@@ -224,7 +224,7 @@ func weapons() -> Array:
 	return out
 
 
-## Fire every weapon of fire group `group` at the world point `aim`. Returns how many fired.
+## Fire every weapon of fire group `group` (1 LMB, 2 RMB, 3 Q; 0 is the AUTO guns, which fire by themselves) at the world point `aim`. Returns how many fired.
 func fire_group(group: int, aim: Vector2) -> int:
 	var n := 0
 	for w in weapons():
@@ -260,7 +260,7 @@ func ability_slots() -> Array:
 	return Abilities.slots(arena.ships[PLAYER].ship)
 
 
-## The player presses ability key `key` ("engine" Shift, "shield" Space, "utility" Q): every ability
+## The player presses ability key `key` ("engine" Shift, "shield" Space, "utility" E): every ability
 ## with that key starts if it can. Returns {"started": [slot ids], "refused": {slot id: reason}}.
 func press_ability(key: String) -> Dictionary:
 	return arena.use_key(PLAYER, key)

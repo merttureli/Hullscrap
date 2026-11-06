@@ -112,13 +112,27 @@ func aim_of(d: Dictionary) -> Dictionary:
 	return {"class": cls, "arc": float(w["arc"]) if cls != "fixed" else 2.0 * float(w["gimbal"]), "gimbal": float(w["gimbal"]), "shape": str(d.get("shape", ""))}
 
 
-## The fire group (1 or 2) of weapon `id`: the mount's own `choice` (1 or 2, a fixed gun only), else its `group` entry, else by kind
-## (lasers, bolts and beams 1; missiles and flak 2).
-func group_of(id: String, choice := 0) -> int:
+## The fire group of weapon `id`: 1 (LMB), 2 (RMB), 3 (Q) or 0 (AUTO, it fires by itself). The mount's own `choice` (0-3; -1 none) wins,
+## else a fixed gun's `group` entry, else by kind (lasers, bolts and beams 1; missiles and flak 2); a turret or swivel is AUTO.
+func group_of(id: String, choice := -1) -> int:
 	var w := def(id)
-	if choice in [1, 2] and not w["turret"]:
+	if choice >= 0 and choice <= 3:
 		return choice
+	if bool(w.get("turret", false)) or str(w.get("aim", "fixed")) != "fixed":
+		return 0
 	return int(w["group"]) if w.has("group") else int(GROUPS.get(w["kind"], 1))
+
+
+## The fire group of mount `uid` of ship `idx`: group_of() with the choice the player made for a placed gun.
+func mount_group(arena, idx: int, uid: int) -> int:
+	var co = arena.ships[idx]
+	var m = co.mounts.get(uid)
+	if m == null:
+		return 0
+	var choice := -1
+	if not m["virtual"] and co.ship.components.instances.has(uid):
+		choice = co.ship.components.group_choice(uid)
+	return group_of(m["id"], choice)
 
 
 ## A mount for every placed component that has weapon stats: {uid: {id, pos (the barrel's pivot, cell
@@ -454,7 +468,12 @@ func tick_turrets(arena) -> void:
 		for uid in uids:
 			var m: Dictionary = co.mounts[uid]
 			var w := def(m["id"])
-			if not w["turret"] or status_of(arena, idx, uid) != "ok" or not (m["powered"] if m["virtual"] else co.powered.get(uid, false)):
+			if status_of(arena, idx, uid) != "ok" or not (m["powered"] if m["virtual"] else co.powered.get(uid, false)):
+				continue
+			var auto := mount_group(arena, idx, uid) == 0  # AUTO fires by itself; a turret in LMB, RMB or Q tracks but holds fire
+			if not w["turret"]:
+				if auto:
+					_auto_fixed(arena, idx, uid, m, w)
 				continue
 			var tgt := target_of(arena, idx)
 			var mis = missile_target(arena, idx, m, w)  # point defence turns on a missile before a ship
@@ -468,9 +487,38 @@ func tick_turrets(arena) -> void:
 			var step: float = deg_to_rad(float(w["track"])) * arena.SUBSTEP
 			cur += clampf(angle_difference(cur, goal), -step, step)
 			m["aim"] = Vector2(m["dir"]).rotated(cur)
-			if arena.autofire.get(idx, true) and absf(angle_difference(cur, Vector2(m["dir"]).angle_to(want))) <= deg_to_rad(ON_TARGET_DEG) \
+			if auto and arena.autofire.get(idx, true) and absf(angle_difference(cur, Vector2(m["dir"]).angle_to(want))) <= deg_to_rad(ON_TARGET_DEG) \
 					and arena.cooldown_left(idx, uid) <= 0.0 and (mis != null or _in_range(arena, idx, m, w, tgt)):
 				arena.fire(idx, uid, lead)
+
+
+## A fixed gun in AUTO: it points its barrel at the enemy and fires when the shot bears (the aim is inside the gimbal cone, or the barrel at
+## the edge of the cone still lines up on the foe's hull) and the foe is in range - as the enemy pilot's guns do (pilot_ai.gd).
+## The T key holds it like a turret.
+func _auto_fixed(arena, idx: int, uid: int, m: Dictionary, w: Dictionary) -> void:
+	var tgt := target_of(arena, idx)
+	if tgt < 0 or not arena.autofire.get(idx, true):
+		return
+	var lead: Vector2 = lead_point_of(arena, idx, m, tgt)
+	point_barrel(arena, idx, uid, lead)
+	if arena.cooldown_left(idx, uid) > 0.0 or not _in_range(arena, idx, m, w, tgt):
+		return
+	if not in_arc(arena, idx, m, lead):
+		var dir: Vector2 = Vector2(m["aim"]).rotated(arena.ships[idx].flight.angle)
+		if not _pilot(arena, idx, tgt).on_hull(muzzle_of(arena, idx, m), dir, float(w["range"])):
+			return
+	arena.fire(idx, uid, lead)
+
+
+var _pilots := {}  # ship index -> a PilotAI used only for its on_hull() test
+
+
+func _pilot(arena, idx: int, foe: int):
+	var p = _pilots.get(idx)
+	if p == null or p.arena != arena or p.foe != foe:
+		p = PilotAI.new(arena, idx, foe)
+		_pilots[idx] = p
+	return p
 
 
 ## Is some part of ship `target` within the range of weapon `w` of mount `m` (ship `idx`)?
