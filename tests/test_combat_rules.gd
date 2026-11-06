@@ -234,6 +234,8 @@ func _duel(sectors: int, shields := 1) -> Arena:
 	for k in shields:
 		check(t.components.place(t.grid, "shield_mk1", Vector2i(13 + 4 * k, 19), 0) > 0, "shield")
 		t.components.by_id["shield_mk1"]["stats"]["sectors"] = sectors
+		for k2 in {"layer_hp": 2.0, "regen_delay": 0.0, "regen_rate": 2.0 / 7.0, "break_delay": 3.0}:  # a layer is 2 HP: one test_bolt; 7 s a layer
+			t.components.by_id["shield_mk1"]["stats"][k2] = {"layer_hp": 2.0, "regen_delay": 0.0, "regen_rate": 2.0 / 7.0, "break_delay": 3.0}[k2]
 	for x in range(9, 13 + 4 * shields):
 		t.cables.place(t.grid, Vector2i(x, 20))
 	a.add_ship(_ship(), Vector2(0.0, -gap))
@@ -421,6 +423,7 @@ func test_overcharge_adds_a_layer_for_six_seconds_then_a_cooldown() -> void:
 	b.overcharge(1)
 	b.fire(2, b.add_mount(2, "test_bolt", Vector2(15.5, 15.5)), Vector2(0.0, 0.0))
 	b.step(0.6)  # the extra layer takes the bolt
-	eq([b.ships[1].layers, _count(b, "shield", 1)], [1, 1], "the overcharge layer absorbs a hit")
+	eq(_count(b, "shield", 1), 1, "the overcharge layer absorbs a hit")
+	check(float(b.ships[1].sector_layers[0]) < 1.2, "and a layer's HP is gone from the pool (%s layers left)" % b.ships[1].sector_layers[0])
 	b.step(6.0)
 	check(b.ships[1].layers <= b.ships[1].layers_cap, "and nothing is left over when it ends")

@@ -173,10 +173,10 @@ func _recharge_seconds(hazard: Dictionary) -> float:
 	var co = a.ships[0]
 	var full: int = co.layers
 	check(full > 0, "the shield is up")
-	Shields.absorb(a, 0, {"damage_type": "energy"}, Vector2.ZERO, Vector2.UP, 0)
+	Shields.absorb(a, 0, {"damage_type": "energy", "damage": 99.0}, Vector2.ZERO, Vector2.UP, 0)
 	check(co.layers < full, "the hit used a layer")
 	var t := 0.0
-	while co.layers < full and t < 40.0:
+	while float(co.sector_layers[0]) < Shields.cap_of(co, 0) - 1e-6 and t < 60.0:
 		a.step(0.05)
 		t += 0.05
 	return t
@@ -185,7 +185,8 @@ func _recharge_seconds(hazard: Dictionary) -> float:
 func test_ion_storm_halves_the_shield_recharge() -> void:
 	var normal := _recharge_seconds({})
 	var storm := _recharge_seconds({"id": "ion_storm", "dir": 0.0})
-	var base: float = Abilities.shield_base() + Abilities.shield_break_delay()  # the one layer is the sector's last: 3 s more
+	var row := Abilities.shield_row({})
+	var base: float = float(row["break_delay"]) + float(row["layer_hp"]) / float(row["regen_rate"])  # knocked to 0: the break delay, then the layer's HP at the regen rate
 	check(absf(normal - base) < 0.15, "a layer takes about %s s to come back (%s)" % [base, normal])
 	check(absf(storm - 2.0 * normal) < 0.2, "in an ion storm twice as long (%s vs %s)" % [storm, normal])
 	var a := _arena({"id": "ion_storm", "dir": 0.0})
@@ -350,7 +351,7 @@ func test_radiation_hurts_unsuited_crew_only_with_no_shield_layer() -> void:
 	eq(safe.hp, safe.max_hp, "a shield layer up: no harm")
 	var co = a.ships[1]
 	co.sector_layers[0] = 0.0  # the layers are gone
-	co.sector_timers[0] = []
+	co.sector_wait[0] = 999.0
 	a.step(2.0)
 	check(co.layers == 0, "the layer stayed down")
 	check(absf(safe.hp - (safe.max_hp - 1.0)) < 0.05, "layers 0: the crew is hurt now")

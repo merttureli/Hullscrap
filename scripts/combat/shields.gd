@@ -386,4 +386,5 @@ static func tick(co, dt: float, rate_mult := 1.0) -> void:
 			co.sector_wait[s] = wait - spent
 			step -= spent
 		if step > 0.0:
-			co.sector_layers[s] = minf(float(co.sector_layers[s]) + step * float(co.shield_hp["regen_rate"]) / float(co.shield_hp["layer_hp"]), cap)
+			var up := minf(float(co.sector_layers[s]) + step * float(co.shield_hp["regen_rate"]) / float(co.shield_hp["layer_hp"]), cap)
+			co.sector_layers[s] = cap if up >= cap - 1e-9 else up

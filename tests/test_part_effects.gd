@@ -332,25 +332,25 @@ func test_crew_needed_recharge_slows_the_layers_coming_back() -> void:
 			_crew(ship, "C%d" % i, "human", 12 + 2 * i, 14)
 		var a := Arena.new(1)
 		a.add_ship(ship)
-		Shields.absorb(a, 0, {"damage_type": "energy"})
+		Shields.absorb(a, 0, {"damage_type": "energy", "damage": 99.0})
 		eq(a.ships[0].layers, 0, "the layer is used")
 		var t := 0.0
-		while a.ships[0].layers == 0 and t < 30.0:
+		while float(a.ships[0].sector_layers[0]) < Shields.cap_of(a.ships[0], 0) - 1e-6 and t < 60.0:
 			a.step(0.1)
 			t += 0.1
 		back.append(t)
-	var usual := Abilities.shield_base() + Abilities.shield_break_delay()  # the one layer is the sector's last: 3 s more
-	near(back[1], usual, "with the crew it is back after the usual 7 s + 3 s", 0.15)
-	near(back[0], 2.0 * usual, "without it, at half speed the layer and the wait both take twice as long: 20 s", 0.15)
+	var usual := _full_seconds(1)  # the break delay, then the layer's HP at the regen rate
+	near(back[1], usual, "with the crew it is back after the usual time", 0.15)
+	near(back[0], 2.0 * usual, "without it, at half speed the wait and the regen both take twice as long", 0.15)
 	var d2 := _rig("shield_mk1", {"shield_mk1": {"abilities": _passive({"crew_needed": {"count": 1, "stat": "recharge", "else_mult": 0.0}})}})
 	var a2 := Arena.new(1)
 	a2.add_ship(d2["ship"])
-	Shields.absorb(a2, 0, {"damage_type": "energy"})
+	Shields.absorb(a2, 0, {"damage_type": "energy", "damage": 99.0})
 	a2.step(20.0)
 	eq(a2.ships[0].layers, 0, "else_mult 0: the layer never comes back until the crew is there")
 	_crew(d2["ship"], "C", "human", 12, 14)
-	a2.step(10.1)
-	eq(a2.ships[0].layers, 1, "and it comes back once they are")
+	a2.step(_full_seconds(1) + 0.2)
+	eq(a2.ships[0].sector_layers[0], 1.0, "and it comes back once they are")
 
 
 func test_crew_needed_evasion_is_the_resonance_helm() -> void:
@@ -372,14 +372,19 @@ func test_crew_needed_evasion_is_the_resonance_helm() -> void:
 
 # --- stats.recharge --------------------------------------------------------------------------------
 
-## Seconds until sector 0 of a shield part has its used layer back (40 at most).
+## Seconds a tier 1 sector of `layers` layers knocked to 0 takes to be full again at normal speed: break delay, then layers x layer HP at the regen rate.
+func _full_seconds(layers: int) -> float:
+	var row := Abilities.shield_row({})
+	return float(row["break_delay"]) + layers * float(row["layer_hp"]) / float(row["regen_rate"])
+
+
+## Seconds until sector 0 of a shield part is full again after a knockdown (60 at most).
 func _back_after(ship: Ship) -> float:
 	var a := Arena.new(1)
 	a.add_ship(ship)
-	Shields.absorb(a, 0, {"damage_type": "energy"}, Vector2.ZERO, Vector2.ZERO, 0)
-	var before: float = a.ships[0].sector_layers[0]
+	Shields.absorb(a, 0, {"damage_type": "energy", "damage": 99.0}, Vector2.ZERO, Vector2.ZERO, 0)
 	var t := 0.0
-	while a.ships[0].sector_layers[0] < before + 1.0 - 1e-6 and t < 40.0:
+	while a.ships[0].sector_layers[0] < Shields.cap_of(a.ships[0], 0) - 1e-6 and t < 60.0:
 		a.step(0.05)
 		t += 0.05
 	return t
@@ -387,11 +392,11 @@ func _back_after(ship: Ship) -> float:
 
 func test_stats_recharge_sets_how_fast_a_used_layer_comes_back() -> void:
 	var times := {}
-	var all := Abilities.shield_base() + Abilities.shield_break_delay()  # the one layer is the sector's last: it waits 3 s more (at the part's speed)
+	var all := _full_seconds(1)  # knocked to 0: the break delay, then the layer at the regen rate (at the part's speed)
 	for recharge in [7.0, 3.5, 14.0]:
 		var d := _rig("shield_mk1", {"shield_mk1": {"stats": {"recharge": recharge}}})
 		times[recharge] = _back_after(d["ship"])
-	near(times[7.0], all, "7.0 is the normal 7 s (+ 3)", 0.1)
+	near(times[7.0], all, "7.0 is the normal speed", 0.1)
 	near(times[3.5], all / 2.0, "3.5 comes back in half the time", 0.1)
 	near(times[14.0], all * 2.0, "14.0 takes twice as long", 0.1)
 	var d2 := _rig("shield_mk1", {})
@@ -403,7 +408,7 @@ func test_the_neon_lattice_shield_recharges_in_its_4_seconds() -> void:
 	var d := _rig("shield_neon_mk1", {})
 	var ship: Ship = d["ship"]
 	near(Abilities.recharge_rate(ship, ship.power_state["powered"]), 7.0 / 4.0, "x1.75", 1e-6)
-	near(_back_after(ship), 4.0, "a used layer is back after 4 s", 0.1)
+	near(_back_after(ship), _full_seconds(2) / 1.75, "a knocked-down sector is full again after the usual time at x1.75", 0.1)
 
 
 func test_crew_needed_recharge_multiplies_the_parts_own_speed_and_several_shields_average_by_layers() -> void:
