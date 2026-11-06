@@ -33,7 +33,9 @@
 					{"id": "laser_turret_mk1", "cost": 12, "weight": 2},
 					{"id": "gilded_lance", "cost": 30, "weight": 2, "from": 60},
 					{"id": "sovereign_turret", "cost": 26, "weight": 2, "from": 70},
-					{"id": "baron_tithe_gun", "cost": 30, "weight": 2, "from": 80}
+					{"id": "baron_tithe_gun", "cost": 30, "weight": 2, "from": 80},
+					{"id": "laser_mk3", "cost": 32, "weight": 1, "from": 140},
+					{"id": "laser_lance", "cost": 40, "weight": 1, "from": 160}
 				],
 				"shields": [
 					{"id": "shield_mk1", "cost": 14, "weight": 2},

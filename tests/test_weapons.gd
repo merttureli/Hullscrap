@@ -7,9 +7,10 @@ const Weapons = preload("res://scripts/combat/weapons.gd")
 const RAPID_SHARE := [0.10, 0.15]  ## of the player's guns (every entry that is not a test_*)
 
 
-## Shots a second of weapon entry `w` (Weapons.def): shots / cooldown. A flak volley's pellets fly together: one shot.
+## Shots a second of weapon entry `w` (Weapons.def): shots / cooldown. A flak volley's pellets fly together: one shot. So does the volley of a
+## fixed gun's barrels (a burst battery or a gun strip: one pull of the trigger, G2).
 func _rate(w: Dictionary) -> float:
-	var shots := 1.0 if str(w["kind"]) == "flak" else float(w["shots"])
+	var shots := 1.0 if str(w["kind"]) == "flak" or not bool(w["turret"]) else float(w["shots"])
 	return shots / float(w["cooldown"])
 
 

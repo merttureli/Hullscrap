@@ -18,6 +18,7 @@ const Air = preload("res://scripts/board/air.gd")
 
 const ERR := 0.12  ## radians of error in a follower's shot
 const SEE := 14.0  ## cells a follower looks for something to shoot
+const SPOT := 18.0  ## cells a follower sees a foe it will close in on (a hunter sees as far: foes.gd SEE_HUNT)
 const MELEE_GO := 8.0  ## cells within which a melee follower goes for a foe
 
 
@@ -107,7 +108,7 @@ static func downed(s) -> Array:
 
 
 ## `dt` seconds pass for every follower.
-static func tick(s, dt: float) -> void:
+static func tick(s, dt: float, hook := Callable()) -> void:
 	for p in s.party:
 		var m: CrewMember = p["m"]
 		var prev: Vector2 = m.pos
@@ -121,45 +122,26 @@ static func tick(s, dt: float) -> void:
 			m.path.clear()
 			p["revive"] = 0.0
 		elif int(p.get("bed", -1)) < 0:  # (one lying on a bed rests there: beds.gd)
-			_act(s, p, dt)
+			_act(s, p, dt, hook)
 		p["moving"] = m.pos.distance_to(prev) > 0.002
 
 
-static func _act(s, p: Dictionary, dt: float) -> void:
+static func _act(s, p: Dictionary, dt: float, hook := Callable()) -> void:
 	var m: CrewMember = p["m"]
-	var w: Dictionary = p["gun"]["w"]
 	var c := Arms.cfg()
-	var foe := _target(s, m, w)
+	p["blocked"] = ""
+	if hook.is_valid() and bool(hook.call(s, p, dt)):  # (squad orders: orders.gd)
+		return
+	var foe := _target(s, m, p["gun"]["w"])
+	if foe.is_empty():
+		foe = _spotted(s, p)  # (a foe in sight beyond the weapon's reach: close in, not too far from him)
 	if not foe.is_empty():
-		p["revive"] = 0.0
-		var off: Vector2 = foe["pos"] - m.pos
-		m.facing = off.normalized() if off.length() > 0.01 else m.facing
-		if bool(w["melee"]):
-			var reach := float(w["range"]) + 0.9
-			if off.length() > reach:
-				_go(s, p, foe["pos"], dt)
-			elif float(p["cd"]) <= 0.0:
-				p["cd"] = 1.0 / float(w["rate"])
-				s.events.append({"type": "swing", "from": m.pos, "dir": off.angle(), "reach": reach, "who": "ally", "look": Bolts.look(str(w["id"]), Mods.bolt_size(m))})
-				s.foes.hurt(foe["ref"], float(w["damage"]) * Mods.damage_mult(m), foe["pos"])
-				s.foes.noise(m.pos, float(c["noise_swing"]))
-		else:
-			var g: Dictionary = p["gun"]
-			if Arms.has_mag(g) and int(g["mag"]) <= 0 and float(g["reload"]) <= 0.0:  # an empty magazine: reload from their own rounds, or they are out
-				if not Arms.start_reload(g, int(p["rest"])) and not bool(p["out"]):
-					p["out"] = true
-					s.events.append({"type": "line", "text": "%s is out of rounds." % m.name, "pos": m.pos})
-			if float(p["cd"]) <= 0.0 and float(g["reload"]) <= 0.0 and (not Arms.has_mag(g) or int(g["mag"]) > 0):
-				p["cd"] = 1.0 / float(w["rate"])
-				if Arms.has_mag(g):
-					g["mag"] = int(g["mag"]) - 1
-				s.shoot(m, "ally", m.pos + Vector2.from_angle(off.angle()) * 0.9, off.angle() + s.rng.randf_range(-ERR, ERR), w, s.foes.bodies())
-				s.foes.noise(m.pos, float(c["noise_gun"]))
-			if m.pos.distance_to(s.soldier.pos) > float(c["follow_far"]) * 1.8:
-				_go(s, p, s.soldier.pos, dt)  # not too far from him to shoot
+		p["doing"] = "fight"
+		engage(s, p, dt, foe, s.soldier.pos)
 		return
 	var down := _nearest_down(s, p)
 	if not down.is_empty():
+		p["doing"] = "revive"
 		if m.pos.distance_to(down["m"].pos) > 1.9:
 			p["revive"] = 0.0
 			_go(s, p, down["m"].pos, dt)
@@ -170,11 +152,50 @@ static func _act(s, p: Dictionary, dt: float) -> void:
 				s.revive_member(down["m"])
 		return
 	p["revive"] = 0.0
+	p["doing"] = "follow"
 	var away: float = m.pos.distance_to(s.soldier.pos)
 	if away > float(c["follow_far"]) or (away > float(c["follow_near"]) and not m.path.is_empty()):
 		_go(s, p, s.soldier.pos, dt)
 	else:
 		m.path.clear()
+
+
+## Fight foe `foe` ({pos, ref}): a melee follower closes and swings, a ranged one shoots (reloading from its own rounds) and, out of reach of it, walks closer.
+## `home` is where it keeps within follow_far x 1.8 of (the soldier, or Vector2.INF for no leash).
+static func engage(s, p: Dictionary, dt: float, foe: Dictionary, home: Vector2) -> void:
+	var m: CrewMember = p["m"]
+	var w: Dictionary = p["gun"]["w"]
+	var c := Arms.cfg()
+	p["revive"] = 0.0
+	var off: Vector2 = foe["pos"] - m.pos
+	m.facing = off.normalized() if off.length() > 0.01 else m.facing
+	if bool(w["melee"]):
+		var reach := float(w["range"]) + 0.9
+		if off.length() > reach:
+			_go(s, p, foe["pos"], dt)
+		elif float(p["cd"]) <= 0.0:
+			p["cd"] = 1.0 / float(w["rate"])
+			s.events.append({"type": "swing", "from": m.pos, "dir": off.angle(), "reach": reach, "who": "ally", "look": Bolts.look(str(w["id"]), Mods.bolt_size(m))})
+			s.foes.hurt(foe["ref"], float(w["damage"]) * Mods.damage_mult(m), foe["pos"])
+			s.foes.noise(m.pos, float(c["noise_swing"]))
+		return
+	var g: Dictionary = p["gun"]
+	if off.length() > minf(float(w["range"]), SEE) or not s.site.clear_line(m.pos, foe["pos"]):  # out of reach or behind a wall: walk to where it can be shot
+		_go(s, p, foe["pos"], dt)
+		return
+	m.path.clear()
+	if Arms.has_mag(g) and int(g["mag"]) <= 0 and float(g["reload"]) <= 0.0:  # an empty magazine: reload from their own rounds, or they are out
+		if not Arms.start_reload(g, int(p["rest"])) and not bool(p["out"]):
+			p["out"] = true
+			s.events.append({"type": "line", "text": "%s is out of rounds." % m.name, "pos": m.pos})
+	if float(p["cd"]) <= 0.0 and float(g["reload"]) <= 0.0 and (not Arms.has_mag(g) or int(g["mag"]) > 0):
+		p["cd"] = 1.0 / float(w["rate"])
+		if Arms.has_mag(g):
+			g["mag"] = int(g["mag"]) - 1
+		s.shoot(m, "ally", m.pos + Vector2.from_angle(off.angle()) * 0.9, off.angle() + s.rng.randf_range(-ERR, ERR), w, s.foes.bodies())
+		s.foes.noise(m.pos, float(c["noise_gun"]))
+	if home != Vector2.INF and m.pos.distance_to(home) > float(c["follow_far"]) * 1.8:
+		_go(s, p, home, dt)  # not too far from him to shoot
 
 
 ## The nearest foe a follower can shoot (across a clear line, within its weapon's reach) or, with a melee weapon, within MELEE_GO cells: {pos, ref} or {}.
@@ -185,6 +206,21 @@ static func _target(s, m: CrewMember, w: Dictionary) -> Dictionary:
 	for b in s.foes.bodies():
 		var d: float = m.pos.distance_to(b["pos"])
 		if d <= reach and d < bd and s.site.clear_line(m.pos, b["pos"]):
+			best = b
+			bd = d
+	return best
+
+
+## A foe a follower sees (a clear line, within SPOT cells) but cannot shoot yet, and that it may close in on while the soldier is within follow_far x 1.8 + 4 of it:
+## {pos, ref} or {}. This keeps a pistol (9 cells) from standing by while a pirate (16 cells) shoots at the soldier.
+static func _spotted(s, p: Dictionary) -> Dictionary:
+	var m: CrewMember = p["m"]
+	var best := {}
+	var bd := INF
+	var leash := float(Arms.cfg()["follow_far"]) * 1.8 + 4.0
+	for b in s.foes.bodies():
+		var d: float = m.pos.distance_to(b["pos"])
+		if d <= SPOT and d < bd and s.site.clear_line(m.pos, b["pos"]) and b["pos"].distance_to(s.soldier.pos) <= leash:
 			best = b
 			bd = d
 	return best
@@ -209,5 +245,7 @@ static func _go(s, p: Dictionary, to: Vector2, dt: float) -> void:
 		s.foes.path_to(p, to)
 		p["repath"] = 0.5
 	if Air.wait(s, p):  # no sealed suit: it waits at the door of an airless room
+		p["blocked"] = "no air"
 		return
+	p["blocked"] = "no way" if p["m"].path.is_empty() and p["m"].pos.distance_to(to) > 1.5 else ""
 	p["m"].step(dt)

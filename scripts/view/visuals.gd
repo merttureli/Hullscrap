@@ -278,6 +278,17 @@ static func _draw_barrel(canvas, def: Dictionary, i2: Dictionary, pivot: Vector2
 	elif float(hp) < float(max_hp) * DAMAGED_BELOW and sheet.has_anim("damaged"):
 		anim = "damaged"
 	frame = sheet.frame_once("fire", float(opts.get("fired_ago", 0.0))) if anim == "fire" else sheet.frame_at(anim, t)
+	var extra := ""  # a chain gun's spin (steps > 0) and a charge gun's capacitor rings (one per stored volley) show while it idles
+	var sub := 0
+	if anim in ["idle", "damaged"]:
+		if int(opts.get("chain", 0)) > 0 and sheet.has_anim("spin"):
+			extra = "spin"
+			sub = int(opts.get("spin", 0.0)) % int(sheet.anims["spin"]["count"])
+		elif opts.has("stored") and sheet.has_anim("charge"):
+			extra = "charge"
+			sub = mini(int(opts["stored"]), int(sheet.anims["charge"]["count"]) - 1)
+		if extra != "":
+			frame = sheet.start_of(extra) + sub
 	var k := cell_px / SpriteSheet.SRC_CELL
 	var pin: Vector2 = (sheet.anchors["pivot"] + Vector2(0.5, 0.5)) if sheet.anchors.has("pivot") else Vector2(sheet.frame) / 2.0
 	var xf := Transform2D(angle, pivot)
@@ -286,8 +297,8 @@ static func _draw_barrel(canvas, def: Dictionary, i2: Dictionary, pivot: Vector2
 	canvas.draw_texture_rect_region(sheet.texture, dest, sheet.region(frame), Color(1, 1, 1, alpha))
 	canvas.draw_set_transform_matrix(Transform2D.IDENTITY)
 	var g = sheet.glow
-	if g != null and anim in ["fire", "damaged"] and g.has_anim(anim):
-		var gf: int = g.frame_once("fire", float(opts.get("fired_ago", 0.0))) if anim == "fire" else g.frame_at(anim, t)
+	if g != null and (anim in ["fire", "damaged"] or extra != "") and g.has_anim(extra if extra != "" else anim):
+		var gf: int = g.start_of(extra) + sub if extra != "" else (g.frame_once("fire", float(opts.get("fired_ago", 0.0))) if anim == "fire" else g.frame_at(anim, t))
 		var quad := {"tex": g.texture, "rect": Rect2(dest.position + g.offset * k, Vector2(g.frame) * k), "src": g.region(gf), "xf": xf, "mod": Color(1, 1, 1, alpha)}
 		if opts.has("glow_out"):
 			opts["glow_out"].append(quad)
