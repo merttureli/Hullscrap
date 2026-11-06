@@ -32,7 +32,7 @@ static func draw(cv: CanvasItem, e: Dictionary, ship, r: Rect2, t := 0.0) -> voi
 		"item":
 			if not _item_sprite(cv, str(e["id"]), r):
 				var s := minf(r.size.x, r.size.y) * 0.8
-				UiKit.icon(cv, e["id"], Rect2(r.get_center() - Vector2(s, s) / 2.0, Vector2(s, s)))
+				UiKit.icon(cv, icon_id(str(e["id"])), Rect2(r.get_center() - Vector2(s, s) / 2.0, Vector2(s, s)))
 		"cable":
 			_cable(cv, r)
 		"belt":
@@ -58,6 +58,13 @@ static func item_art(id: String) -> Dictionary:
 	if Art.gear_rig(id, "human") != null:
 		return {"kind": "gear", "art": id, "path": "%s/gear/%s/human.png" % [Art.root, id]}
 	return {}
+
+
+## The UI icon an item card falls back to: its own, else (an item of items.json with no icon) the cargo crate, so it never reads as a hole.
+static func icon_id(id: String) -> String:
+	if UiKit.icon_art(id) == null and not UiKit.MATERIAL_COLORS.has(id) and Content.has("items", id):
+		return "cargo"
+	return id
 
 
 ## The sprite of item `id` (item_art) scaled to fit `r`, cropped to its pixels. False when it has none.

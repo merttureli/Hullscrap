@@ -943,7 +943,7 @@ func card_spec(id: String) -> Dictionary:
 	var s = ship()
 	var rec: Dictionary = s.crafting.def(id)
 	var out: String = str(rec["output"]["item"])
-	var entry := {"kind": "item", "id": "item"}
+	var entry := {"kind": "item", "id": "cargo"}  # (no art and no icon: the cargo crate, so it reads as an item)
 	var stats := []
 	var aim := ""
 	var line := "standard"
@@ -1083,7 +1083,7 @@ func _draw_fabricator(s, fab: Dictionary) -> void:
 		status = "No fabricator on this ship"
 		col = BAD
 	elif int(fab["level"]) == 0:
-		status = "Offline: no power"
+		status = "Offline: disabled" if off_text(s, "fabricator").contains("disabled") else "Offline: no power"
 		col = BAD
 	_text(status, box.position + Vector2(10.0, 54.0), 22, col)
 	_text(fab_line(fab, false), box.position + Vector2(10.0, 80.0), 14, TEXT)
@@ -1130,6 +1130,21 @@ func _draw_upgrade(box: Rect2, u: Dictionary) -> void:
 	if flash > 0.0:
 		var a := flash / 0.7
 		draw_rect(box.grow(2.0 + 8.0 * (1.0 - a)), Color(0.55, 1.0, 0.8, a), false, 2.0)
+
+
+## Why the ship's first part of `family` ("smelter", "fabricator") is offline: "Smelter Mk1 has no power: cable it to a reactor" or "... is disabled: repair it".
+## (A smelter with none aboard is the no-smelter hint's job.)
+func off_text(s, family: String) -> String:
+	var uids: Array = s.components.instances.keys()
+	uids.sort()
+	for uid in uids:
+		var d: Dictionary = s.components.def(s.components.instances[uid]["id"])
+		if str(d.get("family", "")) == family:
+			var nm := str(d.get("name", family))
+			if s.disabled_uids().has(uid):
+				return "%s is disabled: repair it." % nm
+			return "%s has no power: cable it to a reactor." % nm
+	return "No smelter. Build one (Utility tab) with a radiator beside it."
 
 
 ## The smelter's upgrade card (processing.gd upgrade_info) for the installed smelter: "next" is "" with none or at the top.
@@ -1203,7 +1218,7 @@ func _draw_smelter(s, st: Dictionary) -> void:
 			heat = "   Heat %d%%" % roundi(float(inst["heat"]) / maxf(1.0, float(s.effective(inst["id"])["heat_limit"])) * 100.0)
 		_text("Tools: %s   Smelters: %d%s" % [", ".join(tools) if not tools.is_empty() else "none", st["count"], heat], box.position + Vector2(10.0, 100.0), 14, TEXT)
 	else:
-		draw_multiline_string(ThemeDB.fallback_font, box.position + Vector2(10.0, 78.0), "No smelter. Build one (Utility tab) with a radiator beside it.", HORIZONTAL_ALIGNMENT_LEFT, box.size.x - 20.0, 14, 3, DIM_TEXT)
+		draw_multiline_string(ThemeDB.fallback_font, box.position + Vector2(10.0, 78.0), off_text(s, Processing.SMELTER), HORIZONTAL_ALIGNMENT_LEFT, box.size.x - 20.0, 14, 3, DIM_TEXT)
 	var inf := smelter_upgrade()
 	if str(inf["text"]) == "":  # a part off the chain (the Plasma Forge): by hand
 		_para("This smelter is not on the upgrade path: swap it in build mode.", box.position + Vector2(10.0, 160.0), box.size.x - 20.0, 14, DIM_TEXT)

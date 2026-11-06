@@ -421,3 +421,26 @@ func test_slag_pot_to_mk1_grows_into_the_free_column() -> void:
 	eq(ship.components.instances[uid]["anchor"], a, "it grew to the right, the Slag Pot's own cells are still covered")
 	check(ship.inventory.count("smelter_scrap_mk1") >= 1, "the Slag Pot is in the cargo")
 	_free(d)
+
+
+func test_an_item_with_no_art_and_no_icon_falls_back_to_the_cargo_crate() -> void:
+	eq(Thumbs.icon_id("basic_armor"), "cargo", "no art, no icon: the crate")
+	eq(Thumbs.icon_id("fuel"), "fuel", "an icon of its own is kept")
+	eq(Thumbs.icon_id("titanium"), "titanium", "so is a material's")
+	var d := _panel({})
+	var panel: CraftingPanel = d["panel"]
+	panel.open()
+	eq(panel.card_spec("basic_armor")["entry"], {"kind": "item", "id": "cargo"}, "the recipe card too")
+	_free(d)
+
+
+func test_an_unpowered_smelter_says_why_not_that_there_is_none() -> void:
+	var d := _smelt("smelter_mk1")
+	var panel: CraftingPanel = d["panel"]
+	var ship: Ship = d["ship"]
+	check(panel.off_text(ship, "smelter") == "Smelter Mk1 has no power: cable it to a reactor.", panel.off_text(ship, "smelter"))
+	ship.components.instances[d["smelter"]]["status"] = "disabled"
+	check(panel.off_text(ship, "smelter").ends_with("is disabled: repair it."), panel.off_text(ship, "smelter"))
+	ship.components.remove_uid(d["smelter"])
+	check(panel.off_text(ship, "smelter").begins_with("No smelter. Build one"), "none aboard")
+	_free(d)
