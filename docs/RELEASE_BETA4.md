@@ -79,6 +79,7 @@ Beta 4.1 is a fights, balance and content update on top of Beta 4, from a conten
 - **The fabricator upgrades in place**: no more building robot arms for level 2. In build mode click the fabricator (or hover it and press U) for a card with the next level, what it opens and its price, then click again to pay. Levels 1 to 4, no blueprints; a ship carries one fabricator, and it is never wrecked, only disabled. Arms and rigs in its room now make crafting 25% faster each (up to +50%); the laser cutter and nanoforge stay tools. Older saves keep the level their modules gave them.
 
 ### Fixed
+- **The Slag Pot, Smelter Mk1 and seven more parts have their own art** (they drew as flat blocks): the Slag Pot is a cauldron on legs with slag crusting over it, Smelter Mk1-Mk3 pour one, two and three crucibles into a casting line, the Plasma Forge spins a magenta arc in a bottle, and the Afterburner (a shock-diamond plume), Inertial Dampener, Battering Bow and Ma's Kettle are drawn too. They melt, pour, spin or boil while they have power.
 - The debug keys no longer work in the download builds, and F1 lists them only in a debug build.
 - The Ledger's first goals and the first-fight tip say where things come from.
 - The reactor warning says what it means: "One reactor and no spare. If it's wrecked, you're adrift."

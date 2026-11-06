@@ -315,8 +315,9 @@ class Afterburner(EngBase):
         # the injector ring under the mouth
         for x in range(22, 43, 3): o.put(x, 11, 'a' if on and (x // 3 + i) % 2 else ('u' if on else 'W'))
         # the iris: petals round a wide mouth
-        for k, x in enumerate(range(18, 46, 4)):
-            o.rect(x, 1, 4, 4, 'S'); o.put(x, 1, 'M'); o.put(x + 1, 1, 'L'); o.put(x + 3, 4, 'E'); o.put(x + 3, 1, 'W')
+        for k, x in enumerate(range(18, 46, 4)):                              # the petals overlap like scales, lit ones and shaded ones in turn
+            hi, mid, lo = ('L', 'M', 'S') if k % 2 == 0 else ('M', 'S', 'W')
+            o.rect(x, 1, 4, 4, mid); o.hline(x, 1, 3, hi); o.vline(x + 3, 1, 4, lo); o.put(x, 4, 'E' if k % 2 else lo)
         o.hline(18, 0, 28, 'E')
         o.hline(21, 2, 22, 'D'); o.hline(21, 3, 22, 'D')
         if on:
