@@ -87,6 +87,7 @@ Beta 4.1 is a fights, balance and content update on top of Beta 4, from a conten
 - **Smelter upgrade in the Smelter tab**: an Upgrade button swaps in the next smelter (Slag Pot, Mk1, Mk2, Mk3) in place, paying its recipe; it says why when it can't (blueprint, fabricator level, materials, or one more free column of floor).
 
 ### Fixed
+- **Two Kickjets show one Sputter Boost box** with "x2" (likewise any parts that share an ability key); the starter's lone Bolt Thrower now fires on left-click (a ship whose defaults leave LMB empty puts its guns there; saved choices never move); the fight's top hint line wraps between the two schematics instead of running into the enemy panel's title.
 - **The Slag Pot, Smelter Mk1 and seven more parts have their own art** (they drew as flat blocks): the Slag Pot is a cauldron on legs with slag crusting over it, Smelter Mk1-Mk3 pour one, two and three crucibles into a casting line, the Plasma Forge spins a magenta arc in a bottle, and the Afterburner (a shock-diamond plume), Inertial Dampener, Battering Bow and Ma's Kettle are drawn too. They melt, pour, spin or boil while they have power.
 - The debug keys no longer work in the download builds, and F1 lists them only in a debug build.
 - The Ledger's first goals and the first-fight tip say where things come from.

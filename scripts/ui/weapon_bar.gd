@@ -93,7 +93,7 @@ static func sections(list: Array, slot: Vector2, y: float, gap := GAP) -> Dictio
 ## The weapons laid out for the bar (see sections()), under the ability row.
 func layout() -> Dictionary:
 	var list: Array = session.weapons() if session != null else []
-	var y := (ASLOT.y + GAP if session != null and not session.ability_slots().is_empty() else 0.0) + HEAD
+	var y := (ASLOT.y + GAP if session != null and not session.ability_boxes().is_empty() else 0.0) + HEAD
 	var lay := sections(list, SLOT, y)
 	var bays: Array = session.bays() if session != null else []  # the drone bays: no fire group, no drop zone, their own DRONES header after the groups (keys follow the guns')
 	if not bays.is_empty():
@@ -205,7 +205,7 @@ func _process(_dt: float) -> void:
 	if not visible or session == null:
 		return
 	var weapons_w: float = layout()["width"]
-	var abilities_w := _row_width(session.ability_slots().size(), ASLOT.x)
+	var abilities_w := _row_width(session.ability_boxes().size(), ASLOT.x)
 	size = Vector2(maxf(weapons_w, abilities_w), HEAD + SLOT.y + (ASLOT.y + GAP if abilities_w > 0.0 else 0.0))
 	if badges != null:  # the mouse on a slot lights that gun on the ship
 		var hs := slot_at(get_local_mouse_position()) if drag.is_empty() else {"w": {"uid": drag["uid"]}}
@@ -242,9 +242,9 @@ func _draw() -> void:
 		return
 	var parts: Array = session.shield_sectors()
 	if not parts.is_empty():
-		var rows_left := (size.x - maxf(layout()["width"], _row_width(session.ability_slots().size(), ASLOT.x))) / 2.0
+		var rows_left := (size.x - maxf(layout()["width"], _row_width(session.ability_boxes().size(), ASLOT.x))) / 2.0
 		_shield_diagram(Vector2(rows_left - DIAG.x - 14.0, size.y - DIAG.y), parts)
-	var slots: Array = session.ability_slots()
+	var slots: Array = session.ability_boxes()
 	if not slots.is_empty():
 		var x0 := (size.x - _row_width(slots.size(), ASLOT.x)) / 2.0
 		for i in slots.size():
@@ -450,10 +450,13 @@ static func fit_name(text: String, max_w := NAME_W) -> Dictionary:
 func _ability_slot(at: Vector2, s: Dictionary) -> void:
 	var st: Dictionary = session.ability_state(s)
 	var state: String = st["state"]
-	var flash = flashes.get(s["slot"])
-	if flash != null and Time.get_ticks_msec() >= flash["until"]:
-		flashes.erase(s["slot"])
-		flash = null
+	var flash = null
+	for sl in s.get("slots", [s["slot"]]):
+		var f = flashes.get(sl)
+		if f != null and Time.get_ticks_msec() >= f["until"]:
+			flashes.erase(sl)
+		elif f != null and flash == null:
+			flash = f
 	var col := READY
 	var frac := 1.0
 	var label := "READY"
@@ -477,6 +480,8 @@ func _ability_slot(at: Vector2, s: Dictionary) -> void:
 	var key: String = KEY_LABEL.get(s["key"], "?")
 	_text(key, c + Vector2(-19.0, 4.0 if key.length() > 1 else 6.0), 10 if key.length() > 1 else 17, TEXT, 38.0, HORIZONTAL_ALIGNMENT_CENTER)
 	_text(str(s["name"]), at + Vector2(58.0, 20.0), 14, TEXT)
+	if int(s.get("count", 1)) > 1:
+		_text("x%d" % s["count"], at + Vector2(ASLOT.x - 42.0, 20.0), 13, GOLD, 34.0, HORIZONTAL_ALIGNMENT_RIGHT)
 	if flash != null:
 		draw_multiline_string(ThemeDB.fallback_font, at + Vector2(58.0, 33.0), flash["text"], HORIZONTAL_ALIGNMENT_LEFT, ASLOT.x - 64.0, 10, 3, BAD)
 	else:
