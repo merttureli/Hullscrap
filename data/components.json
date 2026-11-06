@@ -391,8 +391,14 @@
     {
       "id": "fabricator",
       "name": "Fabricator",
-      "blurb": "Turns materials and blueprints into parts, and waiting lists into queues.",
+      "blurb": "Turns materials and blueprints into parts, and waiting lists into queues. One per ship: click it in build mode to upgrade it, level 1 to 4.",
       "family": "fabricator",
+      "no_wreck": true,
+      "upgrades": {
+        "2": {"scrap": 80, "copper": 30, "titanium": 8},
+        "3": {"scrap": 150, "titanium": 30, "silicon": 15, "polymer": 20},
+        "4": {"scrap": 250, "alloy": 40, "conductor": 20, "crystal": 10}
+      },
       "line": "standard",
       "tier": 1,
       "size": [
@@ -412,7 +418,7 @@
     {
       "id": "robot_arm",
       "name": "Robot Arm",
-      "blurb": "Workshop module. Raises the Fabricator to level 2 and holds things steady while you swear at them.",
+      "blurb": "Workshop module. Each one in the Fabricator's room makes crafting 25% faster (up to +50%) and holds things steady while you swear at them.",
       "family": "workshop",
       "line": "standard",
       "tier": 1,
@@ -433,7 +439,7 @@
     {
       "id": "laser_cutter",
       "name": "Laser Cutter",
-      "blurb": "Workshop module. Cuts plate cleanly; the manual notes it will also cut the manual.",
+      "blurb": "Workshop module. Gives the Fabricator the laser cutter tool. Cuts plate cleanly; the manual notes it will also cut the manual.",
       "family": "workshop",
       "line": "standard",
       "tier": 1,
@@ -454,7 +460,7 @@
     {
       "id": "assembly_rig",
       "name": "Assembly Rig",
-      "blurb": "Workshop module. Three arms, one frame, and a safety guide read in full by nobody.",
+      "blurb": "Workshop module. Three arms, one frame, and a safety guide read in full by nobody. Each one in the Fabricator's room makes crafting 25% faster (up to +50%).",
       "family": "workshop",
       "line": "standard",
       "tier": 1,
@@ -475,7 +481,7 @@
     {
       "id": "nanoforge",
       "name": "Nanoforge",
-      "blurb": "Workshop module, level 4. Builds from the atom up. Please do not ask what with.",
+      "blurb": "Workshop module. Gives the Fabricator the nanoforge tool. Builds from the atom up. Please do not ask what with.",
       "family": "workshop",
       "line": "standard",
       "tier": 1,

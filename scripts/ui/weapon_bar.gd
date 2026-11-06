@@ -1,19 +1,21 @@
 extends Control
 ## The weapon bar along the bottom of the combat screen: one picture slot per weapon of the player's ship (the gun's sprite, its key in
 ## a cooldown ring, its name small under it, its state, chain and charge pips), edged in its fire group's colour with the group's mark,
-## grouped LMB, RMB, then the guns that fire by themselves, each under its mouse icon (gun_badges.gd; right-click a slot to move a fixed
-## gun between LMB and RMB). The slot flashes when the gun fires and lights when its gun on the ship is hovered. The state reads ready, cooling, no power, jammed, no ammo,
+## in four sections, LMB, RMB, Q and AUTO, each under its header and icon (gun_badges.gd), even when empty (then a slim drop zone).
+## Drag a slot to another section to move that gun there (the slot follows the mouse and the section lights up); right-click a slot
+## to cycle its group. The slot flashes when the gun fires and lights when its gun on the ship is hovered. The state reads ready, cooling, no power, jammed, no ammo,
 ## out of arc ... Above it, one slot per active ability of the ship (Abilities.slots): the key that
-## triggers it (Shift engine, Space shield, Q utility), its name, a ring that shows the time left while
+## triggers it (Shift engine, Space shield, E utility), its name, a ring that shows the time left while
 ## it runs and the cooldown while it rests, and why it cannot start; a press that is refused flashes
 ## the reason in the slot. To the left of the rows a small diagram shows the shield: a ring of the bubble's
 ## sectors, bow up, each as bright and thick as the layers it holds, with the number, dark while open and
 ## dashed at 0 (arrow keys shift the balance, End makes it even; combat_view.gd takes those keys).
-## Reads a CombatSession; the only input it takes is the three ability keys.
+## Reads a CombatSession; it takes the three ability keys, and combat_view.gd hands it the mouse (grab, motion, release, click).
 
 const Describe = preload("res://scripts/ui/describe.gd")
 const GunBadges = preload("res://scripts/ui/gun_badges.gd")
 const Thumbs = preload("res://scripts/ui/thumbs.gd")
+const Art = preload("res://scripts/view/art.gd")
 
 const SLOT := Vector2(92.0, 104.0)  ## a weapon slot: key, picture, name, state
 const HEAD := 20.0  ## the strip above a fire group with its mouse icon
@@ -27,8 +29,12 @@ const COOLING := Color("#f1c40f")
 const BAD := Color("#e0453a")
 const GREY := Color("#6b7686")
 const GOLD := Color("#ffd24a")
-const KEY_OF := {KEY_SHIFT: "engine", KEY_SPACE: "shield", KEY_Q: "utility"}  ## keycode -> ability key
-const KEY_LABEL := {"engine": "SHIFT", "shield": "SPACE", "utility": "Q"}
+const KEY_OF := {KEY_SHIFT: "engine", KEY_SPACE: "shield", KEY_E: "utility"}  ## keycode -> ability key
+const KEY_LABEL := {"engine": "SHIFT", "shield": "SPACE", "utility": "E"}
+const SECTIONS := [1, 2, 3, 0]  ## the fire groups left to right: LMB, RMB, Q, AUTO (0)
+const EMPTY_W := 74.0  ## an empty section's width: a slim drop zone under its header
+const DRAG_PX := 6.0  ## how far the mouse moves with a slot held before it is a drag
+const REACH_UP := 80.0  ## a drop counts this far above the sections too
 const FLASH_MS := 2200  ## how long a refusal stays in its slot
 const NAME_W := 104.0  ## px a slot's weapon name has (it starts 58 px in and stops short of the power dot)
 const DIAG := Vector2(132.0, 138.0)  ## the shield diagram's box
@@ -47,6 +53,7 @@ var badges  ## gun_badges.gd, shared with combat_view.gd: the flashes, the held 
 var aim: Callable = func() -> Vector2: return Vector2.ZERO  ## the world point the mouse aims at
 var last_note := ""  ## what a refused right-click says (combat_view.gd shows it)
 var flashes := {}  ## ability slot id -> {text, until (Time.get_ticks_msec)}: the refusals on show
+var drag := {}  ## the slot in the hand: {uid, grab (mouse offset in the slot), at (bar-local mouse), moved}; empty when none
 
 
 func _init() -> void:
@@ -59,51 +66,139 @@ func bind(p_session, p_aim: Callable, p_badges = null) -> void:
 	badges = p_badges
 
 
-## The weapons laid out for the bar: {slots: [{rect, w, number}], heads: [{rect, group}], width}, positions against the bar's top
-## left. Grouped LMB, RMB, then the guns that fire by themselves, each group under its mouse icon; `number` is the gun's key.
-func layout() -> Dictionary:
-	var list: Array = session.weapons() if session != null else []
+## The weapons `list` laid out in the four fire-group sections for slots of size `slot` whose top is `y`:
+## {slots: [{rect, w, number}], heads: [{rect, group}], zones: [{rect, group}], width}, positions against the bar's top left. `number` is
+## the gun's key. Every section has a head and a zone, empty or not; a zone spans the head and the slots.
+static func sections(list: Array, slot: Vector2, y: float, gap := GAP) -> Dictionary:
 	var slots := []
 	var heads := []
+	var zones := []
 	var x := 0.0
-	var y := (ASLOT.y + GAP if session != null and not session.ability_slots().is_empty() else 0.0) + HEAD
-	for g in [1, 2, 3]:
-		var first := true
+	for g in SECTIONS:
 		var x0 := x
+		var n := 0
 		for i in list.size():
 			if GunBadges.bar_group(list[i]) != g:
 				continue
-			slots.append({"rect": Rect2(Vector2(x, y), SLOT), "w": list[i], "number": i + 1})
-			x += SLOT.x + GAP
-			first = false
-		if not first:
-			heads.append({"rect": Rect2(Vector2(x0, y - HEAD + 2.0), Vector2(x - GAP - x0, HEAD - 4.0)), "group": g})
-			x += GROUP_GAP - GAP
-	return {"slots": slots, "heads": heads, "width": maxf(x - GROUP_GAP, 0.0)}
+			slots.append({"rect": Rect2(Vector2(x, y), slot), "w": list[i], "number": i + 1})
+			x += slot.x + gap
+			n += 1
+		x = x0 + (n * (slot.x + gap) - gap if n > 0 else EMPTY_W)
+		heads.append({"rect": Rect2(Vector2(x0, y - HEAD + 2.0), Vector2(x - x0, HEAD - 4.0)), "group": g})
+		zones.append({"rect": Rect2(Vector2(x0, y - HEAD), Vector2(x - x0, HEAD + slot.y)), "group": g})
+		x += GROUP_GAP
+	return {"slots": slots, "heads": heads, "zones": zones, "width": x - GROUP_GAP}
+
+
+## The weapons laid out for the bar (see sections()), under the ability row.
+func layout() -> Dictionary:
+	var list: Array = session.weapons() if session != null else []
+	var y := (ASLOT.y + GAP if session != null and not session.ability_slots().is_empty() else 0.0) + HEAD
+	var lay := sections(list, SLOT, y)
+	var bays: Array = session.bays() if session != null else []  # the drone bays: no fire group, no drop zone, their own DRONES header after the groups (keys follow the guns')
+	if not bays.is_empty():
+		var x0: float = float(lay["width"]) + GROUP_GAP
+		var bs := []
+		for i in bays.size():
+			bs.append({"rect": Rect2(Vector2(x0 + i * (SLOT.x + GAP), y), SLOT), "bay": bays[i], "number": list.size() + i + 1})
+		var x1: float = x0 + bays.size() * (SLOT.x + GAP) - GAP
+		lay["bay_slots"] = bs
+		lay["bay_head"] = Rect2(Vector2(x0, y - HEAD + 2.0), Vector2(x1 - x0, HEAD - 4.0))
+		lay["width"] = x1
+	return lay
+
+
+## Where the layout's left edge sits in the bar (it is centred).
+func _base(lay: Dictionary) -> Vector2:
+	return Vector2((size.x - lay["width"]) / 2.0, 0.0)
 
 
 ## The slot under local point `p`: its layout entry, {} when none.
 func slot_at(p: Vector2) -> Dictionary:
 	if session == null:
 		return {}
-	var base := Vector2((size.x - layout()["width"]) / 2.0, 0.0)
-	for s in layout()["slots"]:
+	var lay := layout()
+	var base := _base(lay)
+	for s in lay["slots"]:
 		if Rect2(s["rect"].position + base, s["rect"].size).has_point(p):
 			return s
 	return {}
 
 
-## A right-click at bar-local `p` on a slot cycles that fixed gun's group (LMB, RMB); true when the click was on a slot (it is used up).
+## The fire group whose section the local point `p` is over (a drop target), -1 when none. A section reaches half a gap to each side
+## and well above the bar, so a drop does not have to be exact.
+func group_at(p: Vector2) -> int:
+	if session == null:
+		return -1
+	var lay := layout()
+	var base := _base(lay)
+	for z in lay["zones"]:
+		var r: Rect2 = z["rect"]
+		r = Rect2(r.position + base - Vector2(GROUP_GAP / 2.0, REACH_UP), r.size + Vector2(GROUP_GAP, REACH_UP))
+		if r.has_point(p):
+			return z["group"]
+	return -1
+
+
+## A right-click at bar-local `p` on a slot cycles that gun's group (LMB, RMB, Q, AUTO); true when the click was on a slot (it is used up).
 func click(p: Vector2, button: int) -> bool:
 	var s := slot_at(p)
 	if s.is_empty() or button != MOUSE_BUTTON_RIGHT:
 		return false
+	last_note = ""
 	var co = session.arena.ships[session.PLAYER]
-	var uid: int = s["w"]["uid"]
-	if not co.mounts[uid]["virtual"] and GunBadges.cycle(co.ship.components, session.arena.weapons, uid) != 0:
-		return true
-	last_note = "%s fires by itself" % s["w"]["name"] if str(s["w"]["aim"]) != "fixed" else ""
+	if co.mounts[s["w"]["uid"]]["virtual"] or GunBadges.cycle(co.ship.components, session.arena.weapons, s["w"]["uid"]) < 0:
+		last_note = "%s cannot be moved" % s["w"]["name"]
 	return true
+
+
+## The left button went down at bar-local `p`: on a slot it takes the slot in hand (a drag starts once the mouse moves). True when used up.
+func grab(p: Vector2, button: int) -> bool:
+	drag = {}
+	var s := slot_at(p)
+	if s.is_empty() or button != MOUSE_BUTTON_LEFT:
+		return false
+	var lay := layout()
+	drag = {"uid": s["w"]["uid"], "grab": p - (s["rect"].position + _base(lay)), "at": p, "start": p, "moved": false}
+	return true
+
+
+## The mouse moved to bar-local `p`: a slot in hand follows it. True while a slot is in hand.
+func motion(p: Vector2) -> bool:
+	if drag.is_empty():
+		return false
+	drag["at"] = p
+	if not drag["moved"] and p.distance_to(drag["start"]) >= DRAG_PX:
+		drag["moved"] = true
+	return true
+
+
+## The left button went up at bar-local `p`: a dragged slot is dropped on the section under it (nothing when none). Returns the group the
+## gun was put in, -1 when nothing was moved.
+func release(p: Vector2) -> int:
+	last_note = ""
+	if drag.is_empty():
+		return -1
+	var d := drag
+	drag = {}
+	if not d["moved"]:
+		return -1
+	var g := group_at(p)
+	if g < 0:
+		return -1
+	return drop(d["uid"], g)
+
+
+## Put gun `uid` in fire group `group` (1, 2, 3, or 0 for AUTO). Returns the group, -1 when the gun cannot be moved (last_note says so).
+func drop(uid: int, group: int) -> int:
+	last_note = ""
+	var co = session.arena.ships[session.PLAYER]
+	var got := -1
+	if not co.mounts[uid]["virtual"]:
+		got = GunBadges.assign(co.ship.components, session.arena.weapons, uid, group)
+	if got < 0:
+		last_note = "That gun cannot be moved"
+	return got
 
 
 func _process(_dt: float) -> void:
@@ -113,7 +208,7 @@ func _process(_dt: float) -> void:
 	var abilities_w := _row_width(session.ability_slots().size(), ASLOT.x)
 	size = Vector2(maxf(weapons_w, abilities_w), HEAD + SLOT.y + (ASLOT.y + GAP if abilities_w > 0.0 else 0.0))
 	if badges != null:  # the mouse on a slot lights that gun on the ship
-		var hs := slot_at(get_local_mouse_position())
+		var hs := slot_at(get_local_mouse_position()) if drag.is_empty() else {"w": {"uid": drag["uid"]}}
 		badges.bar_hover = int(hs["w"]["uid"]) if not hs.is_empty() else -1
 	var vp := get_viewport_rect().size
 	position = Vector2((vp.x - size.x) / 2.0, vp.y - size.y - 14.0)
@@ -124,7 +219,7 @@ func _row_width(n: int, slot_w: float) -> float:
 	return n * (slot_w + GAP) - GAP if n > 0 else 0.0
 
 
-## The ability keys: Shift, Space and Q press the engine, shield and utility abilities.
+## The ability keys: Shift, Space and E press the engine, shield and utility abilities.
 func _unhandled_input(e: InputEvent) -> void:
 	if not visible or session == null or not (e is InputEventKey and e.pressed and not e.echo) or not KEY_OF.has(e.keycode):
 		return
@@ -156,20 +251,112 @@ func _draw() -> void:
 			_ability_slot(Vector2(x0 + i * (ASLOT.x + GAP), 0.0), slots[i])
 	var target: Vector2 = aim.call()
 	var lay := layout()
-	var base := Vector2((size.x - lay["width"]) / 2.0, 0.0)
+	var base := _base(lay)
+	var over: int = group_at(drag["at"]) if not drag.is_empty() and drag["moved"] else -1
 	for h in lay["heads"]:
-		var sty := GunBadges.style({"aim": "turret" if h["group"] == 3 else "fixed", "group": h["group"]})
-		var r: Rect2 = h["rect"]
+		draw_head(self, h["rect"].position + base, h["rect"].size, h["group"], over == h["group"])
+	if lay.has("bay_head"):
+		var bh: Rect2 = lay["bay_head"]
+		draw_head(self, bh.position + base, bh.size, 4)
+	for b in lay.get("bay_slots", []):
+		_bay_slot(b["rect"].position + base, b["number"], b["bay"])
+	for z in lay["zones"]:
+		var empty := true
+		for sl in lay["slots"]:
+			if GunBadges.bar_group(sl["w"]) == z["group"]:
+				empty = false
+		var r: Rect2 = z["rect"]
 		r.position += base
-		draw_rect(r, Color(sty["color"], 0.18))
-		draw_rect(Rect2(r.position + Vector2(0.0, r.size.y - 2.0), Vector2(r.size.x, 2.0)), sty["color"])
-		GunBadges.draw_mouse(self, Rect2(r.position + Vector2(3.0, 1.0), Vector2(10.0, r.size.y - 4.0)), h["group"], sty["color"])
-		_text(sty["label"], r.position + Vector2(17.0, r.size.y - 5.0), 11, sty["color"])
+		if over == z["group"]:
+			var gcol: Color = GunBadges.style({"group": z["group"]})["color"]
+			draw_rect(r.grow(3.0), Color(gcol, 0.2))
+			draw_rect(r.grow(3.0), Color(gcol, 0.95), false, 2.5)
+		elif empty:
+			var gcol2: Color = GunBadges.style({"group": z["group"]})["color"]
+			draw_rect(Rect2(r.position + Vector2(0.0, HEAD), Vector2(r.size.x, r.size.y - HEAD)), Color(gcol2, 0.07))
+			draw_rect(Rect2(r.position + Vector2(0.0, HEAD), Vector2(r.size.x, r.size.y - HEAD)), Color(gcol2, 0.4), false, 1.0)
+			_text("drop here" if not drag.is_empty() else "empty", r.position + Vector2(r.size.x / 2.0 - 22.0, HEAD + 30.0), 10, Color(gcol2, 0.75))
+	var held_slot := {}
 	for sl in lay["slots"]:
+		if not drag.is_empty() and drag["moved"] and sl["w"]["uid"] == drag["uid"]:
+			held_slot = sl
+			draw_rect(Rect2(sl["rect"].position + base, SLOT), Color(0.5, 0.55, 0.65, 0.12))  # the empty place it left
+			draw_rect(Rect2(sl["rect"].position + base, SLOT), Color(0.5, 0.55, 0.65, 0.45), false, 1.0)
+			continue
 		_slot(sl["rect"].position + base, sl["number"], sl["w"], target)
+	if not held_slot.is_empty():  # the slot in hand, on top, under the mouse
+		_slot(drag["at"] - drag["grab"], held_slot["number"], held_slot["w"], target, true)
 
 
-func _slot(at: Vector2, number: int, w: Dictionary, target: Vector2) -> void:
+## One drone bay slot, in the guns' picture style: its key in a ring (the re-arm counting down, or the drone's hp while it is out), the loaded kit's picture, the
+## kit's name, its state, and what a launch costs in parts (red when the hold is short).
+func _bay_slot(at: Vector2, number: int, b: Dictionary) -> void:
+	var st: Dictionary = session.bay_state(b["uid"])
+	var status: String = st["status"]
+	var out: bool = st["out"]
+	var col: Color = READY if status == "ready" else (COOLING if status == "re-arming" or out else (GREY if status == "no kit" else BAD))
+	var gcol: Color = GunBadges.style({"drones": true})["color"]
+	var r := Rect2(at, SLOT)
+	draw_rect(r, BG)
+	draw_rect(Rect2(at + Vector2(0.0, 2.0), Vector2(SLOT.x, 3.0)), Color(gcol, 0.9))
+	draw_rect(r, Color(gcol, 0.75), false, 2.0)
+	var c := at + Vector2(17.0, 17.0)
+	draw_circle(c, 13.0, Color(0, 0, 0, 0.7))
+	draw_arc(c, 12.0, 0.0, TAU, 24, Color(1, 1, 1, 0.14), 3.0, true)
+	var done := 1.0
+	if status == "re-arming":
+		done = 1.0 - clampf(st["rearm_left"] / maxf(st["rearm"], 0.01), 0.0, 1.0)
+	elif out:
+		done = clampf(st["hp"] / maxf(st["max_hp"], 1.0), 0.0, 1.0)
+	draw_arc(c, 12.0, -PI / 2.0, -PI / 2.0 + TAU * done, 24, Color(col, 0.95), 3.0, true)
+	if number <= 9:
+		_text(str(number), c + Vector2(-4.0, 6.0), 16, TEXT)
+	var pic := Rect2(at + Vector2(6.0, 10.0), Vector2(SLOT.x - 12.0, 50.0))
+	var sheet = Art.drone(str(st["art"])) if st["art"] != "" else null
+	if sheet != null:
+		var k := 1.9
+		var f := int(Time.get_ticks_msec() / 330) % 2
+		var dim := Color(1, 1, 1, 0.4 if status in ["no parts", "unpowered", "disabled", "offline"] and not out else 1.0)
+		draw_texture_rect_region(sheet.texture, Rect2(pic.get_center() - Vector2(sheet.frame) * k / 2.0 + Vector2(0.0, 4.0), Vector2(sheet.frame) * k), sheet.region(f), dim)
+	if out:  # the hp pips over the picture
+		for i in int(st["max_hp"]):
+			draw_rect(Rect2(at + Vector2(SLOT.x - 12.0 - (int(st["max_hp"]) - i) * 5.0, 62.0), Vector2(4.0, 5.0)), Color(READY if i < ceili(st["hp"] - 1e-6) else GREY, 0.9))
+	var shown := fit_name(str(st["kit_name"]).replace(" Drone", "") if st["kit_name"] != "" else "Empty bay", SLOT.x - 8.0)  # (the header already says DRONES)
+	_text(shown["text"], at + Vector2(5.0, 76.0), mini(shown["size"], 11), TEXT, SLOT.x - 8.0)
+	var label := "READY"
+	match status:
+		"ready":
+			label = "READY"
+		"re-arming":
+			label = "RE-ARM %.1f" % st["rearm_left"]
+		"drone out":
+			label = "OUT %d/%d" % [ceili(st["hp"] - 1e-6), int(st["max_hp"])]
+		"no parts":
+			label = "NO PARTS"
+		"no kit":
+			label = "NO KIT"
+		_:
+			label = STATUS_TEXT.get(status, status.to_upper())
+	_text(label, at + Vector2(5.0, 92.0), 11, col, SLOT.x - 40.0)
+	if st["cost"] > 0:
+		_text("%dp" % st["cost"], at + Vector2(SLOT.x - 24.0, 92.0), 11, TEXT if st["parts"] >= st["cost"] else BAD)
+	var powered: bool = status not in ["unpowered", "disabled", "overheated", "malfunction", "wrecked", "offline"]
+	draw_circle(at + Vector2(SLOT.x - 8.0, 17.0), 3.5, READY if powered else BAD)
+
+
+## A section's header at `at`: its colour band, icon and name. `lit` brightens it (a drag is over the section).
+static func draw_head(c: CanvasItem, at: Vector2, sz: Vector2, group: int, lit := false) -> void:
+	var sty := GunBadges.style({"drones": true} if group == 4 else {"group": group})
+	var col: Color = sty["color"]
+	var r := Rect2(at, sz)
+	c.draw_rect(r, Color(col, 0.34 if lit else 0.18))
+	c.draw_rect(Rect2(r.position + Vector2(0.0, r.size.y - 2.0), Vector2(r.size.x, 2.0)), col)
+	if group != 4:  # (the drone header has no mouse icon: a bay launches by its key only)
+		GunBadges.draw_mouse(c, Rect2(r.position + Vector2(3.0, 1.0), Vector2(10.0, r.size.y - 4.0)), group, col)
+	c.draw_string(ThemeDB.fallback_font, r.position + Vector2(17.0 if group != 4 else 6.0, r.size.y - 5.0), str(sty["label"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, col)
+
+
+func _slot(at: Vector2, number: int, w: Dictionary, target: Vector2, lifted := false) -> void:
 	var st: Dictionary = session.slot_state(w["uid"], target)
 	var status: String = st["status"]
 	var col: Color = READY if status == "ready" else (COOLING if status in ["cooling down", "feeding"] else (GREY if status == "out of arc" else BAD))
@@ -179,11 +366,15 @@ func _slot(at: Vector2, number: int, w: Dictionary, target: Vector2) -> void:
 	var hot: bool = badges != null and badges.hover_uid() == w["uid"]
 	var held: bool = badges != null and badges.outlined(w)
 	var r := Rect2(at, SLOT)
-	draw_rect(r, BG)
+	if lifted:  # the slot in hand: a shadow under it and a white edge
+		draw_rect(Rect2(at + Vector2(5.0, 6.0), SLOT), Color(0, 0, 0, 0.45))
+	draw_rect(r, Color(0.07, 0.11, 0.17, 1.0) if lifted else BG)
 	draw_rect(Rect2(at + Vector2(0.0, 2.0), Vector2(SLOT.x, 3.0)), Color(gcol, 0.9))  # the group's colour along the top edge
 	if fl > 0.0:
 		draw_rect(r, Color(gcol, 0.45 * fl))
-	draw_rect(r, Color(gcol, 1.0 if (hot or held) else 0.75), false, 3.0 if (hot or held) else 2.0)
+	draw_rect(r, Color(gcol, 1.0 if (hot or held or lifted) else 0.75), false, 3.0 if (hot or held or lifted) else 2.0)
+	if lifted:
+		draw_rect(r.grow(2.0), Color(1, 1, 1, 0.8), false, 1.5)
 	var ship = session.arena.ships[session.PLAYER].ship
 	var pic := Rect2(at + Vector2(6.0, 10.0), Vector2(SLOT.x - 12.0, 50.0))
 	if ship.components.has(str(w["id"])):

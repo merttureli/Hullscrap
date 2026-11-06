@@ -19,6 +19,7 @@ const Ship = preload("res://scripts/ship/ship.gd")
 const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const TileDefs = preload("res://scripts/ship/tile_defs.gd")
 const Components = preload("res://scripts/ship/components.gd")
+const Drones = preload("res://scripts/combat/drones.gd")
 const Mounts = preload("res://scripts/ship/mounts.gd")
 const Shapes = preload("res://scripts/ship/shapes.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
@@ -260,7 +261,7 @@ static func from_spec(text: String) -> Ship:
 	for x in p.slice(4):
 		if x.length() > 1 and x.begins_with("s") and x.substr(1).is_valid_int():
 			stage = int(x.substr(1))
-	var opts := {"ram": p.slice(4).has("ram"), "stage": stage, "warden": p.slice(4).has("warden")}
+	var opts := {"ram": p.slice(4).has("ram"), "stage": stage, "warden": p.slice(4).has("warden"), "bays": true}  # (a spec makes a fight's enemy: it may carry drone bays)
 	var at := p.slice(4).find("role")  # ":role:<id>" pins the role (the tools measure each role); a spec without it rolls the role from its seed
 	if at >= 0 and at + 1 < p.slice(4).size() and tables().get("roles", {}).get("list", {}).has(p.slice(4)[at + 1]):
 		opts["role"] = p.slice(4)[at + 1]
@@ -302,6 +303,8 @@ static func build(faction: String, size: String, seed_value: int, budget: float,
 			ship.get_meta("shipgen")["seed"] = seed_value
 			if bool(opts.get("warden", false)) and Morale.fades_style(str(ship.get_meta("ai").get("morale", ""))):
 				ship.get_meta("ai")["morale"] = "hollow"
+			if bool(opts.get("bays", false)):
+				add_enemy_bay(ship, faction, size, seed_value, int(opts.get("stage", 0)))
 			return ship
 		failed.append(r["why"])
 	last_failed = failed
@@ -1357,6 +1360,101 @@ static func _wire_cost(ship: Ship, c: Vector2i) -> int:
 	if g.tile_flag(t, "solid"):
 		return 3
 	return 1
+
+
+# --- drone bays (docs/DRONES.md section 7) --------------------------------------------------------
+
+## Mount a drone bay `bay_id` on `ship`: on a flank first, then the stern (`prefer`: the rotations to try), at the place along the wall nearest the middle where the mount rules
+## allow it, joined to the nearest cable, and kept only when the ship's power still covers every part. `kit_id` is loaded into it ("" leaves it empty). Returns its uid, -1 when none fit.
+static func add_bay(ship: Ship, bay_id: String, kit_id := "", prefer := [1, 3, 2]) -> int:
+	var g: ShipGrid = ship.grid
+	var lo := Vector2i(1 << 20, 1 << 20)
+	var hi := Vector2i(-(1 << 20), -(1 << 20))
+	for c in g.tiles:
+		lo = lo.min(c)
+		hi = hi.max(c)
+	for rot in prefer:
+		var vertical: bool = int(rot) % 2 == 1
+		var from: int = lo.y if vertical else lo.x
+		var to: int = hi.y if vertical else hi.x
+		var mid := (from + to) / 2
+		var order: Array = [mid]
+		for k in range(1, (to - from) / 2 + 2):
+			order.append(mid + k)
+			order.append(mid - k)
+		for pos in order:
+			if pos < from or pos > to:
+				continue
+			var out := _out_anchor(g, bay_id, int(rot), int(pos))
+			if out.x < -900:
+				continue
+			var uid: int = ship.components.place_mount(g, bay_id, out, int(rot))
+			if uid < 0:
+				continue
+			var inst: Dictionary = ship.components.instances[uid]
+			var added: Array = []
+			var net: Dictionary = ship.cables.cells.duplicate()
+			if not _touches(inst["cells"], net):
+				for cell in _route(ship, inst["cells"], net):
+					if ship.cables.place(g, cell):
+						added.append(cell)
+			ship.refresh()
+			var ok: bool = ship.power_state["powered"].get(uid, false)
+			for n in ship.power_state["networks"]:
+				ok = ok and float(n["supply"]) + 0.0001 >= float(n["demand"])
+			if ok:
+				if kit_id != "":
+					inst["kit"] = kit_id
+				return uid
+			ship.components.remove_uid(uid)
+			for cell in added:
+				ship.cables.remove(cell)
+			ship.refresh()
+	return -1
+
+
+## The drone bays of a generated enemy (data/enemy_tables.json `drones`): rolled from the ship's seed, so the same spec gives the same ship. Returns how many bays it got.
+static func add_enemy_bay(ship: Ship, faction: String, size: String, seed_value: int, stage: int) -> int:
+	var cfg: Dictionary = tables().get("drones", {})
+	if cfg.is_empty() or cfg["never"].has(faction) or not Content.has("components", str(cfg["bay"].get(size, ""))):
+		return 0
+	var rng := RandomNumberGenerator.new()
+	rng.seed = _mix(seed_value, faction, size, 97)
+	var chance := float(cfg["chance"].get(size, 0.0)) * float(cfg["stage_mult"].get(str(stage), 1.0))
+	if rng.randf() >= chance:
+		return 0
+	var bays := 1
+	if size != "small" and rng.randf() < float(cfg["second_bay"].get(faction, 0.0)):
+		bays = 2
+	var kits: Dictionary = cfg["kits"].get(faction, cfg["default"])
+	var bay_id := str(cfg["bay"][size])
+	var tier := int(ship.components.def(bay_id)["bay"]["max_tier"])
+	var made := 0
+	for i in bays:
+		var pool := {}
+		var total := 0.0
+		for id in kits:
+			if Drones.kit(id).is_empty() or int(Drones.kit(id)["drone"]["tier"]) > tier:
+				continue
+			pool[id] = float(kits[id])
+			total += float(kits[id])
+		if pool.is_empty():
+			break
+		var x := rng.randf() * total
+		var pick := ""
+		for id in pool:
+			pick = str(id)
+			x -= float(pool[id])
+			if x <= 0.0:
+				break
+		if add_bay(ship, bay_id, pick, [1, 3, 2] if i == 0 else [3, 1, 2]) >= 0:
+			made += 1
+			ship.inventory.add(pick, 1)
+	if made > 0:
+		ship.inventory.add(Drones.PART, rng.randi_range(int(cfg["parts"][0]), int(cfg["parts"][1])))
+		ship.mark_dirty()
+		ship.refresh()
+	return made
 
 
 # --- the finish ----------------------------------------------------------------------------------

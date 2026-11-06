@@ -202,7 +202,7 @@ static func apply(arena, idx: int, cell: Vector2i, obj: Dictionary, dmg: float, 
 				arena.log_event("disable", idx, cell, {"uid": obj["uid"], "half": "out"})
 			return {"dealt": dealt, "left": left}
 		inst["hp"] = cur
-		if was <= 0.0 and eff > 0.0 and int(inst.get("zero_tick", -1)) < arena.tick:  # disabled already, and hit again: gone
+		if was <= 0.0 and eff > 0.0 and int(inst.get("zero_tick", -1)) < arena.tick and co.ship.components.can_wreck(str(inst["id"])):  # disabled already, and hit again: gone
 			wreck_part(arena, idx, obj["uid"])
 			return {"dealt": dealt, "left": left}
 		if cur <= 0.0 and inst.get("status", "") != "disabled":

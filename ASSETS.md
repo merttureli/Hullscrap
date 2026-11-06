@@ -30,7 +30,13 @@ Source and licence of every art and audio file in the repo.
 | `art/components/assembly_rig_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/baron_tithe_gun.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/baron_tithe_gun.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/baron_tithe_gun_barrel.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/baron_tithe_gun_barrel.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/baron_tithe_gun_barrel_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/baron_tithe_gun_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/baron_tithe_gun_out.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/baron_tithe_gun_out.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/baron_tithe_gun_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/basalt_gravity_anchor.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/basalt_gravity_anchor.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/basalt_gravity_anchor_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
@@ -132,6 +138,24 @@ Source and licence of every art and audio file in the repo.
 | `art/components/breach_harpoon_out.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/breach_harpoon_out.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/breach_harpoon_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/drone_bay_mk1.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/drone_bay_mk1.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/drone_bay_mk1_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/drone_bay_mk1_out.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/drone_bay_mk1_out.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/drone_bay_mk1_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/drone_bay_mk2.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/drone_bay_mk2.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/drone_bay_mk2_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/drone_bay_mk2_out.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/drone_bay_mk2_out.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/drone_bay_mk2_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/drone_bay_mk3.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/drone_bay_mk3.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/drone_bay_mk3_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/drone_bay_mk3_out.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/drone_bay_mk3_out.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/drone_bay_mk3_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/emberkin_cinder_mortar.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/emberkin_cinder_mortar.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/emberkin_cinder_mortar_barrel.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
@@ -368,7 +392,13 @@ Source and licence of every art and audio file in the repo.
 | `art/components/gauntling_tesla_picket_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/gilded_lance.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/gilded_lance.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/gilded_lance_barrel.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/gilded_lance_barrel.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/gilded_lance_barrel_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/gilded_lance_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/gilded_lance_out.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/gilded_lance_out.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/gilded_lance_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/grundl_barge_flak.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/grundl_barge_flak.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/grundl_barge_flak_barrel.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
@@ -1064,7 +1094,13 @@ Source and licence of every art and audio file in the repo.
 | `art/components/slug_spinal_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/sovereign_turret.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/sovereign_turret.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/sovereign_turret_barrel.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/sovereign_turret_barrel.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/sovereign_turret_barrel_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/sovereign_turret_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/sovereign_turret_out.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/sovereign_turret_out.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/components/sovereign_turret_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/sporeling_bloom_reactor.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/sporeling_bloom_reactor.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/components/sporeling_bloom_reactor_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
@@ -1504,6 +1540,47 @@ Source and licence of every art and audio file in the repo.
 | `art/debris/silicon_rock.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/debris/titanium_plate.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/debris/titanium_plate.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/beam_drone_mk3.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/beam_drone_mk3.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/beam_drone_mk3_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/beam_drone_mk3_rot.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/defence_drone_mk1.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/defence_drone_mk1.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/defence_drone_mk1_barrel_rot.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/defence_drone_mk1_base.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/defence_drone_mk1_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/defence_drone_mk1_rot.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/defence_drone_mk2.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/defence_drone_mk2.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/defence_drone_mk2_barrel_rot.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/defence_drone_mk2_base.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/defence_drone_mk2_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/defence_drone_mk2_rot.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/flak_drone_mk3.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/flak_drone_mk3.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/flak_drone_mk3_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/flak_drone_mk3_rot.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/ion_drone_mk2.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/ion_drone_mk2.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/ion_drone_mk2_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/ion_drone_mk2_rot.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/laser_drone_mk2.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/laser_drone_mk2.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/laser_drone_mk2_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/laser_drone_mk2_rot.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/pulse_drone_mk1.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/pulse_drone_mk1.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/pulse_drone_mk1_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/pulse_drone_mk1_rot.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/trail_neon.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/trail_neon.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/trail_neon_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/trail_scrap.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/trail_scrap.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/trail_scrap_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/trail_standard.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/trail_standard.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/drones/trail_standard_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/endings/haven_exodus.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/endings/haven_exodus.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/endings/haven_exodus_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
@@ -1553,30 +1630,628 @@ Source and licence of every art and audio file in the repo.
 | `art/fx/smoke.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/fx/sparks.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/fx/sparks.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/basalt.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/brine.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/choir.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/corvin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/drakkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/echo.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/emberkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/fenn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/ferro.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/gauntling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/gear.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/grundl.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/hullkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/human.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/kett.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/kite.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/lantern.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/mire.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/murrow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/oorth.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/prismatic.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/quillback.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/rattler.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/revenant.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/sable.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/siltborn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/sporeling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/tessellate.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/tessellate_half.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/vellum.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/warden_frame.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/ballast_rig/wisp.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/basalt.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/brine.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/choir.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/corvin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/drakkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/echo.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/emberkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/fenn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/ferro.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/gauntling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/gear.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/grundl.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/hullkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/human.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/kett.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/kite.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/lantern.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/mire.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/murrow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/oorth.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/prismatic.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/quillback.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/rattler.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/revenant.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/sable.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/siltborn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/sporeling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/tessellate.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/tessellate_half.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/vellum.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/warden_frame.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/chitin_plate/wisp.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/combat_vest.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/combat_vest.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/basalt.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/brine.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/choir.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/corvin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/drakkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/echo.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/emberkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/fenn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/ferro.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/gear.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/grundl.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/hullkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/kett.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/kite.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/lantern.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/mire.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/murrow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/oorth.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/prismatic.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/quillback.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/rattler.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/revenant.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/sable.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/siltborn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/sporeling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/tessellate.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/tessellate_half.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/vellum.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/warden_frame.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/combat_vest/wisp.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/combat_vest_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/combat_vest_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/eva_suit.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/eva_suit.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/basalt.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/brine.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/choir.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/corvin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/drakkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/echo.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/emberkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/fenn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/ferro.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/gear.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/grundl.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/hullkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/kett.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/kite.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/lantern.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/mire.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/murrow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/oorth.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/prismatic.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/quillback.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/rattler.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/revenant.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/sable.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/siltborn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/sporeling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/tessellate.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/tessellate_half.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/vellum.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/warden_frame.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/eva_suit/wisp.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/eva_suit_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/eva_suit_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/exosuit.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/exosuit.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/basalt.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/brine.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/choir.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/corvin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/drakkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/echo.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/emberkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/fenn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/ferro.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/gear.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/grundl.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/hullkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/kett.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/kite.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/lantern.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/mire.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/murrow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/oorth.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/prismatic.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/quillback.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/rattler.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/revenant.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/sable.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/siltborn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/sporeling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/tessellate.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/tessellate_half.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/vellum.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/warden_frame.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/exosuit/wisp.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/exosuit_arms.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/exosuit_arms_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/exosuit_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/exosuit_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/exosuit_legs.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/exosuit_legs_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/basalt.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/brine.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/choir.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/corvin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/drakkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/echo.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/emberkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/fenn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/ferro.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/gauntling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/gear.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/grundl.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/hullkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/human.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/kett.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/kite.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/lantern.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/mire.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/murrow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/oorth.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/prismatic.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/quillback.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/rattler.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/revenant.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/sable.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/siltborn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/sporeling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/tessellate.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/tessellate_half.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/vellum.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/warden_frame.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/firefighter_coat/wisp.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/basalt.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/brine.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/choir.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/corvin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/drakkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/echo.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/emberkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/fenn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/ferro.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/gauntling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/gear.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/grundl.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/hullkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/human.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/kett.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/kite.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/lantern.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/mire.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/murrow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/oorth.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/prismatic.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/quillback.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/rattler.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/revenant.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/sable.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/siltborn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/sporeling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/tessellate.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/tessellate_half.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/vellum.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/warden_frame.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/forge_apron/wisp.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/heat_suit.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/heat_suit.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/basalt.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/brine.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/choir.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/corvin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/drakkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/echo.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/emberkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/fenn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/ferro.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/gear.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/grundl.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/hullkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/kett.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/kite.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/lantern.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/mire.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/murrow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/oorth.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/prismatic.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/quillback.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/rattler.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/revenant.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/sable.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/siltborn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/sporeling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/tessellate.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/tessellate_half.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/vellum.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/warden_frame.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/heat_suit/wisp.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/heat_suit_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/heat_suit_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/basalt.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/brine.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/choir.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/corvin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/drakkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/echo.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/emberkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/fenn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/ferro.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/gauntling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/gear.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/grundl.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/hullkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/human.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/kett.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/kite.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/lantern.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/mire.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/murrow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/oorth.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/prismatic.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/quillback.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/rattler.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/revenant.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/sable.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/siltborn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/sporeling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/tessellate.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/tessellate_half.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/vellum.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/warden_frame.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/jump_pack/wisp.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/basalt.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/brine.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/choir.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/corvin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/drakkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/echo.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/emberkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/fenn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/ferro.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/gauntling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/gear.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/grundl.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/hullkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/human.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/kett.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/kite.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/lantern.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/mire.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/murrow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/oorth.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/prismatic.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/quillback.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/rattler.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/revenant.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/sable.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/siltborn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/sporeling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/tessellate.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/tessellate_half.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/vellum.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/warden_frame.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/marine_plate/wisp.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/basalt.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/brine.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/choir.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/corvin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/drakkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/echo.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/emberkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/fenn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/ferro.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/gauntling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/gear.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/grundl.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/hullkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/human.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/kett.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/kite.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/lantern.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/mire.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/murrow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/oorth.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/prismatic.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/quillback.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/rattler.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/revenant.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/sable.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/siltborn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/sporeling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/tessellate.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/tessellate_half.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/vellum.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/warden_frame.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/medic_sash/wisp.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/basalt.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/brine.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/choir.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/corvin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/drakkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/echo.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/emberkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/fenn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/ferro.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/gauntling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/gear.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/grundl.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/hullkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/human.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/kett.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/kite.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/lantern.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/mire.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/murrow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/oorth.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/prismatic.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/quillback.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/rattler.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/revenant.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/sable.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/siltborn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/sporeling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/tessellate.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/tessellate_half.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/vellum.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/warden_frame.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/prism_cloak/wisp.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/basalt.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/brine.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/choir.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/corvin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/drakkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/echo.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/emberkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/fenn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/ferro.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/gauntling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/gear.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/grundl.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/hullkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/human.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/kett.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/kite.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/lantern.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/mire.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/murrow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/oorth.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/prismatic.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/quillback.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/rattler.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/revenant.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/sable.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/siltborn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/sporeling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/tessellate.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/tessellate_half.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/vellum.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/warden_frame.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/rigger_harness/wisp.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/salamander_suit.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/salamander_suit.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/basalt.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/brine.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/choir.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/corvin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/drakkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/echo.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/emberkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/fenn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/ferro.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/gear.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/grundl.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/hullkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/kett.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/kite.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/lantern.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/mire.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/murrow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/oorth.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/prismatic.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/quillback.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/rattler.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/revenant.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/sable.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/siltborn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/sporeling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/tessellate.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/tessellate_half.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/vellum.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/warden_frame.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/salamander_suit/wisp.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/salamander_suit_color.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/gear/salamander_suit_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/basalt.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/brine.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/choir.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/corvin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/drakkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/echo.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/emberkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/fenn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/ferro.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/gauntling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/gear.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/grundl.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/hullkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/human.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/kett.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/kite.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/lantern.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/mire.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/murrow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/oorth.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/prismatic.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/quillback.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/rattler.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/revenant.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/sable.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/siltborn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/sporeling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/tessellate.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/tessellate_half.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/vellum.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/warden_frame.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/scrap_gauntlets/wisp.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/basalt.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/brine.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/choir.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/corvin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/drakkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/echo.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/emberkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/fenn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/ferro.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/gauntling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/gear.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/grundl.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/hullkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/human.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/kett.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/kite.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/lantern.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/mire.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/murrow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/oorth.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/prismatic.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/quillback.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/rattler.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/revenant.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/sable.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/siltborn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/sporeling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/tessellate.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/tessellate_half.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/vellum.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/warden_frame.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/spore_mantle/wisp.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/basalt.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/brine.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/choir.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/corvin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/drakkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/echo.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/emberkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/fenn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/ferro.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/gauntling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/gear.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/grundl.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/hullkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/human.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/kett.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/kite.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/lantern.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/mire.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/murrow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/oorth.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/prismatic.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/quillback.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/rattler.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/revenant.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/sable.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/siltborn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/sporeling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/tessellate.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/tessellate_half.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/vellum.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/warden_frame.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/stone_plates/wisp.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/basalt.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/brine.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/choir.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/corvin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/drakkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/echo.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/emberkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/fenn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/ferro.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/gauntling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/gear.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/grundl.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/hullkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/human.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/kett.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/kite.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/lantern.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/mire.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/murrow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/oorth.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/prismatic.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/quillback.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/rattler.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/revenant.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/sable.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/siltborn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/sporeling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/tessellate.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/tessellate_half.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/vellum.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/warden_frame.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/tank_harness/wisp.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/basalt.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/brine.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/choir.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/corvin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/drakkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/echo.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/emberkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/fenn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/ferro.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/gauntling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/gear.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/grundl.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/hullkin.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/human.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/kett.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/kite.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/lantern.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/mire.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/murrow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/oorth.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/prismatic.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/quillback.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/rattler.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/revenant.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/sable.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/siltborn.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/sporeling.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/tessellate.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/tessellate_half.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/vellum.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/warden_frame.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `art/gear/traders_coat/wisp.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/items/arc_welder.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/items/arc_welder.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/items/arc_welder_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
@@ -2021,6 +2696,43 @@ Source and licence of every art and audio file in the repo.
 | `art/ui/titlebar.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/ui/tooltip.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
 | `art/ui/tooltip.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
+| `assets/audio/music/ada_found.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/black_box_battle.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/black_box_explore.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/build.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/clans_battle.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/clans_explore.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/combat.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/concord_battle.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/concord_explore.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/defeat.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/demos/black_box_battle.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_blackbox.py`) | project-owned |
+| `assets/audio/music/demos/black_box_explore.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_blackbox.py`) | project-owned |
+| `assets/audio/music/demos/black_box_transition.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_blackbox.py`) | project-owned |
+| `assets/audio/music/demos/ledger_ii_battle.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_ledger2.py`) | project-owned |
+| `assets/audio/music/demos/ledger_ii_explore.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_ledger2.py`) | project-owned |
+| `assets/audio/music/demos/ledger_ii_transition.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_ledger2.py`) | project-owned |
+| `assets/audio/music/demos/long_haul_battle.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_longhaul.py`) | project-owned |
+| `assets/audio/music/demos/long_haul_explore.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_longhaul.py`) | project-owned |
+| `assets/audio/music/demos/long_haul_transition.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_longhaul.py`) | project-owned |
+| `assets/audio/music/demos/r3_black_box_transition.ogg` | original, composed and synthesised for Hullscrap (round-3 listening demo, generator: `audio/_src/music/p_black_box.py`) | project-owned |
+| `assets/audio/music/demos/r3_clans_transition.ogg` | original, composed and synthesised for Hullscrap (round-3 listening demo, generator: `audio/_src/music/p_clans.py`) | project-owned |
+| `assets/audio/music/demos/r3_concord_transition.ogg` | original, composed and synthesised for Hullscrap (round-3 listening demo, generator: `audio/_src/music/p_concord.py`) | project-owned |
+| `assets/audio/music/demos/r3_lumen_transition.ogg` | original, composed and synthesised for Hullscrap (round-3 listening demo, generator: `audio/_src/music/p_lumen.py`) | project-owned |
+| `assets/audio/music/demos/signal_battle.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_signal.py`) | project-owned |
+| `assets/audio/music/demos/signal_explore.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_signal.py`) | project-owned |
+| `assets/audio/music/demos/signal_transition.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_signal.py`) | project-owned |
+| `assets/audio/music/ending.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/explore_a.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/explore_b.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/hollow.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/jump.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/lumen_battle.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/lumen_explore.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/menu.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/region_cross.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/unlock.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
+| `assets/audio/music/victory.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
 | `assets/audio/sfx/ability_1.wav` | original, generated by `audio/_src/sfx/build_sfx.py` | project-owned |
 | `assets/audio/sfx/ability_2.wav` | original, generated by `audio/_src/sfx/build_sfx.py` | project-owned |
 | `assets/audio/sfx/ability_3.wav` | original, generated by `audio/_src/sfx/build_sfx.py` | project-owned |
@@ -2212,662 +2924,3 @@ Source and licence of every art and audio file in the repo.
 | `assets/audio/sfx/tractor_loop.wav` | original, generated by `audio/_src/sfx/build_sfx.py` | project-owned |
 | `assets/audio/sfx/unlock.wav` | original, generated by `audio/_src/sfx/build_sfx.py` | project-owned |
 | `tests/fixtures/art/**` (tiny test images and JSON, every kind) | original, made for Hullscrap (hand-generated, 2-5 px) | project-owned |
-| `assets/audio/music/ada_found.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
-| `assets/audio/music/black_box_battle.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
-| `assets/audio/music/black_box_explore.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
-| `assets/audio/music/build.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
-| `assets/audio/music/clans_battle.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
-| `assets/audio/music/clans_explore.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
-| `assets/audio/music/combat.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
-| `assets/audio/music/concord_battle.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
-| `assets/audio/music/concord_explore.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
-| `assets/audio/music/defeat.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
-| `assets/audio/music/ending.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
-| `assets/audio/music/explore_a.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
-| `assets/audio/music/explore_b.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
-| `assets/audio/music/hollow.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
-| `assets/audio/music/jump.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
-| `assets/audio/music/lumen_battle.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
-| `assets/audio/music/lumen_explore.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
-| `assets/audio/music/menu.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
-| `assets/audio/music/region_cross.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
-| `assets/audio/music/unlock.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
-| `assets/audio/music/victory.ogg` | original, composed and synthesised for Hullscrap (generator: `audio/_src/music/`) | project-owned |
-| `assets/audio/music/demos/black_box_explore.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_blackbox.py`) | project-owned |
-| `assets/audio/music/demos/black_box_battle.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_blackbox.py`) | project-owned |
-| `assets/audio/music/demos/black_box_transition.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_blackbox.py`) | project-owned |
-| `assets/audio/music/demos/ledger_ii_explore.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_ledger2.py`) | project-owned |
-| `assets/audio/music/demos/ledger_ii_battle.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_ledger2.py`) | project-owned |
-| `assets/audio/music/demos/ledger_ii_transition.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_ledger2.py`) | project-owned |
-| `assets/audio/music/demos/long_haul_explore.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_longhaul.py`) | project-owned |
-| `assets/audio/music/demos/long_haul_battle.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_longhaul.py`) | project-owned |
-| `assets/audio/music/demos/long_haul_transition.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_longhaul.py`) | project-owned |
-| `assets/audio/music/demos/signal_explore.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_signal.py`) | project-owned |
-| `assets/audio/music/demos/signal_battle.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_signal.py`) | project-owned |
-| `assets/audio/music/demos/signal_transition.ogg` | original, composed and synthesised for Hullscrap (round-2 demo, generator: `audio/_src/music/d_signal.py`) | project-owned |
-| `assets/audio/music/demos/r3_black_box_transition.ogg` | original, composed and synthesised for Hullscrap (round-3 listening demo, generator: `audio/_src/music/p_black_box.py`) | project-owned |
-| `assets/audio/music/demos/r3_clans_transition.ogg` | original, composed and synthesised for Hullscrap (round-3 listening demo, generator: `audio/_src/music/p_clans.py`) | project-owned |
-| `assets/audio/music/demos/r3_concord_transition.ogg` | original, composed and synthesised for Hullscrap (round-3 listening demo, generator: `audio/_src/music/p_concord.py`) | project-owned |
-| `assets/audio/music/demos/r3_lumen_transition.ogg` | original, composed and synthesised for Hullscrap (round-3 listening demo, generator: `audio/_src/music/p_lumen.py`) | project-owned |
-| `art/gear/ballast_rig/basalt.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/brine.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/choir.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/corvin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/drakkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/echo.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/emberkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/fenn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/ferro.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/gauntling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/gear.json` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/grundl.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/hullkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/human.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/kett.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/kite.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/lantern.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/mire.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/murrow.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/oorth.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/prismatic.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/quillback.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/rattler.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/revenant.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/sable.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/siltborn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/sporeling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/tessellate.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/tessellate_half.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/vellum.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/warden_frame.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/ballast_rig/wisp.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/basalt.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/brine.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/choir.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/corvin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/drakkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/echo.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/emberkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/fenn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/ferro.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/gauntling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/gear.json` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/grundl.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/hullkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/human.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/kett.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/kite.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/lantern.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/mire.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/murrow.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/oorth.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/prismatic.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/quillback.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/rattler.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/revenant.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/sable.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/siltborn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/sporeling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/tessellate.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/tessellate_half.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/vellum.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/warden_frame.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/chitin_plate/wisp.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/basalt.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/brine.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/choir.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/corvin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/drakkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/echo.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/emberkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/fenn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/ferro.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/gear.json` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/grundl.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/hullkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/kett.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/kite.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/lantern.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/mire.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/murrow.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/oorth.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/prismatic.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/quillback.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/rattler.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/revenant.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/sable.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/siltborn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/sporeling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/tessellate.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/tessellate_half.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/vellum.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/warden_frame.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/combat_vest/wisp.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/basalt.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/brine.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/choir.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/corvin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/drakkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/echo.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/emberkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/fenn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/ferro.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/gear.json` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/grundl.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/hullkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/kett.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/kite.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/lantern.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/mire.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/murrow.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/oorth.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/prismatic.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/quillback.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/rattler.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/revenant.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/sable.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/siltborn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/sporeling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/tessellate.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/tessellate_half.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/vellum.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/warden_frame.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/eva_suit/wisp.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/basalt.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/brine.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/choir.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/corvin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/drakkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/echo.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/emberkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/fenn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/ferro.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/gear.json` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/grundl.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/hullkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/kett.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/kite.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/lantern.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/mire.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/murrow.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/oorth.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/prismatic.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/quillback.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/rattler.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/revenant.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/sable.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/siltborn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/sporeling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/tessellate.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/tessellate_half.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/vellum.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/warden_frame.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/exosuit/wisp.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/basalt.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/brine.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/choir.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/corvin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/drakkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/echo.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/emberkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/fenn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/ferro.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/gauntling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/gear.json` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/grundl.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/hullkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/human.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/kett.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/kite.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/lantern.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/mire.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/murrow.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/oorth.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/prismatic.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/quillback.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/rattler.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/revenant.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/sable.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/siltborn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/sporeling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/tessellate.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/tessellate_half.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/vellum.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/warden_frame.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/firefighter_coat/wisp.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/basalt.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/brine.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/choir.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/corvin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/drakkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/echo.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/emberkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/fenn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/ferro.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/gauntling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/gear.json` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/grundl.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/hullkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/human.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/kett.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/kite.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/lantern.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/mire.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/murrow.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/oorth.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/prismatic.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/quillback.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/rattler.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/revenant.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/sable.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/siltborn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/sporeling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/tessellate.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/tessellate_half.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/vellum.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/warden_frame.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/forge_apron/wisp.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/basalt.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/brine.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/choir.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/corvin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/drakkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/echo.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/emberkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/fenn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/ferro.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/gear.json` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/grundl.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/hullkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/kett.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/kite.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/lantern.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/mire.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/murrow.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/oorth.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/prismatic.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/quillback.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/rattler.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/revenant.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/sable.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/siltborn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/sporeling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/tessellate.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/tessellate_half.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/vellum.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/warden_frame.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/heat_suit/wisp.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/basalt.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/brine.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/choir.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/corvin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/drakkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/echo.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/emberkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/fenn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/ferro.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/gauntling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/gear.json` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/grundl.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/hullkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/human.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/kett.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/kite.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/lantern.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/mire.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/murrow.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/oorth.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/prismatic.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/quillback.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/rattler.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/revenant.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/sable.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/siltborn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/sporeling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/tessellate.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/tessellate_half.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/vellum.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/warden_frame.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/jump_pack/wisp.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/basalt.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/brine.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/choir.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/corvin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/drakkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/echo.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/emberkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/fenn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/ferro.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/gauntling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/gear.json` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/grundl.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/hullkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/human.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/kett.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/kite.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/lantern.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/mire.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/murrow.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/oorth.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/prismatic.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/quillback.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/rattler.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/revenant.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/sable.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/siltborn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/sporeling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/tessellate.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/tessellate_half.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/vellum.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/warden_frame.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/marine_plate/wisp.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/basalt.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/brine.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/choir.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/corvin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/drakkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/echo.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/emberkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/fenn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/ferro.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/gauntling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/gear.json` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/grundl.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/hullkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/human.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/kett.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/kite.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/lantern.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/mire.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/murrow.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/oorth.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/prismatic.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/quillback.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/rattler.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/revenant.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/sable.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/siltborn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/sporeling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/tessellate.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/tessellate_half.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/vellum.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/warden_frame.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/medic_sash/wisp.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/basalt.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/brine.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/choir.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/corvin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/drakkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/echo.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/emberkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/fenn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/ferro.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/gauntling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/gear.json` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/grundl.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/hullkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/human.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/kett.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/kite.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/lantern.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/mire.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/murrow.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/oorth.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/prismatic.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/quillback.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/rattler.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/revenant.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/sable.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/siltborn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/sporeling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/tessellate.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/tessellate_half.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/vellum.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/warden_frame.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/prism_cloak/wisp.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/basalt.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/brine.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/choir.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/corvin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/drakkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/echo.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/emberkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/fenn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/ferro.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/gauntling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/gear.json` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/grundl.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/hullkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/human.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/kett.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/kite.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/lantern.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/mire.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/murrow.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/oorth.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/prismatic.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/quillback.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/rattler.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/revenant.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/sable.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/siltborn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/sporeling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/tessellate.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/tessellate_half.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/vellum.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/warden_frame.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/rigger_harness/wisp.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/basalt.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/brine.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/choir.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/corvin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/drakkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/echo.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/emberkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/fenn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/ferro.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/gear.json` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/grundl.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/hullkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/kett.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/kite.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/lantern.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/mire.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/murrow.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/oorth.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/prismatic.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/quillback.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/rattler.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/revenant.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/sable.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/siltborn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/sporeling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/tessellate.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/tessellate_half.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/vellum.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/warden_frame.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/salamander_suit/wisp.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/basalt.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/brine.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/choir.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/corvin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/drakkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/echo.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/emberkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/fenn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/ferro.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/gauntling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/gear.json` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/grundl.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/hullkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/human.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/kett.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/kite.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/lantern.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/mire.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/murrow.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/oorth.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/prismatic.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/quillback.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/rattler.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/revenant.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/sable.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/siltborn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/sporeling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/tessellate.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/tessellate_half.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/vellum.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/warden_frame.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/scrap_gauntlets/wisp.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/basalt.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/brine.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/choir.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/corvin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/drakkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/echo.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/emberkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/fenn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/ferro.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/gauntling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/gear.json` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/grundl.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/hullkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/human.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/kett.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/kite.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/lantern.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/mire.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/murrow.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/oorth.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/prismatic.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/quillback.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/rattler.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/revenant.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/sable.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/siltborn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/sporeling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/tessellate.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/tessellate_half.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/vellum.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/warden_frame.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/spore_mantle/wisp.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/basalt.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/brine.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/choir.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/corvin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/drakkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/echo.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/emberkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/fenn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/ferro.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/gauntling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/gear.json` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/grundl.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/hullkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/human.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/kett.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/kite.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/lantern.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/mire.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/murrow.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/oorth.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/prismatic.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/quillback.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/rattler.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/revenant.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/sable.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/siltborn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/sporeling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/tessellate.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/tessellate_half.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/vellum.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/warden_frame.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/stone_plates/wisp.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/basalt.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/brine.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/choir.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/corvin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/drakkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/echo.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/emberkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/fenn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/ferro.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/gauntling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/gear.json` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/grundl.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/hullkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/human.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/kett.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/kite.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/lantern.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/mire.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/murrow.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/oorth.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/prismatic.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/quillback.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/rattler.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/revenant.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/sable.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/siltborn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/sporeling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/tessellate.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/tessellate_half.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/vellum.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/warden_frame.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/tank_harness/wisp.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/basalt.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/brine.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/choir.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/corvin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/drakkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/echo.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/emberkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/fenn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/ferro.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/gauntling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/gear.json` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/grundl.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/hullkin.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/human.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/kett.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/kite.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/lantern.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/mire.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/murrow.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/oorth.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/prismatic.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/quillback.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/rattler.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/revenant.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/sable.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/siltborn.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/sporeling.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/tessellate.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/tessellate_half.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/vellum.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/warden_frame.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/gear/traders_coat/wisp.png` | original, generated for Hullscrap from each rig's own sprites (generator: `art/_src/sp_wardrobe.py`) | project-owned |
-| `art/components/baron_tithe_gun_barrel.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
-| `art/components/baron_tithe_gun_barrel.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
-| `art/components/baron_tithe_gun_barrel_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
-| `art/components/baron_tithe_gun_out.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
-| `art/components/baron_tithe_gun_out.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
-| `art/components/baron_tithe_gun_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
-| `art/components/gilded_lance_barrel.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
-| `art/components/gilded_lance_barrel.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
-| `art/components/gilded_lance_barrel_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
-| `art/components/gilded_lance_out.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
-| `art/components/gilded_lance_out.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
-| `art/components/gilded_lance_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
-| `art/components/sovereign_turret_barrel.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
-| `art/components/sovereign_turret_barrel.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
-| `art/components/sovereign_turret_barrel_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
-| `art/components/sovereign_turret_out.json` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
-| `art/components/sovereign_turret_out.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
-| `art/components/sovereign_turret_out_glow.png` | original, made for Hullscrap (generator: `art/_src/`) | project-owned |
-
-## Station interiors (claude/station-interiors)
-No image or audio files were added. The fixtures, wall and floor dressing, race skins, signage glyphs and the nebula, asteroid-field and distant-station backdrops are drawn in code (scripts/board/station_decor.gd, station_glyph.gd, station_backdrop.gd) in the style of the existing prop art; no outside assets.
-
-## Race rooms (claude/race-rooms)
-No image or audio files were added. The art of the 80 fixtures of the 36 race rooms and of 38 plain fixtures, 20 signage glyphs and 20 fixture mark styles are drawn in code (scripts/board/station_art.gd, station_glyph.gd, station_decor.gd); no outside assets.

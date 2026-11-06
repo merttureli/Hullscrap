@@ -1,0 +1,92 @@
+{
+ "frame": [
+  48,
+  52
+ ],
+ "cells": [
+  3,
+  3
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   4
+  ],
+  "disabled": [
+   5,
+   1,
+   0
+  ],
+  "fire": [
+   6,
+   4,
+   10
+  ],
+  "out": [
+   10,
+   2,
+   3
+  ]
+ },
+ "glow": {
+  "image": "drone_bay_mk2_glow.png",
+  "frame": [
+   68,
+   72
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "damaged": [
+    3,
+    2,
+    4
+   ],
+   "fire": [
+    6,
+    4,
+    10
+   ],
+   "out": [
+    10,
+    2,
+    3
+   ]
+  }
+ },
+ "offset": [
+  0,
+  -4
+ ],
+ "anchors": {
+  "cradle": [
+   24,
+   38
+  ]
+ },
+ "cradle_launch_up": [
+  0,
+  9,
+  19,
+  27
+ ],
+ "notes": "INSIDE half of the drone_bay_mk2 (standard line, 3x3): the hangar pit with its launch rail, the cradle (EMPTY here: the game draws the loaded drone on it while docked, and an empty cradle while it is out), parts racks and a status strip. fire = launch 0-3 (the cradle runs up the rail), out = re-arming. anchors.cradle is the cradle pivot in frame px at rest; cradle_launch_up the px it has risen per launch frame."
+}

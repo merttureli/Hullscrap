@@ -1,0 +1,72 @@
+{
+ "frame": [
+  48,
+  20
+ ],
+ "cells": [
+  3,
+  1
+ ],
+ "anims": {
+  "on": [
+   0,
+   2,
+   3
+  ],
+  "off": [
+   2,
+   1,
+   0
+  ],
+  "damaged": [
+   3,
+   2,
+   4
+  ],
+  "disabled": [
+   5,
+   1,
+   0
+  ],
+  "fire": [
+   6,
+   3,
+   8
+  ]
+ },
+ "glow": {
+  "image": "drone_bay_mk2_out_glow.png",
+  "frame": [
+   68,
+   40
+  ],
+  "offset": [
+   -10,
+   -10
+  ],
+  "anims": {
+   "on": [
+    0,
+    2,
+    3
+   ],
+   "damaged": [
+    3,
+    2,
+    4
+   ],
+   "fire": [
+    6,
+    3,
+    8
+   ]
+  }
+ },
+ "anchors": {
+  "pivot": [
+   24,
+   15
+  ]
+ },
+ "notes": "OUTSIDE half of the drone_bay_mk2 (3x1, low): a hatch of two door leaves over the launch well. fire = open 0-2 (the leaves slide apart); the bottom flange overhangs the outer wall face."
+}

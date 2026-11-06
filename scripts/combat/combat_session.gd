@@ -6,6 +6,7 @@ extends RefCounted
 
 const Abilities = preload("res://scripts/sim/abilities.gd")
 const Arena = preload("res://scripts/combat/arena.gd")
+const Drones = preload("res://scripts/combat/drones.gd")
 const Morale = preload("res://scripts/combat/morale.gd")
 const PilotAI = preload("res://scripts/combat/pilot_ai.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
@@ -43,6 +44,7 @@ var cursor: Variant = null  ## the world point the mouse is on, set by the view 
 var enemy_label := "Pirate"
 var threat := 0  ## the enemy's threat against the player's ship, 1-5 skulls (Shipgen.threat), rated once at start()
 var _acc := 0.0
+var _recalled := false  ## the fight is over and the drones have been told to fly home
 
 
 ## A ship from a saved-ship JSON file (Ship.to_dict format) or a generated one (a Shipgen spec), or null when it cannot be
@@ -84,6 +86,7 @@ static func spawn_rammer() -> Ship:
 ## {player_pos, player_angle, player_vel, player_ang_vel, enemy_pos}; the enemy always starts facing the player.
 func start(player: Ship, enemy: Ship, seed_value := 1, place := {}) -> void:
 	threat = int(Shipgen.threat(enemy, player)["skulls"])
+	Drones.autoload(player)  # a bay nobody loaded takes the best kit in the hold
 	arena = Arena.new(seed_value)
 	var at: Vector2 = place.get("player_pos", Vector2.ZERO)
 	arena.add_ship(player, at, float(place.get("player_angle", 0.0)))
@@ -97,6 +100,7 @@ func start(player: Ship, enemy: Ship, seed_value := 1, place := {}) -> void:
 	input = {"throttle": 0.0, "turn": 0.0, "strafe": 0.0}
 	cursor = null
 	_acc = 0.0
+	_recalled = false
 
 
 ## Run `dt` seconds in fixed substeps: the player's helm, the pilot, then the arena.
@@ -133,6 +137,9 @@ func tick(dt: float) -> void:
 		ai.think(STEP)
 		arena.step(STEP)
 		morale.tick(STEP)
+		if not _recalled and state() != "fighting":  # the fight is over: every drone flies home (the part is spent)
+			_recalled = true
+			Drones.recall_all(arena)
 		if jump_charge >= 0.0 and state() == "fighting" and jump_hold() == "":
 			jump_charge += STEP
 
@@ -205,7 +212,7 @@ func can_leave() -> bool:
 	return arena.ships[ENEMY].wrecked or morale.end_state() != "fighting" or distance() > LEAVE_DISTANCE or jump_ready()
 
 
-## The player's weapons in slot order: [{uid, id, name, group (the mount's own choice first), turret, aim (fixed, swivel, turret), pd (point defence)}]: placed ones by uid, then virtual mounts as added.
+## The player's weapons in slot order: [{uid, id, name, group (the mount's own choice first: 1 LMB, 2 RMB, 3 Q, 0 AUTO), turret, aim (fixed, swivel, turret), pd (point defence)}]: placed ones by uid, then virtual mounts as added.
 func weapons() -> Array:
 	var co = arena.ships[PLAYER]
 	var uids: Array = co.mounts.keys()
@@ -214,7 +221,7 @@ func weapons() -> Array:
 	for uid in uids:
 		var m: Dictionary = co.mounts[uid]
 		var name := str(m["id"])
-		var choice := 0
+		var choice := -1
 		if not m["virtual"]:
 			name = str(co.ship.components.def(co.ship.components.instances[uid]["id"]).get("name", name))
 			choice = co.ship.components.group_choice(uid)
@@ -224,7 +231,7 @@ func weapons() -> Array:
 	return out
 
 
-## Fire every weapon of fire group `group` at the world point `aim`. Returns how many fired.
+## Fire every weapon of fire group `group` (1 LMB, 2 RMB, 3 Q; 0 is the AUTO guns, which fire by themselves) at the world point `aim`. Returns how many fired.
 func fire_group(group: int, aim: Vector2) -> int:
 	var n := 0
 	for w in weapons():
@@ -233,10 +240,34 @@ func fire_group(group: int, aim: Vector2) -> int:
 	return n
 
 
-## Fire weapon slot `slot` (1 = the first). False when there is none or it cannot fire.
+## Fire weapon slot `slot` (1 = the first); after the guns come the drone bays, which launch. False when there is none or it cannot fire.
 func fire_slot(slot: int, aim: Vector2) -> bool:
 	var list := weapons()
+	if slot > list.size():
+		var b := bays()
+		return slot - list.size() <= b.size() and arena.launch_drone(PLAYER, b[slot - list.size() - 1]["uid"]) == ""
 	return slot >= 1 and slot <= list.size() and arena.fire(PLAYER, list[slot - 1]["uid"], aim)
+
+
+## The player's drone bays in slot order: [{uid, name, kit}]. Their keys follow the guns'.
+func bays() -> Array:
+	var out := []
+	for uid in Drones.slots(arena, PLAYER):
+		var b: Dictionary = arena.ships[PLAYER].bays[uid]
+		out.append({"uid": uid, "name": str(Drones.def_of(arena, PLAYER, uid).get("name", b["id"])), "kit": str(b["kit"])})
+	return out
+
+
+## What the bar shows for bay `uid`: {status ("ready" or why not: no kit, no parts, re-arming, drone out, unpowered ...), kit (item id), kit_name, tier, cost (parts),
+## parts (held), rearm_left, rearm (its time), out (a drone is out), hp, max_hp, art (the drone's sprite name)}.
+func bay_state(uid: int) -> Dictionary:
+	var k := Drones.kit_of(arena, PLAYER, uid)
+	var d = arena.ships[PLAYER].bays[uid]["drone"]
+	var why := Drones.can_launch(arena, PLAYER, uid)
+	return {"status": "ready" if why == "" else why, "kit": str(arena.ships[PLAYER].bays[uid]["kit"]), "kit_name": str(k.get("name", "")), "tier": int(k.get("drone", {}).get("tier", 0)),
+		"cost": int(k.get("drone", {}).get("tier", 0)), "parts": arena.ships[PLAYER].ship.inventory.count(Drones.PART), "rearm_left": Drones.ready_in(arena, PLAYER, uid),
+		"rearm": float(Drones.def_of(arena, PLAYER, uid).get("bay", {}).get("rearm_s", 12.0)), "out": d != null, "hp": float(d["hp"]) if d != null else 0.0,
+		"max_hp": float(d["max_hp"]) if d != null else float(k.get("drone", {}).get("hp", 0)), "art": str(k.get("drone", {}).get("art", ""))}
 
 
 ## What the weapon bar shows for the player's weapon `uid` aiming at `aim`: {cooldown_left, cooldown,
@@ -260,7 +291,7 @@ func ability_slots() -> Array:
 	return Abilities.slots(arena.ships[PLAYER].ship)
 
 
-## The player presses ability key `key` ("engine" Shift, "shield" Space, "utility" Q): every ability
+## The player presses ability key `key` ("engine" Shift, "shield" Space, "utility" E): every ability
 ## with that key starts if it can. Returns {"started": [slot ids], "refused": {slot id: reason}}.
 func press_ability(key: String) -> Dictionary:
 	return arena.use_key(PLAYER, key)

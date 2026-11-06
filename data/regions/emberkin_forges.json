@@ -16,7 +16,7 @@
 	"debris": {"copper_coil": 1.4},
 	"pois": {"mining_field": 1.3, "anomaly": 1.3, "exp_platform": 2.0, "exp_planet": 1.5},
 	"ambient": {"trader": 3, "pirate": 2, "patrol": 1},
-	"stock": {"reactor_neon_mk1": 360, "engine_neon_mk1": 300, "heat_lance_neon": 420, "engine_scrap_mk1": 90, "radiator": 50, "emberkin_pyre_lance": 340, "emberkin_cinder_mortar": 290, "emberkin_flare_turret": 150, "emberkin_pyre_drive": 330, "emberkin_furnace_core": 210, "emberkin_hearth_shield": 340, "forge_apron": 230, "firefighter_coat": 160, "beam_light": 260, "beam_mk2": 330, "laser_long": 340},
+	"stock": {"drone_part": 24, "reactor_neon_mk1": 360, "engine_neon_mk1": 300, "heat_lance_neon": 420, "engine_scrap_mk1": 90, "radiator": 50, "emberkin_pyre_lance": 340, "emberkin_cinder_mortar": 290, "emberkin_flare_turret": 150, "emberkin_pyre_drive": 330, "emberkin_furnace_core": 210, "emberkin_hearth_shield": 340, "forge_apron": 230, "firefighter_coat": 160, "beam_light": 260, "beam_mk2": 330, "laser_long": 340},
 	"recruit": {"emberkin": 8, "human": 1, "prismatic": 1},
 	"enemies": "wardens",
 	"hazards": ["star_heat"],

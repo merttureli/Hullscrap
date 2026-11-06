@@ -131,6 +131,8 @@ func test_data_is_complete() -> void:
 		"kett_brood_crown": [-6, 3, 3], "emberkin_kiln_mantle": [-5, 3, 3], "prismatic_conductor_helm": [-2, 2, 2], "basalt_anvil_bay": [-1, 3, 3], "sporeling_grove_veil": [-5, 3, 3],
 		"mire_fenwater_heart": [13, 0, 2], "fenn_exchange_drive": [-3, 4, 3], "gauntling_overseer_drive": [-3, 4, 3], "grundl_ramhead_thrusters": [-4, 4, 3], "human_flag_array": [-2, 3, 2],
 		"gilded_lance": [-4, 5, 3], "baron_tithe_gun": [-4, 5, 3], "sovereign_turret": [-3, 5, 3], "sovereign_aegis": [-7, 3, 3], "starwhale_fin": [-4, 4, 4],
+		# the drone bays (docs/DRONES.md section 2, data/packs/drones_1)
+		"drone_bay_mk1": [-1, 4, 1], "drone_bay_mk2": [-1, 4, 2], "drone_bay_mk3": [-2, 4, 3],
 	}
 	eq(c.ids().size(), want.size(), "component count")
 	for id in want:

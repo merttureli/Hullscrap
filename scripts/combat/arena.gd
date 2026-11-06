@@ -19,6 +19,7 @@ const Abilities = preload("res://scripts/sim/abilities.gd")
 const Effects = preload("res://scripts/combat/effects.gd")
 const Hazards = preload("res://scripts/combat/hazards.gd")
 const Structure = preload("res://scripts/ship/structure.gd")
+const Drones = preload("res://scripts/combat/drones.gd")
 
 const SUBSTEP := 1.0 / 60.0
 const CELL := 32.0  ## pixels per grid cell
@@ -65,6 +66,7 @@ class Combatant extends RefCounted:
 	var input := {"throttle": 0.0, "turn": 0.0, "strafe": 0.0}
 	var dirty := true  ## parts or tiles changed: power, mass and shield cap need recomputing
 	var next_virtual := -1
+	var bays := {}  ## uid -> drone bay (drones.gd): the hatch, the loaded kit and the drone out
 
 var ships: Array = []  ## Combatant objects; the index is the ship's id everywhere
 var rng := RandomNumberGenerator.new()
@@ -78,6 +80,8 @@ var power_bonus := {}  ## ship index -> power the neon lattice has made of absor
 var collision := Collisions.load_config()  ## data/collision.json: restitution, min_speed, damage_k, crew_knock, separation_slop...
 var contact_tick := {}  ## ship index -> the last tick it touched another ship
 var fx := Effects.fresh()  ## running weapon effects: acid, spores, frost, shocks, corroded walls, drag-able debris (effects.gd)
+var drones: Array = []  ## the drones out (drones.gd)
+var drone_serial := 1
 var tethers: Array = []  ## bow latches: {a, b (ships), la, lb (anchors in each ship's cell coordinates), left (seconds)}
 var hazard := {}  ## the fight's sector hazard, {id, dir} or {} (hazards.gd): set by the caller after add_ship
 var tick := 0  ## substeps run so far
@@ -114,6 +118,7 @@ func add_ship(ship, pos := Vector2.ZERO, angle := 0.0) -> int:
 	co.half = (hi - lo) / 2.0
 	grid.hp_mult = Abilities.wall_hp_mults(ship)  # a Stonehide bay: tougher walls round its room, from the start of the fight
 	co.mounts = weapons.mounts_of(ship)
+	co.bays = Drones.bays_of(ship)
 	ships.append(co)
 	co.structure = Structure.structure_fraction(co)
 	_recompute(co)
@@ -153,6 +158,11 @@ func fire(idx: int, uid: int, aim: Vector2) -> bool:
 	return true
 
 
+## Launch the drone of bay `uid` of ship `idx` (drones.gd). "" when it flew, else why not.
+func launch_drone(idx: int, uid: int) -> String:
+	return Drones.launch(self, idx, uid)
+
+
 ## Seconds until mount `uid` of ship `idx` may fire again (0 when ready).
 func cooldown_left(idx: int, uid: int) -> float:
 	return maxf(0.0, (int(ships[idx].cooldowns.get(uid, 0)) - tick) * SUBSTEP)
@@ -189,6 +199,7 @@ func _substep() -> void:
 	weapons.tick_turrets(self)
 	weapons.tick_charge(self)
 	weapons.tick_beams(self)
+	Drones.step(self, SUBSTEP)
 	Projectiles.step(self, SUBSTEP)
 	Effects.tick(self, SUBSTEP)
 	Hazards.tick(self, SUBSTEP)
@@ -324,4 +335,4 @@ func snapshot() -> Dictionary:
 		list.append({"pos": [co.flight.pos.x, co.flight.pos.y], "vel": [co.flight.vel.x, co.flight.vel.y], "angle": co.flight.angle, "ang_vel": co.flight.ang_vel,
 			"wrecked": co.wrecked, "layers": co.layers, "weights": co.weights.duplicate(), "sector_layers": co.sector_layers.duplicate(), "ion_lock": co.ion_lock,
 			"grid": co.ship.grid.to_dict(), "parts": parts})
-	return {"tick": tick, "ships": list, "projectiles": projectiles.size(), "tethers": tethers.size(), "events": events.size(), "power_bonus": power_bonus.duplicate(), "fx": Effects.summary(self)}
+	return {"tick": tick, "ships": list, "projectiles": projectiles.size(), "drones": drones.map(func(d): return [d["id"], d["pos"].x, d["pos"].y, d["hp"]]), "tethers": tethers.size(), "events": events.size(), "power_bonus": power_bonus.duplicate(), "fx": Effects.summary(self)}

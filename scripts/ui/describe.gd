@@ -21,7 +21,7 @@ const Mods = preload("res://scripts/board/mods.gd")
 
 const PATH := "res://data/describe.json"
 const STAT_NAMES := {"rate": "fire rate", "damage": "damage"}
-const KEY_NAMES := {"engine": "Shift", "shield": "Space", "utility": "Q"}  ## the ability keys (weapon_bar.gd KEY_LABEL)
+const KEY_NAMES := {"engine": "Shift", "shield": "Space", "utility": "E"}  ## the ability keys (weapon_bar.gd KEY_LABEL)
 const MINUS := "\u2212"
 
 static var _data := {}
@@ -110,6 +110,9 @@ static func of(id: String, ship, rot := -1, angle := -1.0) -> Dictionary:
 			out["what"] = str(weapons().defs[id]["version"])  # the card names the version and what it does
 	else:
 		_stats(def, eff, fam, rot, rows, angle)
+	if fam == "drone_bay":
+		rows.append(["Launches", "tier %d and below" % int(def["bay"]["max_tier"])])
+		rows.append(["Re-arm", "%s s (25%% quicker with crew)" % num(float(def["bay"]["rearm_s"]))])
 	var pw := float(eff["power"])
 	if pw != 0.0:
 		rows.append(["Power", ("+" if pw > 0.0 else MINUS) + num(absf(pw))])
@@ -219,6 +222,10 @@ static func _of_item(id: String, out: Dictionary) -> Dictionary:
 	var kind := str(item.get("kind", "")) if not item.is_empty() else ("material" if Content.has("materials", id) else "")
 	out["what"] = str(item.get("does", data()["items"].get(kind, "")))
 	out["lore"] = first_sentence(str(item.get("blurb", Content.entry("materials", id).get("blurb", ""))))
+	if kind == "drone" and item.get("drone") is Dictionary:  # a drone kit: its tier, hp, role and what a launch costs
+		var dd: Dictionary = item["drone"]
+		out["stats"] = [["Tier", str(dd["tier"])], ["HP", str(dd["hp"])], ["Role", "defence: guards your ship" if dd["role"] == "defence" else "combat: circles the foe"],
+			["Launch", "%d part%s" % [dd["tier"], "" if int(dd["tier"]) == 1 else "s"]], ["Fires", "%s every %s s" % [str(dd["gun"].get("family", "")), num(float(dd["gun"]["cooldown"]))]]]
 	if kind == "mod" and Mods.is_item(id):  # a boarding mod: what it does, the numbers of its tier and who they work for
 		var h := Mods.hover(id)
 		out["what"] = str(h[0])
@@ -291,7 +298,7 @@ static func _weapon(id: String, rows: Array, kws: Array, tail: Array) -> void:
 		tail.append(["Hit", "%s%%" % num(float(w["accuracy"]) * 100.0)])
 	else:
 		tail.append(["Gimbal", "%s\u00b0" % num(float(w["gimbal"]))])
-		tail.append(["Fire", "LMB" if weapons().group_of(id) == 1 else "RMB"])
+		tail.append(["Fire", ["AUTO", "LMB", "RMB", "Q"][weapons().group_of(id)]])
 	kws.append(keyword(str(w["kind"])))
 	kws.append(keyword(str(w["damage_type"])))
 	if w["turret"]:

@@ -16,7 +16,7 @@
 	"debris": {"scrap_chunk_m": 1.5, "sealed_crate": 2.0, "copper_coil": 1.3},
 	"pois": {"wreck": 1.5, "abandoned_station": 2.0, "exp_ruin": 1.5, "exp_base": 1.5},
 	"ambient": {"pirate": 4, "trader": 2, "patrol": 1},
-	"stock": {"engine_scrap_mk1": 90, "engine_scrap_mk2": 200, "reactor_scrap_mk1": 140, "oxygen_scrap_mk1": 80, "shield_scrap_mk1": 110, "bolt_thrower_scrap": 150, "shrapnel_cannon_scrap": 160, "radiator": 40, "bed": 30, "missile": 12, "ammo_rack": 60, "rigger_harness": 150, "firefighter_coat": 160, "missile_pod": 170, "swarm_pod": 340, "artemis_mk2": 350, "slug_gun": 130, "slug_mortar": 150, "flak_turret": 130},
+	"stock": {"drone_part": 24, "engine_scrap_mk1": 90, "engine_scrap_mk2": 200, "reactor_scrap_mk1": 140, "oxygen_scrap_mk1": 80, "shield_scrap_mk1": 110, "bolt_thrower_scrap": 150, "shrapnel_cannon_scrap": 160, "radiator": 40, "bed": 30, "missile": 12, "ammo_rack": 60, "rigger_harness": 150, "firefighter_coat": 160, "missile_pod": 170, "swarm_pod": 340, "artemis_mk2": 350, "slug_gun": 130, "slug_mortar": 150, "flak_turret": 130},
 	"recruit": {"human": 4, "rattler": 2, "kett": 1, "basalt": 1},
 	"enemies": "rustfangs",
 	"hazards": ["debris_surge"],

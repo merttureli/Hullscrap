@@ -11,6 +11,7 @@ const Mounts = preload("res://scripts/ship/mounts.gd")
 const Art = preload("res://scripts/view/art.gd")
 const SpriteSheet = preload("res://scripts/view/sprite_sheet.gd")
 const Ammo = preload("res://scripts/sim/ammo.gd")
+const BAY_LAUNCH_S := 0.45  ## seconds a bay shows its launch frames (the hatch opens, the cradle runs up the rail)
 const FIRE_WINDOW := 0.15  ## seconds a weapon shows its fire frame after a shot
 const BARRELS: Array[String] = ["weapon", "radar", "tractor"]  ## the families whose outside half carries a head that turns: a gun, a dish, an emitter
 const DISH_SPIN := 2.1  ## radians a second a radar dish turns while the radar works
@@ -361,7 +362,16 @@ static func anim_state(sheet, def: Dictionary, inst: Dictionary, opts := {}) -> 
 		anim = "overheated"
 	else:
 		st["heat"] = status == "overheated"
-		if sheet.has_anim("fire") and opts.has("fired_ago") and float(opts["fired_ago"]) < FIRE_WINDOW:
+		if opts.has("bay_out"):  # a drone bay (drones.gd): the launch frames while its drone leaves, then empty (inside) or shut (outside) while it is out; open while one homes
+			var age := float(opts.get("fired_ago", 99.0))
+			if bool(opts["bay_out"]) and age < BAY_LAUNCH_S and sheet.has_anim("fire"):
+				anim = "fire"
+			elif bool(opts["bay_out"]) and sheet.has_anim("out"):
+				anim = "out"
+			elif bool(opts.get("bay_open", false)) and sheet.has_anim("fire"):
+				anim = "fire"
+				opts["fired_ago"] = BAY_LAUNCH_S
+		elif sheet.has_anim("fire") and opts.has("fired_ago") and float(opts["fired_ago"]) < FIRE_WINDOW:
 			anim = "fire"
 		elif sheet.has_anim("charge"):
 			anim = "charge"
