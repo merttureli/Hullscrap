@@ -106,7 +106,8 @@ func recipe_ids() -> Array[String]:
 	var s = ship()
 	if s == null:
 		return []
-	var key := "%s|%d|%d|%d" % [station, s.crafting.known.size(), s.crafting.order.size(), s.get_instance_id()]
+	var has_fab: bool = s.components.has_fabricator()  # (one per ship: its own recipe is not offered while it has one)
+	var key := "%s|%d|%d|%d|%s" % [station, s.crafting.known.size(), s.crafting.order.size(), s.get_instance_id(), has_fab]
 	if key == _ids_key:
 		return _ids_cache
 	var out: Array[String] = []
@@ -128,7 +129,7 @@ func recipe_ids() -> Array[String]:
 		return out
 	for cat in CATEGORIES:
 		for id in s.crafting.ids():
-			if s.crafting.def(id)["category"] == cat and s.crafting.station_of(id) == station and s.crafting.is_known(id):
+			if s.crafting.def(id)["category"] == cat and s.crafting.station_of(id) == station and s.crafting.is_known(id) and not (has_fab and id == "fabricator"):
 				out.append(id)
 	_ids_key = key
 	_ids_cache = out

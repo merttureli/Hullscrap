@@ -3,7 +3,7 @@
 "build_first": true,
 "cables": {"cells":[],"version":1},
 "cargo": {"bed":1,"copper":50,"credits":400,"engine_mk1":2,"fabricator":1,"fuel":6,"hand_ammo":10,"oxygen_gen":1,"polymer":30,"pulse_mk1":1,"reactor_mk2":1,"scrap":330,"shield_mk1":1,"titanium":100},
-"components": {"instances":[{"anchor":[40,40],"heat":0.0,"hp":4,"id":"helm","rot":0,"status":"ok","uid":1}],"next_uid":2,"version":8},
+"components": {"instances":[{"anchor":[40,40],"heat":0.0,"hp":4,"id":"helm","rot":0,"status":"ok","uid":1}],"next_uid":2,"version":9},
 "crafting": {"known":["basic_armor","bed","bolt_thrower_scrap","engine_mk1","engine_scrap_mk1","fabricator","helm","laser_mk1","medbay","net_mouth_scrap","oxygen_gen","oxygen_scrap_mk1","pistol","polymer","radiator","rattle_burst_scrap","reactor_mk1","reactor_scrap_mk1","robot_arm","shield_mk1","shield_scrap_mk1","shrapnel_cannon_scrap"],"queue":[],"version":1.0},
 "crew": [{"name":"Soldier","species":"human"}],
 "doors_open": [],

@@ -40,6 +40,7 @@ const MapView = preload("res://scripts/ui/map_view.gd")
 const ShieldPanel = preload("res://scripts/ui/shield_panel.gd")
 const Palette = preload("res://scripts/build/palette.gd")
 const Hud = preload("res://scripts/ui/hud.gd")
+const FireDock = preload("res://scripts/ui/fire_dock.gd")
 const RedAlert = preload("res://scripts/sim/red_alert.gd")
 const BeltArt = preload("res://scripts/view/belt_art.gd")
 const ArmFx = preload("res://scripts/view/arm_fx.gd")
@@ -179,6 +180,10 @@ func _make_hud() -> void:
 	hud.name = "Hud"
 	hud.setup(self)
 	layer.add_child(hud)
+	var dock := FireDock.new()  # the fire groups of the placed guns, drag a chip to another section
+	dock.name = "FireDock"
+	dock.bind(self)
+	layer.add_child(dock)
 	get_parent().add_child.call_deferred(layer)
 
 
@@ -1173,11 +1178,10 @@ func _draw_components() -> void:
 				mount_fx.get(uid, {}).get("aim", Vector2.ZERO), opts)
 
 
-## The fire-group chips of the placed guns (gun_badges.gd), in the canvas' pixels: [{uid, at, h, sty, key}]; none outside build mode.
-## The key is the gun's number in a fight (guns by uid, as CombatSession.weapons() lists them).
-func gun_chips() -> Array:
+## The placed guns that have an outside half, in key order (as CombatSession.weapons() lists them): [{uid, id, name, group, aim, pd, number}].
+func gun_entries() -> Array:
 	var out := []
-	if not build_on or ship == null:
+	if ship == null:
 		return out
 	var uids: Array = ship.components.instances.keys()
 	uids.sort()
@@ -1190,18 +1194,29 @@ func gun_chips() -> Array:
 		if inst["out_cells"].is_empty():
 			continue
 		var d: Dictionary = _aim().def(inst["id"])
-		var w := {"aim": d["aim"], "group": _aim().group_of(inst["id"], ship.components.group_choice(uid)),
-			"pd": d["turret"] and d.get("effects") is Dictionary and d["effects"].has("intercept")}
-		out.append({"uid": uid, "at": _cells_rect(inst["out_cells"]).get_center(), "h": 24.0, "sty": GunBadges.style(w), "key": GunBadges.key_of(n - 1)})
+		out.append({"uid": uid, "id": inst["id"], "name": str(ship.components.def(inst["id"]).get("name", inst["id"])), "number": n, "aim": d["aim"],
+			"group": _aim().group_of(inst["id"], ship.components.group_choice(uid)),
+			"pd": d["turret"] and d.get("effects") is Dictionary and d["effects"].has("intercept")})
 	return out
 
 
-## A right-click on a gun's chip moves a fixed gun between LMB and RMB; true when it hit a chip (the click is used up).
+## The fire-group chips of the placed guns (gun_badges.gd), in the canvas' pixels: [{uid, at, h, sty, key}]; none outside build mode.
+## The key is the gun's number in a fight (guns by uid, as CombatSession.weapons() lists them).
+func gun_chips() -> Array:
+	var out := []
+	if not build_on or ship == null:
+		return out
+	for w in gun_entries():
+		out.append({"uid": w["uid"], "at": _cells_rect(ship.components.instances[w["uid"]]["out_cells"]).get_center(), "h": 24.0, "sty": GunBadges.style(w),
+			"key": GunBadges.key_of(int(w["number"]) - 1)})
+	return out
+
+
+## A right-click on a gun's chip cycles its group (LMB, RMB, Q, AUTO); true when it hit a chip (the click is used up).
 func chip_click(canvas_pos: Vector2) -> bool:
 	for ch in gun_chips():
 		if canvas_pos.distance_to(ch["at"]) <= ch["h"] * 0.9:
-			if GunBadges.cycle(ship.components, _aim(), ch["uid"]) == 0:
-				message = "That gun fires by itself"
+			GunBadges.cycle(ship.components, _aim(), ch["uid"])
 			queue_redraw()
 			return true
 	return false

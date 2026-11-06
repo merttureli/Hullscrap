@@ -389,3 +389,16 @@ func test_the_panel_stays_shut_in_a_fight() -> void:
 	panel._input(_key(KEY_C))
 	check(not panel.visible, "and not during one")
 	main.free()
+
+
+func test_the_fabricator_recipe_is_not_listed_on_a_ship_that_has_one() -> void:
+	var d := _rig()
+	var ship: Ship = d["ship"]
+	ship.crafting.known["fabricator"] = true
+	var panel := CraftingPanel.new()
+	panel.sim = _sim(ship)
+	check(not panel.recipe_ids().has("fabricator"), "hidden with a fabricator aboard")
+	ship.components.remove_uid(d["fab"])
+	check(panel.recipe_ids().has("fabricator"), "offered when the ship has none")
+	panel.sim.free()
+	panel.free()

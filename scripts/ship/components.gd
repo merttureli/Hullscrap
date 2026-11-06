@@ -15,7 +15,9 @@ const Mounts = preload("res://scripts/ship/mounts.gd")
 ## 6 is the gun rework (docs/GUNS.md 8): the guns have new outside halves (shapes of any size), so a mount saved before 6 whose gun
 ## changed shape (_reshaped()) is re-planned from its inside half; one whose new outside half does not fit goes back to the cargo.
 ## 7 adds the optional fire group a player chose for a fixed gun (`group`, 1 or 2; absent: the kind's default); older saves load with the defaults.
-const VERSION := 8  ## 8: the fabricator has its own level (`fab_level`, 1 to 4); an older save's takes the level its room's modules gave it (Workshop.migrate)
+## 8 widens the choice to every gun and four groups: `group` 1 (LMB), 2 (RMB), 3 (Q) or 0 (AUTO); absent still means the kind's default.
+## 9: the fabricator has its own level (`fab_level`, 1 to 4); an older save's takes the level its room's modules gave it (Workshop.migrate)
+const VERSION := 9
 const FAB := "fabricator"
 const ONE_FAB := "One fabricator per ship: click yours to upgrade it"
 const OLD_OUTSIDE := [4, 2]  ## the outside half every gun had before version 6 ...
@@ -128,15 +130,15 @@ func place(grid, id: String, anchor: Vector2i, rot: int) -> int:
 	return uid
 
 
-## The fire group (1 or 2) the player chose for gun `uid`, or 0 for the kind's default.
+## The fire group the player chose for gun `uid`: 1 (LMB), 2 (RMB), 3 (Q), 0 (AUTO), or -1 for the kind's default.
 func group_choice(uid: int) -> int:
-	return int(instances[uid].get("group", 0)) if instances.has(uid) else 0
+	return int(instances[uid].get("group", -1)) if instances.has(uid) else -1
 
 
-## Choose gun `uid`'s fire group (1 or 2; 0 goes back to the default).
+## Choose gun `uid`'s fire group (0-3; -1 goes back to the default).
 func set_group_choice(uid: int, group: int) -> void:
-	if instances.has(uid) and group in [0, 1, 2]:
-		if group == 0:
+	if instances.has(uid) and group in [-1, 0, 1, 2, 3]:
+		if group < 0:
 			instances[uid].erase("group")
 		else:
 			instances[uid]["group"] = group
@@ -337,7 +339,7 @@ func to_dict() -> Dictionary:
 			rec["fab_level"] = int(i["fab_level"])
 		if int(i.get("loaded", 0)) > 0:  # what a gun has taken off a belt
 			rec["loaded"] = int(i["loaded"])
-		if int(i.get("group", 0)) > 0:  # the fire group the player chose
+		if i.has("group"):  # the fire group the player chose (0 is AUTO)
 			rec["group"] = int(i["group"])
 		list.append(rec)
 	var d := {"version": VERSION, "next_uid": _next_uid, "instances": list}
@@ -497,7 +499,7 @@ func _load_state(inst: Dictionary, saved: Dictionary) -> void:
 		inst["loaded"] = maxi(0, int(saved["loaded"]))
 	if inst["id"] == FAB and (saved.get("fab_level") is float or saved.get("fab_level") is int):
 		inst["fab_level"] = clampi(int(saved["fab_level"]), 1, 4)
-	if (saved.get("group") is float or saved.get("group") is int) and int(saved["group"]) in [1, 2]:
+	if (saved.get("group") is float or saved.get("group") is int) and int(saved["group"]) in [0, 1, 2, 3]:
 		inst["group"] = int(saved["group"])
 
 
