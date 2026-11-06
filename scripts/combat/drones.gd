@@ -30,7 +30,7 @@ const DOCKED_SCALE := 0.714  ## the size it has on the cradle (the view draws a 
 const HOME_DIST := 26.0  ## px from the hatch at which a returning drone is docked
 const EVASION := 0.12  ## the chance a turret's tracer misses a drone, on top of its accuracy
 const LIMPET_REACH := 2660.0  ## an enemy throws limpets and pods only when the foe is this near
-const LIMPET_SIGHT := 3.0  ## point defence and turrets engage a flying limpet or pod from this many times their usual reach
+const LIMPET_SIGHT := 3.6  ## point defence and turrets engage a flying limpet or pod from this many times their usual reach
 const AI_SKILL := 0.75  ## how often the enemy picks its best-predicted throw
 const DRONE_EVENTS := ["drone_launch", "drone_shot", "drone_hit", "drone_down", "drone_home", "drone_recall"]
 
