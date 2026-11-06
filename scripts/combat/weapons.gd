@@ -484,6 +484,12 @@ func target_of(arena, idx: int) -> int:
 	return best
 
 
+## Can point defence shoot down the shots of weapon entry `w` (def()): a missile, one marked `interceptable`, or one at or below `pd_speed`?
+## A hitscan laser or beam has no shot to stop.
+func pd_can_stop(w: Dictionary) -> bool:
+	return str(w["kind"]) == "missile" or bool(w.get("interceptable", false)) or (w.has("speed") and float(w["speed"]) <= pd_speed)
+
+
 ## Is shot `p` (an entry of arena.projectiles) something point defence shoots down: a missile, a shot at or below `pd_speed`, or one
 ## whose weapon is marked `interceptable`? A fast bolt is not.
 func interceptable(p: Dictionary) -> bool:
