@@ -26,6 +26,7 @@ const KEY_NAMES: Array[String] = ["red", "blue", "green", "amber"]
 const BREACH_MAX := 2  ## modules that lost their air, at most
 
 static var _cfg := {}
+static var _variants := {}  # "mid|rot|x|y" -> _variant(): the modules are data, so each turn and stretch is parsed once
 static var race_rooms := true  ## a test switches it off to compare two stations of different builders: a race's own room is a different layout
 static var forced_module := ""  ## a test or a tool sets it: a module every station must have (besides its type's)
 
@@ -54,6 +55,7 @@ static func config() -> Dictionary:
 					merged[k] = def[k]
 				data["modules"][mid] = merged
 		_cfg = data
+		_variants = {}
 	return _cfg
 
 
@@ -445,6 +447,13 @@ func _roll_stretch(mid: String) -> Dictionary:
 ## "w" window, "@" hatch}, room ({cell: room number}), conns: [{side, cells (in order along the wall), type ("door" or "hall")}], wins ({cell: normal}),
 ## inner ([[cell, cell]]: the inner doors), hatch ([cell, cell]), keep (cells to keep empty), w, h}.
 static func _variant(mid: String, rot: int, stretch := {}) -> Dictionary:
+	var key := "%s|%d|%d|%d" % [mid, posmod(rot, 4), int(stretch.get("x", -1)), int(stretch.get("y", -1))]
+	if not _variants.has(key):
+		_variants[key] = _parse_variant(mid, rot, stretch)
+	return _variants[key]  # (shared: nothing writes to a variant)
+
+
+static func _parse_variant(mid: String, rot: int, stretch: Dictionary) -> Dictionary:
 	var def: Dictionary = modules()[mid]
 	var rows: Array = def["cells"].duplicate()
 	var st: Dictionary = def.get("stretch", {})
