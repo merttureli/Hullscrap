@@ -321,7 +321,7 @@ func centre_of_room(id: int) -> Vector2:
 func air_of(id: int) -> float:
 	if id < 0 or id >= rooms.size():
 		return 1.0
-	return float(rooms[id].get("air", config()["kinds"].get(kind, {}).get("air", 1.0)))
+	return float(rooms[id]["air"]) if rooms[id].has("air") else float(config()["kinds"].get(kind, {}).get("air", 1.0))
 
 
 ## The pressure at point `p` (cells); 1 where there is no room (a doorway, a hole).
