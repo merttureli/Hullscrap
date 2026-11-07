@@ -41,7 +41,7 @@ const SPECS := {
 			"reactor_mk2"
 		],
 		"armour": 2,
-		"aim": 0.7,
+		"aim": 0.8,
 		"beds": 3,
 		"hull_seed": 11,
 		"morale": "flagship_kett",
@@ -65,7 +65,8 @@ const SPECS := {
 		"blurb": "x",
 		"interior": 44,
 		"after_s": 0,
-		"yield_frac": 0.8
+		"ammo": 400,
+		"yield_hp": 80
 	},
 	"emberkin": {
 		"stage": 5,
@@ -74,13 +75,13 @@ const SPECS := {
 		"role": "kiln-barge",
 		"weapons": [
 			"emberkin_pyre_lance",
-			"laser_mk3",
-			"laser_mk3",
-			"laser_mk3",
-			"laser_mk3",
 			"pulse_mk3",
-			"laser_turret_mk1",
-			"laser_turret_mk1"
+			"pulse_mk3",
+			"pulse_mk3",
+			"pulse_mk3",
+			"pulse_mk3",
+			"laser_burst",
+			"laser_burst"
 		],
 		"engines": [
 			"emberkin_pyre_drive",
@@ -103,7 +104,7 @@ const SPECS := {
 			"reactor_mk2"
 		],
 		"armour": 3,
-		"aim": 0.75,
+		"aim": 0.9,
 		"beds": 3,
 		"hull_seed": 21,
 		"morale": "flagship_emberkin",
@@ -125,7 +126,7 @@ const SPECS := {
 		"blurb": "x",
 		"interior": 64,
 		"after_s": 0,
-		"yield_frac": 0.8
+		"yield_hp": 90
 	},
 	"prismatic": {
 		"stage": 6,
@@ -184,7 +185,7 @@ const SPECS := {
 		"blurb": "x",
 		"interior": 66,
 		"after_s": 0,
-		"yield_frac": 0.8
+		"yield_hp": 90
 	},
 	"basalt": {
 		"stage": 4,
@@ -195,8 +196,8 @@ const SPECS := {
 			"basalt_quarry_driver",
 			"basalt_quarry_driver",
 			"basalt_quarry_driver",
-			"basalt_magma_spitter",
-			"pulse_heavy",
+			"pulse_mk3",
+			"pulse_mk3",
 			"pulse_heavy",
 			"basalt_pumice_flak",
 			"basalt_pumice_flak"
@@ -220,7 +221,7 @@ const SPECS := {
 			"reactor_mk1"
 		],
 		"armour": 4,
-		"aim": 0.65,
+		"aim": 0.85,
 		"beds": 3,
 		"hull_seed": 41,
 		"morale": "flagship_basalt",
@@ -249,7 +250,7 @@ const SPECS := {
 		],
 		"blurb": "x",
 		"after_s": 0,
-		"yield_frac": 0.8
+		"yield_hp": 100
 	},
 	"sporeling": {
 		"stage": 5,
@@ -259,10 +260,10 @@ const SPECS := {
 		"weapons": [
 			"sporeling_spore_cannon",
 			"sporeling_spore_cannon",
-			"sporeling_spore_cannon",
 			"sporeling_rot_pod",
-			"sporeling_rot_pod",
-			"sporeling_pollen_turret",
+			"pulse_mk3",
+			"pulse_mk3",
+			"pulse_mk3",
 			"sporeling_pollen_turret",
 			"swarm_pod"
 		],
@@ -287,7 +288,7 @@ const SPECS := {
 			"reactor_mk1"
 		],
 		"armour": 2,
-		"aim": 0.8,
+		"aim": 0.85,
 		"beds": 3,
 		"hull_seed": 51,
 		"prow_add": 3,
@@ -309,7 +310,9 @@ const SPECS := {
 		],
 		"blurb": "x",
 		"after_s": 0,
-		"yield_frac": 0.8
+		"ammo": 200,
+		"yield_hp": 90,
+		"interior": 60
 	},
 	"mire": {
 		"stage": 5,
@@ -320,12 +323,12 @@ const SPECS := {
 			"mire_steam_lance",
 			"mire_steam_lance",
 			"mire_steam_lance",
-			"mire_bog_mortar",
-			"mire_bog_mortar",
-			"laser_mk2",
+			"pulse_mk3",
+			"pulse_mk3",
+			"pulse_mk3",
 			"mire_mist_projector",
-			"laser_turret_mk1",
-			"laser_turret_mk1"
+			"laser_burst",
+			"laser_burst"
 		],
 		"engines": [
 			"engine_mk2",
@@ -346,7 +349,7 @@ const SPECS := {
 			"reactor_mk2"
 		],
 		"armour": 4,
-		"aim": 0.65,
+		"aim": 0.8,
 		"beds": 4,
 		"hull_seed": 61,
 		"morale": "flagship_mire",
@@ -369,8 +372,8 @@ const SPECS := {
 		],
 		"blurb": "x",
 		"after_s": 0,
-		"yield_frac": 0.8,
-		"interior": 56
+		"interior": 56,
+		"yield_hp": 100
 	},
 	"fenn": {
 		"stage": 5,
@@ -380,12 +383,12 @@ const SPECS := {
 		"weapons": [
 			"fenn_market_missile",
 			"fenn_market_missile",
-			"laser_chain",
-			"laser_chain",
-			"pulse_chain",
-			"pulse_chain",
+			"pulse_mk3",
+			"pulse_mk3",
+			"pulse_mk3",
+			"pulse_mk3",
 			"fenn_spark_lattice",
-			"fenn_spark_lattice"
+			"laser_burst"
 		],
 		"engines": [
 			"fenn_haggle_engine",
@@ -407,7 +410,7 @@ const SPECS := {
 			"reactor_mk2"
 		],
 		"armour": 2,
-		"aim": 0.8,
+		"aim": 0.9,
 		"beds": 3,
 		"hull_seed": 71,
 		"morale": "flagship_fenn",
@@ -429,7 +432,8 @@ const SPECS := {
 		"blurb": "x",
 		"interior": 44,
 		"after_s": 0,
-		"yield_frac": 0.8
+		"ammo": 200,
+		"yield_hp": 90
 	},
 	"gauntling": {
 		"stage": 4,
@@ -441,10 +445,11 @@ const SPECS := {
 			"gauntling_arc_hammer",
 			"gauntling_arc_hammer",
 			"gauntling_arc_hammer",
-			"gauntling_scrap_shotgun",
-			"gauntling_scrap_shotgun",
+			"pulse_mk3",
+			"pulse_mk3",
 			"gauntling_tesla_picket",
-			"pulse_mk2"
+			"laser_burst",
+			"laser_burst"
 		],
 		"engines": [
 			"gauntling_overclock_engine",
@@ -464,7 +469,7 @@ const SPECS := {
 			"reactor_mk1"
 		],
 		"armour": 3,
-		"aim": 0.75,
+		"aim": 0.85,
 		"beds": 2,
 		"hull_seed": 81,
 		"morale": "flagship_gauntling",
@@ -485,7 +490,7 @@ const SPECS := {
 		],
 		"blurb": "x",
 		"after_s": 0,
-		"yield_frac": 0.8
+		"yield_hp": 90
 	},
 	"grundl": {
 		"stage": 5,
@@ -496,8 +501,8 @@ const SPECS := {
 			"grundl_slug_mortar",
 			"grundl_slug_mortar",
 			"grundl_slug_mortar",
-			"laser_mk3",
-			"laser_mk3",
+			"pulse_mk3",
+			"pulse_mk3",
 			"grundl_barge_flak",
 			"grundl_barge_flak",
 			"grundl_barge_flak"
@@ -521,7 +526,7 @@ const SPECS := {
 			"reactor_mk1"
 		],
 		"armour": 4,
-		"aim": 0.6,
+		"aim": 0.7,
 		"beds": 3,
 		"hull_seed": 91,
 		"morale": "flagship_grundl",
@@ -543,8 +548,8 @@ const SPECS := {
 		],
 		"blurb": "x",
 		"after_s": 0,
-		"ammo": 120,
-		"yield_frac": 0.8
+		"ammo": 600,
+		"yield_hp": 300
 	},
 	"human": {
 		"stage": 4,
@@ -555,10 +560,10 @@ const SPECS := {
 			"human_concord_railgun",
 			"human_concord_railgun",
 			"human_volley_rack",
-			"human_volley_rack",
-			"pulse_mk2",
-			"pulse_mk2",
-			"laser_mk2",
+			"pulse_mk3",
+			"pulse_mk3",
+			"pulse_mk3",
+			"human_flak_screen",
 			"human_flak_screen"
 		],
 		"engines": [
@@ -581,7 +586,7 @@ const SPECS := {
 			"reactor_mk2"
 		],
 		"armour": 3,
-		"aim": 0.8,
+		"aim": 0.9,
 		"beds": 4,
 		"hull_seed": 101,
 		"morale": "flagship_human",
@@ -602,6 +607,7 @@ const SPECS := {
 		],
 		"blurb": "x",
 		"after_s": 0,
-		"yield_frac": 0.8
+		"ammo": 200,
+		"yield_hp": 90
 	}
 }

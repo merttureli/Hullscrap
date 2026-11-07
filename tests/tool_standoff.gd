@@ -48,6 +48,7 @@ const BUILDS := {
 	4: {"size": "large", "weapons": ["laser_mk2", "laser_mk1", "pulse_mk1", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2"], "armour": 1},
 	5: {"size": "large", "weapons": ["laser_mk2", "laser_mk2", "pulse_mk2", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2", "shield_mk1"], "armour": 2},
 	6: {"size": "large", "weapons": ["laser_mk2", "laser_mk2", "pulse_mk2", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2", "shield_mk1"], "armour": 2},
+	7: {"size": "large", "weapons": ["laser_mk2", "laser_mk2", "laser_mk2", "pulse_mk2", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2", "shield_mk2", "shield_mk1"], "armour": 3},  # a well-prepared ship (the flagship bench pstage=7): more guns, a third layer and a plate more than the stage 6 median
 }
 
 var args := {}
