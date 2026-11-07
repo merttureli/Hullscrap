@@ -26,6 +26,7 @@ const O2_LOW := Color("#e88aa0")
 const LINE_COLORS := {"scrap": Color("#9c5a33"), "standard": Color("#8d9aab"), "neon": Color("#3cf2ff"), "unique": Color("#f2c14e")}
 const CARD_FRAMES := {"scrap": "scrap", "standard": "steel", "neon": "neon", "unique": "gold"}  ## line -> frame of the kit's card sheet
 const PX := 2.0  ## screen px per source px of the kit
+const WRAPS_KEPT := 512  ## the wrapped texts remembered (all forgotten when full)
 const ICON_SHEETS: Array[String] = ["icons_res", "icons_mode", "icons_cat"]
 const MATERIAL_COLORS := {"scrap": Color("#9aa0a6"), "copper": Color("#d98a4e"), "polymer": Color("#e8e1c8"), "titanium": Color("#b9c6d6"),
 	"silicon": Color("#6c7a89"), "crystal": Color("#7fdbff"), "plasma_cell": Color("#ff7ae0"), "nanite_paste": Color("#7dff9b"),
@@ -38,6 +39,7 @@ static var _sheets := {}  # kit sheet name -> SpriteSheet or null
 static var _cursors := {}  # cursor name -> [ImageTexture, hotspot] or null
 static var _bold: Font
 static var _italic: Font
+static var _wraps := {}  # [s, width, size, font, sep] -> wrap()'s lines: the panels wrap the same text every frame
 
 
 ## Is `e` a mouse wheel step (either axis)? A panel under the pointer marks these handled (accept_event), so the world behind it never zooms.
@@ -96,6 +98,15 @@ static func fit(s: String, width: float, size: int, f: Font = null) -> String:
 ## `s` broken into lines no wider than `width` px (greedy, by words, or by the chunks between `sep`s; a chunk too
 ## long for a line is cut).
 static func wrap(s: String, width: float, size: int, f: Font = null, sep := " ") -> PackedStringArray:
+	var key := [s, width, size, f, sep]
+	if not _wraps.has(key):
+		if _wraps.size() >= WRAPS_KEPT:
+			_wraps.clear()
+		_wraps[key] = _wrap(s, width, size, f, sep)
+	return _wraps[key].duplicate()
+
+
+static func _wrap(s: String, width: float, size: int, f: Font, sep: String) -> PackedStringArray:
 	var out := PackedStringArray()
 	for para in s.split("\n"):
 		var line := ""
