@@ -69,6 +69,10 @@ var _dress_plan: Array = []  # Dressing.plan() of the ship, remade when its cell
 var _dress_sig := []
 var _emblem_cells := 4.0  # the emblem decal's side, in cells
 var _livery := {}  # the ship's `style` meta of this frame
+var _dress: Node2D  # the exterior dressing, drawn behind this node every frame (its lights blink)
+var _tiles: Node2D  # every tile but the doors, behind this node and the dressing, drawn only again when they change (_sync_tiles)
+var _tiles_key := []  # what _tiles was drawn from
+var _door_cells: Array[Vector2i] = []  # the door cells, in tile order: _draw draws the doors every frame (they slide)
 
 
 ## Follow ship `idx` of `p_arena`.
@@ -101,6 +105,13 @@ func _follow() -> void:
 
 
 func _ready() -> void:
+	_dress = Node2D.new()
+	_tiles = Node2D.new()
+	for layer in [_dress, _tiles]:  # (behind this node, in this order: the dressing under the tiles)
+		layer.show_behind_parent = true
+		add_child(layer)
+	_dress.draw.connect(_draw_dressing)
+	_tiles.draw.connect(_draw_tiles)
 	_glow = GlowLayer.new()
 	add_child(_glow)
 
@@ -153,9 +164,13 @@ func _draw() -> void:
 				entries.append({"kind": "trim"})
 			_dress_plan = Dressing.plan(ship, entries)
 			_dress_sig = dsig
-		Dressing.draw(self, _dress_plan, px(Vector2.ZERO), CELL, _livery["palette"], _clock)
-	for c in grid.tiles:
-		_draw_tile(grid, c, grid.tiles[c])
+	if _dress != null:
+		_dress.queue_redraw()
+	_sync_tiles(grid)
+	for c in _door_cells:
+		var piece: Array[Vector2i] = grid.door_piece(c)
+		if piece[0] == c:
+			_draw_door(grid, piece, grid.defs.color(grid.tiles[c]), grid.is_door_open(c))
 	if arena != null or skin_on:
 		_draw_skin(grid)
 	for c in grid.breached:
@@ -292,24 +307,49 @@ func _weapon_opts(uid: int) -> Dictionary:
 const SPIN_TURNS := 1.5  ## a chain gun's barrel turns this often a second per step
 
 
-func _draw_tile(grid, c: Vector2i, id: String) -> void:
+## The exterior dressing (the _dress layer): outside the hull, under everything.
+func _draw_dressing() -> void:
+	if ship != null and not _livery.is_empty():
+		Dressing.draw(_dress, _dress_plan, px(Vector2.ZERO), CELL, _livery["palette"], _clock)
+
+
+## Redraw the _tiles layer when what it shows changed: another ship, a tile or a shape, the livery, the pivot, the art.
+func _sync_tiles(grid) -> void:
+	var key := [grid, grid.tiles, grid.shapes, _livery, pivot, Art.root]
+	if key == _tiles_key or _tiles == null:
+		return
+	_tiles_key = key.duplicate(true)
+	_door_cells.clear()
+	for c in grid.tiles:
+		if grid.defs.get_def(grid.tiles[c]).get("door", false):
+			_door_cells.append(c)
+	_tiles.queue_redraw()
+
+
+## The _tiles layer: every tile but the doors.
+func _draw_tiles() -> void:
+	if ship == null:
+		return
+	for c in ship.grid.tiles:
+		_draw_tile(_tiles, ship.grid, c, ship.grid.tiles[c])
+
+
+func _draw_tile(cv: CanvasItem, grid, c: Vector2i, id: String) -> void:
 	var r := Rect2(px(Vector2(c)), Vector2(CELL, CELL))
 	var col: Color = grid.defs.color(id)
 	var def: Dictionary = grid.defs.get_def(id)
 	if def.get("door", false):
-		var piece: Array[Vector2i] = grid.door_piece(c)
-		if piece[0] == c:
-			_draw_door(grid, piece, col, grid.is_door_open(c))
-	elif def.get("solid", false):
-		TileArt.solid_cell(self, r, grid, c, id, col)
+		return  # (_draw draws the doors)
+	if def.get("solid", false):
+		TileArt.solid_cell(cv, r, grid, c, id, col)
 		if not _livery.is_empty() and grid.shape_of(c).is_empty():  # the livery washes the plating (the skin only covers the outermost ring)
-			draw_rect(r, Color(_livery["palette"]["tint"], LIVERY_WASH) if id != "wall" else Color(_livery["palette"]["wall"], LIVERY_WASH * 0.7))
+			cv.draw_rect(r, Color(_livery["palette"]["tint"], LIVERY_WASH) if id != "wall" else Color(_livery["palette"]["wall"], LIVERY_WASH * 0.7))
 	else:
-		if not TileArt.floor_tile(self, r, c):
-			draw_rect(r, col)
-			draw_rect(r.grow(-1), col.lightened(0.05), false, 1.0)
+		if not TileArt.floor_tile(cv, r, c):
+			cv.draw_rect(r, col)
+			cv.draw_rect(r.grow(-1), col.lightened(0.05), false, 1.0)
 		if not _livery.is_empty():  # the livery's floor tint: the inside reads too
-			draw_rect(r, Color(_livery["palette"]["floor"], FLOOR_WASH))
+			cv.draw_rect(r, Color(_livery["palette"]["floor"], FLOOR_WASH))
 
 
 ## The exterior skin over the walls that face space. The plan is remade when walls come or go (a breach, a repair).
