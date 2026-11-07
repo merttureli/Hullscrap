@@ -4,12 +4,12 @@ extends Control
 ## J opens it from the map; Esc, J or Enter close it, Up / Down / PgUp / PgDn / the wheel scroll it by an entry.
 ## While open it takes every key and click. In the style of the help panel (help_panel.gd).
 
-## Emitted when the panel is closed.
 const Audio = preload("res://scripts/audio/audio.gd")
 const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
 const Advisor = preload("res://scripts/sim/advisor.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
 
+## Emitted when the panel is closed.
 signal closed
 
 const WIDTH := 980.0
