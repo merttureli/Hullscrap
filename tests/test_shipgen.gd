@@ -20,6 +20,10 @@ const Regions = preload("res://scripts/space/regions.gd")
 const HullOutline = preload("res://scripts/ship/hull_outline.gd")
 const Shapes = preload("res://scripts/ship/shapes.gd")
 const Components = preload("res://scripts/ship/components.gd")
+const Lanes = preload("res://scripts/space/lanes.gd")
+const LaneUtil = preload("res://tests/lane_util.gd")
+const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
+const TileDefs = preload("res://scripts/ship/tile_defs.gd")
 
 const SIZES: Array[String] = ["small", "medium", "large"]
 const BUDGETS: Array[float] = [30.0, 45.0, 60.0, 90.0, 130.0, 200.0, 320.0, 520.0]  ## from a jump 0 pirate to a jump 35 ship of the Hollow
@@ -525,3 +529,62 @@ func test_a_generated_enemy_shoots_back() -> void:
 		shots += int(int(e.get("ship", -1)) == Session.ENEMY and (e["type"] == "shot" or e["type"] == "beam"))
 	check(shots > 0, "the enemy fired %d times in 45 seconds" % shots)
 	check(not s.arena.ships[Session.ENEMY].wrecked or s.state() == "won", "and the session knows who won")
+
+
+# --- clear corridors (scripts/space/lanes.gd) ------------------------------------------------------
+
+func test_few_generated_ships_have_a_room_cut_off_by_its_parts() -> void:
+	for stage in range(1, 7):
+		var r := LaneUtil.sweep(stage, 60)
+		check(r["ships"] >= 55, "stage %d: the ships were built" % stage)
+		check(r["blocked"] * 20 <= r["ships"], "stage %d: %d of %d ships have a room cut off (5%% at most)" % [stage, r["blocked"], r["ships"]])
+
+
+## A 2 wide, 6 tall room (x 4-5, y 3-8) between walls at x=3 and x=6, with a room either side; the doors are `left_y` / `right_y`.
+func _lane_room(left_y: int, right_y: int) -> Array:
+	var defs := TileDefs.new()
+	defs.load_file("res://data/tiles.json")
+	var g := ShipGrid.new(Vector2i(12, 12), defs)
+	for y in 12:
+		for x in 12:
+			g.hull[Vector2i(x, y)] = true
+	for y in range(2, 10):
+		for x in range(0, 10):
+			g.force_tile(Vector2i(x, y), "wall")
+	for y in range(3, 9):
+		for x in [1, 2, 4, 5, 7, 8]:
+			g.force_tile(Vector2i(x, y), "floor")
+	var ok: bool = g.place_door("door", Vector2i(3, left_y), Vector2i.DOWN) and g.place_door("door", Vector2i(6, right_y), Vector2i.DOWN)
+	return [g, Ship.new("T", g), ok]
+
+
+func test_a_part_is_stood_to_leave_a_lane_between_the_doors() -> void:
+	var made := _lane_room(7, 7)
+	check(made[2], "the doors go in")
+	var g: ShipGrid = made[0]
+	var ship: Ship = made[1]
+	var rect := Rect2i(4, 3, 2, 6)
+	var items: Array = [{"id": "reactor_mk1", "want": Vector2i(4, 5), "vital": false, "n": 0}]
+	var stood := Shipgen._arrange(g, ship.components, rect, items)
+	check(stood.size() == 1, "the part stands")
+	check(not Lanes.rect_blocked(g, ship.components, rect), "and a body walks between the doors")
+	check(ship.components.instances[items[0]["uid"]]["anchor"].y == 3, "at the top, off the doors' rows")
+
+
+func test_a_part_with_no_clear_spot_is_left_out_unless_the_ship_needs_it() -> void:
+	for vital in [false, true]:
+		var made := _lane_room(5, 5)
+		check(made[2], "the doors go in")
+		var g: ShipGrid = made[0]
+		var ship: Ship = made[1]
+		var rect := Rect2i(4, 3, 2, 6)
+		# a 2x4 and a 2x2 fill a 2x6 room: no lane is left with both
+		var items: Array = [{"id": "reactor_mk1", "want": Vector2i(4, 3), "vital": true, "n": 0}, {"id": "helm", "want": Vector2i(4, 3), "vital": vital, "n": 1}]
+		var stood := Shipgen._arrange(g, ship.components, rect, items)
+		check(stood.size() == (2 if vital else 1), "vital %s: %d stand" % [str(vital), stood.size()])
+
+
+func test_a_generated_ship_is_the_same_with_the_lane_rule() -> void:
+	var a := Shipgen.build("concord", "medium", 77, 90.0, {"stage": 4})
+	var b := Shipgen.build("concord", "medium", 77, 90.0, {"stage": 4})
+	check(a.to_dict() == b.to_dict(), "same seed, same ship")
