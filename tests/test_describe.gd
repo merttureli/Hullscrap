@@ -67,7 +67,7 @@ func test_every_family_keyword_effect_and_stat_in_use_has_its_words() -> void:
 				in_use[str(k)] = true
 	for k in ["acid", "spores", "shard", "sonic", "magnetic", "frost", "corrode", "split_on_shield", "intercept", "self_room", "needs_operator", "needs_crew_in_room"]:
 		in_use[k] = true  # every effect of effects.gd
-	for k in ["manned", "hot", "faulty", "ion_weak", "quirk", "ability", "ablative", "lattice_power", "ram", "mod"]:
+	for k in ["manned", "hot", "faulty", "ion_weak", "quirk", "ability", "ablative", "lattice_power", "ram", "mod", "pd_stop"]:
 		in_use[k] = true  # the part's own
 	for k in _keywords_in_use():
 		in_use[k] = true
@@ -301,3 +301,10 @@ func test_the_selection_card_describes_a_part_in_a_few_lines() -> void:
 	eq(info["note"], "Craft at Fabricator (C)", "none held: where to craft it, and only then")
 	ship.inventory.add("laser_turret_mk1", 1)
 	eq(Palette.info(Palette.part_entry(ship, "laser_turret_mk1"), ship)["note"], "", "held: no note")
+
+
+func test_guns_whose_shots_point_defence_can_stop_say_so() -> void:
+	var ship := Ship.new_starter()
+	for id in ["slug_mortar", "heavy_battery", "torpedo"]:
+		check("PD CAN STOP" in _labels(id, ship), id + " has the PD CAN STOP tag")
+	check(not "PD CAN STOP" in _labels("laser_mk1", ship), "a laser does not")
