@@ -40,7 +40,7 @@ static func plan(ship, entries: Array) -> Array:
 	rng.seed = int(ship.rng_seed) * 7919 + 17
 	for e in entries:
 		var kind := str(e["kind"])
-		var pool: Array = faces.filter(func(f): return _fits(str(e.get("where", "any")), f[1], f[0], lo, hi, mid_x))
+		var pool: Array = faces.filter(func(f): return _fits(str(e.get("where", "any")), f[1], f[0], lo, hi))
 		if kind == "mandibles":
 			pool = faces.filter(func(f): return f[1] == Vector2i.UP and f[0].y == lo.y)
 			if pool.is_empty():
@@ -84,7 +84,7 @@ static func plan(ship, entries: Array) -> Array:
 	return out
 
 
-static func _fits(where: String, n: Vector2i, c: Vector2i, lo: Vector2i, hi: Vector2i, mid_x: float) -> bool:
+static func _fits(where: String, n: Vector2i, c: Vector2i, lo: Vector2i, hi: Vector2i) -> bool:
 	match where:
 		"flank":
 			return n.x != 0

@@ -1037,7 +1037,7 @@ static func _construct(f: Dictionary, faction: String, lo: Dictionary, bands: Ar
 				var origin: Vector2i = r["rect"].position if dx >= 0 else Vector2i(r["rect"].end.x, r["rect"].position.y)
 				var id := str(p["id"])
 				items.append({"id": id, "want": origin + Vector2i(dx, int(p["dy"])), "vital": id == lo["helm"] or id == lo["o2"] or _is_reactor(id), "n": items.size()})
-			var stood := _arrange(g, comps, r["rect"], items)
+			_arrange(g, comps, r["rect"], items)
 			left_over.append({"rect": r["rect"], "items": items})
 			for it in items:
 				if it["uid"] >= 0:

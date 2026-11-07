@@ -86,7 +86,6 @@ var _fighting := false  # a fight of ours is on
 var _boarding := false  # the soldier is aboard another vessel
 var _board_ev := {}  # the page he went aboard from: it opens again when he is back
 var _after_win := {}  # the after_win of the event that started it
-var _fight_node := ""  # the type of the node it was started at
 var _queue: Array[Callable] = []  # what comes after the event panel is done
 var panel_only := false  ## shown only to hold the event or station panel of a sector POI: no map is drawn
 var _poi := ""  # the id of the POI whose event is up (open_poi), "" when none
@@ -573,7 +572,6 @@ func _start_fight(value: String, after_win: Dictionary) -> void:
 		session.arena.hazard = campaign.hazard_at(campaign.current)  # the node's sector hazard, if any (hazards.gd)
 	_fighting = true
 	_after_win = after_win
-	_fight_node = str(campaign.node(campaign.current)["type"])
 	visible = false
 
 

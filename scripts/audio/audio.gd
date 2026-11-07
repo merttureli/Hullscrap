@@ -94,7 +94,6 @@ var front: Node  ## the siblings this node reads (set up in setup(), null when a
 var build: Node
 var combat: Node
 var board: Node  ## the boarding view: while the soldier is aboard, a foe on the hunt makes the music combat (fight_music)
-var sector: Node
 var sim: Node
 var _rng := RandomNumberGenerator.new()  # which variant and how much pitch: heard, never simulated
 var _cache := {}  # path -> stream, or null for a file that is missing
@@ -290,7 +289,6 @@ func setup() -> void:
 		build = parent.get_node_or_null("BuildMode")
 		combat = parent.get_node_or_null("Combat")
 		board = parent.get_node_or_null("Board")
-		sector = parent.get_node_or_null("Sector")
 		sim = parent.get_node_or_null("ShipSim")
 	_apply_buses()
 

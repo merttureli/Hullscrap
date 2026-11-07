@@ -648,7 +648,7 @@ func _draw_poi(poi: Dictionary, px: float) -> void:
 			_hull(at, float(seed_h % 628) / 100.0, 760.0, Color(col.darkened(0.7), a), Color(col, a))
 			draw_arc(at, 520.0 + 700.0 * pulse, 0.0, TAU, 64, Color(col, a * (1.0 - pulse)), 6.0 * px)
 		"exp_planet", "exp_base", "exp_ruin", "exp_platform":
-			_draw_site(poi, px, a, seed_h)
+			_draw_site(poi, a, seed_h)
 		"pirate_nest":
 			_rock(at, 480.0, seed_h, Color("#3b2f2a", a))
 			for k in 5:
@@ -660,7 +660,7 @@ func _draw_poi(poi: Dictionary, px: float) -> void:
 
 ## An expedition site: a planet, a rock with a base cut into it, an icy world with a ruin, a gas giant with a platform. The bodies are the station windows' planets
 ## (station_backdrop.gd paint) painted once per kind and drawn smaller; the rest is flat shapes.
-func _draw_site(poi: Dictionary, px: float, a: float, seed_h: int) -> void:
+func _draw_site(poi: Dictionary, a: float, seed_h: int) -> void:
 	var at: Vector2 = poi["pos"]
 	var kind := Expedition.kind_of(poi)
 	var col: Color = TYPE_COLORS.get(str(poi["type"]), TEXT)

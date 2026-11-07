@@ -767,7 +767,7 @@ func _draw() -> void:
 	_text(message, Vector2(help_rect().end.x + 16.0, p.position.y + 34.0), 16, BAD if message_bad else GOOD)
 	_draw_tabs()
 	var fab := station_info(s)
-	_draw_list(s, fab)
+	_draw_list(s)
 	_draw_details()
 	if station == Crafting.FABRICATOR:
 		_draw_fabricator(s, fab)
@@ -776,7 +776,7 @@ func _draw() -> void:
 		_draw_smelter(s, fab)
 		_draw_queue(s)
 	_draw_cargo(s)
-	_draw_hover_card(s)
+	_draw_hover_card()
 
 
 func _draw_tabs() -> void:
@@ -877,7 +877,7 @@ func _draw_pinned_foot(r: Rect2) -> void:
 
 
 ## The hover card: the row under the mouse (not the pinned one), as PartCard shows it, to the right of the row.
-func _draw_hover_card(s) -> void:
+func _draw_hover_card() -> void:
 	var rows_all := rows()
 	if hover_row < 0 or hover_row >= rows_all.size() or not rows_all[hover_row].has("id") or rows_all[hover_row]["id"] == selected or help_open:
 		return
@@ -907,7 +907,7 @@ func _para(text: String, at: Vector2, width: float, font_size: int, col: Color) 
 	return font.get_multiline_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, width, font_size).y
 
 
-func _draw_list(s, fab: Dictionary) -> void:
+func _draw_list(s) -> void:
 	var l := list_rect()
 	var all := rows()
 	if all.is_empty():
@@ -1172,7 +1172,6 @@ func upgrade_smelter() -> String:
 	if uid < 0:
 		_say("No smelter on this ship", true)
 		return "No smelter on this ship"
-	var was := str(s.components.instances[uid]["id"])
 	var why := Processing.upgrade(s, uid)
 	if why != "":
 		_say(why, true)
