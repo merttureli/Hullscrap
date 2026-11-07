@@ -135,25 +135,31 @@ static func draw_map(cv: CanvasItem, ship, powered: Dictionary, map: Rect2, boun
 	var s: float = lay["s"]
 	var origin: Vector2 = lay["origin"]
 	var atmo = ship.atmosphere
+	var kinds := {}  # tile id -> [def, its wall colour], and room id -> its floor colour: asked once per map
 	for c in grid.tiles:
 		var id: String = grid.tiles[c]
-		var def: Dictionary = grid.defs.get_def(id)
+		if not kinds.has(id):
+			kinds[id] = [grid.defs.get_def(id), grid.defs.color(id).darkened(0.25)]
+		var def: Dictionary = kinds[id][0]
 		var r := Rect2(origin + Vector2(c) * s, Vector2(s, s) + Vector2(0.4, 0.4))
 		if def.get("solid", false):
-			var lost: float = 1.0 - grid.hp_of(c) / maxf(grid.max_hp_of(c), 0.01)
-			cv.draw_rect(r, grid.defs.color(id).darkened(0.25).lerp(WALL_DAMAGE, lost * 0.8))
+			var most: float = grid.max_hp_of(c)
+			var lost: float = 1.0 - float(grid.hp.get(c, most)) / maxf(most, 0.01)  # (grid.hp_of)
+			cv.draw_rect(r, kinds[id][1].lerp(WALL_DAMAGE, lost * 0.8))
 		elif def.get("door", false):
 			var open: bool = grid.is_door_open(c)
 			cv.draw_rect(r, ROOM_TINTS[0])
 			cv.draw_rect(r.grow(-s * 0.2) if open else r.grow(-s * 0.05), grid.defs.color(id), not open)
 		else:
 			var room: int = atmo.room_of.get(c, -1)
-			var col := ROOM_TINTS[room % 2] if room >= 0 else ROOM_TINTS[0]
-			if room >= 0:
-				col = col.lerp(Color("#7a2020"), (1.0 - atmo.pressure_of(room)) * 0.7)  # thin air reddens a room
-				if ship.lost_rooms.has(room):
-					col = col.lerp(LOST, 0.45)  # a lost room (a fight, jobs.gd): the crew have given it up
-			cv.draw_rect(r, col)
+			if not kinds.has(room):
+				var col := ROOM_TINTS[room % 2] if room >= 0 else ROOM_TINTS[0]
+				if room >= 0:
+					col = col.lerp(Color("#7a2020"), (1.0 - atmo.pressure_of(room)) * 0.7)  # thin air reddens a room
+					if ship.lost_rooms.has(room):
+						col = col.lerp(LOST, 0.45)  # a lost room (a fight, jobs.gd): the crew have given it up
+				kinds[room] = col
+			cv.draw_rect(r, kinds[room])
 	var pulse := 0.65 + 0.35 * sin(Time.get_ticks_msec() * 0.008)
 	for c in grid.breached:
 		var r := Rect2(origin + Vector2(c) * s, Vector2(s, s) + Vector2(0.4, 0.4))
