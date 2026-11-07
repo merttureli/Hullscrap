@@ -199,7 +199,7 @@ func max_hp_of(c: Vector2i) -> float:
 
 ## Current hp of the tile on `c`; 0 where there is no tile.
 func hp_of(c: Vector2i) -> float:
-	return hp.get(c, max_hp_of(c))
+	return hp[c] if hp.has(c) else max_hp_of(c)
 
 
 ## Shoot the tile on `c` open: the cell becomes empty (so rooms see a hole there) and `breached`
