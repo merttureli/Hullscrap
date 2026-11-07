@@ -2,7 +2,7 @@ extends "res://tests/base_test.gd"
 ## The race flagships (scripts/space/flagships.gd, data/flagships.json, data/packs/flagships_1/ships/flagship_<race>.json, data/packs/flagships_1; docs/CONTENT.md section 25): one
 ## named boss ship for each of the ten major races, met as an optional beacon in its homeland. The designs are valid and use only real parts; the
 ## beacon appears in one sector of the homeland, from its stage on, never at the exit; a win pays the trophy once and sets the flag; the contact card
-## says it is a boss; a flagship never flees; each fight ends inside 180 s.
+## says it is a boss; a flagship never flees; each fight ends inside 240 s.
 
 const Campaign = preload("res://scripts/space/campaign.gd")
 const Flagships = preload("res://scripts/space/flagships.gd")
@@ -331,7 +331,7 @@ func _fight(race: String, seed_value: int) -> Dictionary:
 	var pilot := PilotAI.new(sess.arena, Session.PLAYER, Session.ENEMY, {"aim_skill": float(Threat.config()["player_aim"])})
 	pilot.foe_morale = sess.morale
 	var n := 0
-	while sess.state() == "fighting" and n < 180 * 60:
+	while sess.state() == "fighting" and n < 240 * 60:
 		if n % 3 == 0:
 			pilot.think(3.0 / 60.0)
 		if sess.morale.state == "offering":
@@ -347,7 +347,7 @@ func _fight(race: String, seed_value: int) -> Dictionary:
 	return out
 
 
-func test_each_flagship_fight_ends_within_180_seconds() -> void:  # one seed each keeps the suite short; tests/tool_flagships.gd runs the full bench
+func test_each_flagship_fight_ends_within_240_seconds() -> void:  # one seed each keeps the suite short; tests/tool_flagships.gd runs the full bench
 	for race in MAJORS:
 		var r := _fight(race, 0)
 		check(r["state"] != "fighting", "%s: the fight ends (%s after %.0f s)" % [race, r["state"], r["t"]])

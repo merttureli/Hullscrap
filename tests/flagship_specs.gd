@@ -65,7 +65,7 @@ const SPECS := {
 		"interior": 56,
 		"after_s": 210,
 		"ammo": 400,
-		"yield_hp": 30
+		"yield_hp": 45
 	},
 	"emberkin": {
 		"stage": 5,
@@ -125,7 +125,7 @@ const SPECS := {
 		"blurb": "x",
 		"interior": 64,
 		"after_s": 210,
-		"yield_hp": 30
+		"yield_hp": 45
 	},
 	"prismatic": {
 		"stage": 6,
@@ -184,7 +184,7 @@ const SPECS := {
 		"blurb": "x",
 		"interior": 66,
 		"after_s": 210,
-		"yield_hp": 10
+		"yield_hp": 15
 	},
 	"basalt": {
 		"stage": 4,
@@ -249,7 +249,7 @@ const SPECS := {
 		],
 		"blurb": "x",
 		"after_s": 210,
-		"yield_hp": 40
+		"yield_hp": 60
 	},
 	"sporeling": {
 		"stage": 5,
@@ -310,7 +310,7 @@ const SPECS := {
 		"blurb": "x",
 		"after_s": 210,
 		"ammo": 200,
-		"yield_hp": 15,
+		"yield_hp": 40,
 		"interior": 60
 	},
 	"mire": {
@@ -372,7 +372,7 @@ const SPECS := {
 		"blurb": "x",
 		"after_s": 210,
 		"interior": 56,
-		"yield_hp": 25
+		"yield_hp": 80
 	},
 	"fenn": {
 		"stage": 5,
@@ -544,7 +544,7 @@ const SPECS := {
 		"blurb": "x",
 		"after_s": 210,
 		"ammo": 600,
-		"yield_hp": 250
+		"yield_hp": 400
 	},
 	"human": {
 		"stage": 4,
@@ -601,6 +601,6 @@ const SPECS := {
 		"blurb": "x",
 		"after_s": 210,
 		"ammo": 200,
-		"yield_hp": 15
+		"yield_hp": 25
 	}
 }

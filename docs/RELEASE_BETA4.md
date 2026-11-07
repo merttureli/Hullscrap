@@ -175,6 +175,7 @@ Boarding, a rebuilt hull, the Ledger, and a balance pass measured by a playtest 
   - the map hint sits over the journal;
   - the Hollow tide clock overlaps the fabricator's corner.
 - **Evacuation**: your soldier is player-controlled, so evacuating a room doesn't walk them out.
+- **Flagships fight to the end**: the ten race flagships have more and better guns, more shields and armour, and sharper pilots; they no longer give up on a timer after 150 s (a late yield at 210 s is left as a backstop), and they yield only after losing a few dozen hp of their blocks, so a run needs a well-prepared ship to beat one.
 - Balance is measured by a bot. Tell us where it hurts.
 
 ## Saves
