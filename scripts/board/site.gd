@@ -286,10 +286,18 @@ func unlock_door(id: int) -> void:
 func free_anchors(id: int) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
 	var r: Rect2i = rooms[id]["rect"]
-	for y in range(r.position.y, r.end.y - 1):
-		for x in range(r.position.x, r.end.x - 1):
-			if Pathfinder.body_ok(walk, Vector2i(x, y)) and (not rooms[id].has("cells") or _body_in(id, Vector2i(x, y))):
-				out.append(Vector2i(x, y))
+	var w := r.size.x
+	var ok := PackedByteArray()  # each cell of the room looked at once (Pathfinder.body_ok asks for every cell of every body)
+	ok.resize(w * r.size.y)
+	for y in r.size.y:
+		for x in w:
+			ok[y * w + x] = 1 if Pathfinder.walkable(walk, r.position + Vector2i(x, y)) else 0
+	var shaped: bool = rooms[id].has("cells")
+	for y in r.size.y - 1:
+		for x in w - 1:
+			var i := y * w + x
+			if ok[i] and ok[i + 1] and ok[i + w] and ok[i + w + 1] and (not shaped or _body_in(id, r.position + Vector2i(x, y))):
+				out.append(r.position + Vector2i(x, y))
 	return out
 
 
