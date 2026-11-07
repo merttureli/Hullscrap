@@ -13,6 +13,7 @@ const Arena = preload("res://scripts/combat/arena.gd")
 const Schematic = preload("res://scripts/ui/schematic.gd")
 const Structure = preload("res://scripts/ship/structure.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
+const Palette = preload("res://scripts/build/palette.gd")
 
 const DESIGNS: Array[String] = [
 	"res://data/ships/starter_rustbucket.json",
@@ -295,7 +296,7 @@ func _draw_card(i: int) -> void:
 	var st: Dictionary = c["stats"]
 	y += 66.0
 	var ok: bool = st["supply"] + 0.0001 >= st["demand"]
-	_stat(x, y, "Power", "%s supply / %s demand" % [_num(st["supply"]), _num(st["demand"])], GOOD if ok else BAD)
+	_stat(x, y, "Power", "%s supply / %s demand" % [Palette.num(st["supply"]), Palette.num(st["demand"])], GOOD if ok else BAD)
 	_stat(x, y + 19.0, "Mass", "%d" % roundi(st["mass"]))
 	_stat(x + 130.0, y + 19.0, "Hull", "%d" % roundi(st["hull"]))
 	var layers: int = st["layers"]
@@ -316,11 +317,6 @@ func _draw_confirm() -> void:
 func _stat(x: float, y: float, label: String, value: String, col := TEXT) -> void:
 	_text(label, Vector2(x, y), 13, DIM_TEXT)
 	_text(value, Vector2(x + 62.0, y), 13, col)
-
-
-## A figure: whole numbers plain, others with one decimal.
-static func _num(v: float) -> String:
-	return "%d" % roundi(v) if is_equal_approx(v, roundf(v)) else "%.1f" % v
 
 
 func _text(text: String, at: Vector2, font_size: int, col: Color) -> void:

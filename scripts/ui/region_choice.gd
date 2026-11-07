@@ -16,6 +16,7 @@ const Art = preload("res://scripts/view/art.gd")
 const PersonDrawer = preload("res://scripts/crew/person_drawer.gd")
 const Skulls = preload("res://scripts/ui/skulls.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
+const UiKit = preload("res://scripts/ui/ui_kit.gd")
 
 const PAD := 26.0
 const GAP := 20.0
@@ -23,11 +24,8 @@ const CARD_H := 540.0
 const CONFIRM_W := 720.0
 const CONFIRM_H := 250.0
 const DIM := Color(0.0, 0.0, 0.0, 0.6)
-const PANEL_BG := Color("#1f2630")
 const CARD_BG := Color("#10151c")
-const EDGE := Color("#cfd6df")
 const EDGE_DIM := Color("#59667a")
-const HIGHLIGHT := Color(1.0, 1.0, 1.0, 0.1)
 const TEXT := Color("#eef2f7")
 const DIM_TEXT := Color("#97a3b3")
 const GOOD := Color("#6bd34a")
@@ -194,7 +192,7 @@ func _draw() -> void:
 func _draw_confirm() -> void:
 	var c = map.campaign
 	var r := confirm_rect()
-	_panel(r)
+	UiKit.frame(self, r)
 	_text("EXIT BEACON", r.position + Vector2(PAD, 42.0), 24, TEXT)
 	var body := "The beacon's charts show the lanes out of %s. Jump through and there is no coming back." % c.region_name()
 	if c.stage >= c.stages():
@@ -211,7 +209,7 @@ func _draw_confirm() -> void:
 func _draw_choose() -> void:
 	var c = map.campaign
 	var p := panel_rect()
-	_panel(p)
+	UiKit.frame(self, p)
 	var next: String = "Stage %d/%d" % [c.stage + 1, c.stages()] if c.stage < c.stages() else "The last jump"
 	_text("CHOOSE THE NEXT REGION", p.position + Vector2(PAD, 42.0), 24, TEXT)
 	_text("Leaving %s.  %s" % [c.region_name(), next], p.position + Vector2(PAD, 70.0), 16, DIM_TEXT)
@@ -285,13 +283,6 @@ func _draw_warden(i: int, box: Rect2) -> void:
 		_text(part[0], Vector2(at, y + 22.0), 14, part[1])
 		at += font.get_string_size(part[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
 	draw_multiline_string(font, Vector2(x, y + 44.0), str(w["hint"]), HORIZONTAL_ALIGNMENT_LEFT, width, 13, 4, DIM_TEXT)
-
-
-## A chunky panel: a slate fill, a 2 px light border and a 1 px inner highlight.
-func _panel(r: Rect2, fill := PANEL_BG) -> void:
-	draw_rect(r, fill)
-	draw_rect(r, EDGE, false, 2.0)
-	draw_rect(r.grow(-3.0), HIGHLIGHT, false, 1.0)
 
 
 func _text(text: String, at: Vector2, font_size: int, col: Color) -> void:

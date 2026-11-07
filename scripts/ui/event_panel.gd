@@ -28,6 +28,7 @@ const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
 const FoeInfo = preload("res://scripts/space/foe_info.gd")
 const FoePic = preload("res://scripts/ui/foe_pic.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
+const UiKit = preload("res://scripts/ui/ui_kit.gd")
 
 const WIDTH := 940.0
 const PAD := 26.0
@@ -39,11 +40,9 @@ const ROW_TEXT_W := 90.0  ## px kept free at the right of a row's text
 const TEXT_SIZE := 18
 const ROW_SIZE := 17
 const DIM := Color(0.0, 0.0, 0.0, 0.55)
-const PANEL_BG := Color("#1f2630")
 const ROW_BG := Color("#2a3340")
 const EDGE := Color("#cfd6df")
 const EDGE_DIM := Color("#59667a")
-const HIGHLIGHT := Color(1.0, 1.0, 1.0, 0.1)
 const TEXT := Color("#eef2f7")
 const DIM_TEXT := Color("#97a3b3")
 const GOOD := Color("#6bd34a")
@@ -395,7 +394,7 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), DIM)
 	var lay := layout()
 	var p: Rect2 = lay["panel"]
-	_panel(p)
+	UiKit.frame(self, p)
 	_text(title.to_upper(), p.position + Vector2(PAD, 36.0), 22, AMBER)
 	draw_line(p.position + Vector2(PAD, TITLE_H - 6.0), p.position + Vector2(p.size.x - PAD, TITLE_H - 6.0), EDGE_DIM, 1.0)
 	var t: Rect2 = lay["text"]
@@ -472,13 +471,6 @@ static func tone_of(line: String) -> int:
 		return 0
 	var sign := 1 if m.get_string().begins_with("+") else -1
 	return -sign if line.begins_with("Debt") else sign
-
-
-## A chunky panel: a slate fill, a 2 px light border and a 1 px inner highlight.
-func _panel(r: Rect2, fill := PANEL_BG) -> void:
-	draw_rect(r, fill)
-	draw_rect(r, EDGE, false, 2.0)
-	draw_rect(r.grow(-3.0), HIGHLIGHT, false, 1.0)
 
 
 func _text(text: String, at: Vector2, font_size: int, col: Color) -> void:

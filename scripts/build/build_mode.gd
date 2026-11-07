@@ -947,11 +947,6 @@ func _load() -> void:
 
 # --- HUD (scripts/ui/hud.gd draws it; these are the words and numbers it reads) ---
 
-## A power figure: whole numbers plain, line-adjusted ones (5.4) with one decimal.
-func _num(v: float) -> String:
-	return Palette.num(v)
-
-
 ## The air where the soldier stands: {pressure: 0..1, or -1 in a doorway or with no soldier yet; breach: the room is open to space}.
 func player_o2() -> Dictionary:
 	var player = crew.get("player") if crew != null else null
@@ -1308,7 +1303,7 @@ func _draw_power() -> void:
 		for uid in n["members"]:
 			draw_rect(_cells_rect(ship.components.instances[uid]["cells"]).grow(-1), col, false, 2.0)
 		var at: Vector2 = cell_rect(n["cells"][0]).position + Vector2(0, -4)
-		var text := "supply %s / demand %s" % [_num(n["supply"]), _num(n["demand"])]
+		var text := "supply %s / demand %s" % [Palette.num(n["supply"]), Palette.num(n["demand"])]
 		draw_string(font, at + Vector2(1, 1), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0, 0, 0, 0.8))
 		draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, col.lightened(0.35))
 

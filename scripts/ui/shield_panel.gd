@@ -17,6 +17,8 @@ const Shields = preload("res://scripts/combat/shields.gd")
 const Shape = preload("res://scripts/combat/shield_shape.gd")
 const Balance = preload("res://scripts/combat/shield_balance.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
+const Palette = preload("res://scripts/build/palette.gd")
+const UiKit = preload("res://scripts/ui/ui_kit.gd")
 
 const MARGIN := 40.0
 const PAD := 18.0
@@ -32,7 +34,6 @@ const PANEL_BG := Color("#1f2630")
 const ROW_BG := Color("#2a3340")
 const EDGE := Color("#cfd6df")
 const EDGE_DIM := Color("#59667a")
-const HIGHLIGHT := Color(1.0, 1.0, 1.0, 0.1)
 const TEXT := Color("#eef2f7")
 const DIM_TEXT := Color("#97a3b3")
 const GOOD := Color("#6bd34a")
@@ -399,7 +400,7 @@ func _draw() -> void:
 		return
 	draw_rect(Rect2(Vector2.ZERO, size), DIM)
 	var p := panel_rect()
-	_panel(p)
+	UiKit.frame(self, p)
 	_text("SHIELDS", p.position + Vector2(PAD, 36.0), 26, TEXT)
 	_text(message, p.position + Vector2(180.0, 34.0), 16, BAD if message_bad else GOOD)
 	var pw := powered()
@@ -447,7 +448,7 @@ func _draw_bubble(n: int, total: int) -> void:
 func _draw_side(n: int) -> void:
 	var side := side_rect()
 	var box := Rect2(side.position, Vector2(side.size.x, 92.0))
-	_panel(box, ROW_BG)
+	UiKit.frame(self, box, ROW_BG)
 	_text("GENERATORS", box.position + Vector2(10.0, 24.0), 15, AMBER)
 	var gens := generators()
 	if gens.is_empty():
@@ -458,12 +459,12 @@ func _draw_side(n: int) -> void:
 	_text(", ".join(PackedStringArray(gens)), box.position + Vector2(10.0, 78.0), 13, DIM_TEXT)
 	if n < 2:
 		var one := Rect2(side.position + Vector2(0.0, 104.0), Vector2(side.size.x, 70.0))
-		_panel(one, ROW_BG)
+		UiKit.frame(self, one, ROW_BG)
 		draw_multiline_string(ThemeDB.fallback_font, one.position + Vector2(12.0, 30.0), ONE_PIECE, HORIZONTAL_ALIGNMENT_LEFT, one.size.x - 24.0, 18, 3, TEXT)
 		return
 	var w := weights()
 	var rows := Rect2(side.position + Vector2(0.0, 104.0), Vector2(side.size.x, n * ROW_H + 44.0))
-	_panel(rows, ROW_BG)
+	UiKit.frame(self, rows, ROW_BG)
 	_text("BALANCE  (weights add up to %d)" % n, rows.position + Vector2(10.0, 24.0), 15, AMBER)
 	for k in n:
 		var y := rows.position.y + 36.0 + k * ROW_H
@@ -478,7 +479,7 @@ func _draw_side(n: int) -> void:
 		_text(_layers_text(layers() * float(w[k])), Vector2(bar.end.x + 56.0, y + 16.0), 14, DIM_TEXT)
 	var py := _presets_y(n)
 	var presets := Rect2(Vector2(side.position.x, py - 4.0), Vector2(side.size.x, 196.0))
-	_panel(presets, ROW_BG)
+	UiKit.frame(self, presets, ROW_BG)
 	_text("PRESETS", Vector2(presets.position.x + 10.0, py + 20.0), 15, AMBER)
 	_text("CUSTOM SLOTS", Vector2(presets.position.x + 10.0, py + 100.0), 15, AMBER)
 	for i in Balance.SLOTS:
@@ -502,18 +503,6 @@ func _button(b: Dictionary) -> void:
 	_text(b["label"], r.position + Vector2((r.size.x - wide) / 2.0, r.size.y / 2.0 + size_px * 0.35), size_px, col)
 
 
-## A chunky panel: a slate fill, a 2 px light border and a 1 px inner highlight.
-func _panel(r: Rect2, fill := PANEL_BG) -> void:
-	draw_rect(r, fill)
-	draw_rect(r, EDGE, false, 2.0)
-	draw_rect(r.grow(-3.0), HIGHLIGHT, false, 1.0)
-
-
-## A figure: whole numbers plain, others with one decimal.
-static func _num(v: float) -> String:
-	return "%d" % roundi(v) if is_equal_approx(v, roundf(v)) else "%.1f" % v
-
-
 func _text(text: String, at: Vector2, font_size: int, col: Color) -> void:
 	draw_string(ThemeDB.fallback_font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, col)
 
@@ -527,4 +516,4 @@ func _text_aligned(text: String, at: Vector2, font_size: int, col: Color, side: 
 
 ## "1 layer", "1.5 layers".
 static func _layers_text(v: float) -> String:
-	return "%s layer%s" % [_num(v), "" if is_equal_approx(v, 1.0) else "s"]
+	return "%s layer%s" % [Palette.num(v), "" if is_equal_approx(v, 1.0) else "s"]

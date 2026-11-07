@@ -135,7 +135,7 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), BACKDROP)
 	var lay := layout()
 	var p: Rect2 = lay["panel"]
-	_panel(p)
+	UiKit.frame(self, p)
 	var e: Dictionary = report.get("ending", {})
 	_text("ENDING", p.position + Vector2(PAD, 36.0), 14, DIM_TEXT)
 	_text(str(e.get("title", "The End")).to_upper(), p.position + Vector2(PAD, 80.0), 40, AMBER)
@@ -212,7 +212,7 @@ func _draw_hall(lay: Dictionary) -> void:
 
 
 func _draw_score(r: Rect2) -> void:
-	_panel(r, ROW_BG)
+	UiKit.frame(self, r, ROW_BG)
 	_text("SCORE", r.position + Vector2(16.0, 28.0), 18, AMBER)
 	var y := r.position.y + 62.0
 	for row in report.get("score", {}).get("rows", []):
@@ -232,7 +232,7 @@ func _draw_score(r: Rect2) -> void:
 
 ## A titled box of text lines.
 func _box(title: String, r: Rect2, lines: Array, col: Color) -> void:
-	_panel(r, ROW_BG)
+	UiKit.frame(self, r, ROW_BG)
 	_text(title, r.position + Vector2(16.0, 24.0), 15, AMBER)
 	var y := r.position.y + 44.0
 	for l in lines:

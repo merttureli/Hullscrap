@@ -174,6 +174,13 @@ static func panel(cv: CanvasItem, r: Rect2, alpha := 0.95) -> void:
 		cv.draw_rect(Rect2(c, Vector2(2, 2)), EDGE_DIM)
 
 
+## The flat window of the menus and the station panels: `fill`, a 2 px light border and a 1 px inner highlight.
+static func frame(cv: CanvasItem, r: Rect2, fill := PANEL_BG) -> void:
+	cv.draw_rect(r, fill)
+	cv.draw_rect(r, EDGE, false, 2.0)
+	cv.draw_rect(r.grow(-3.0), HIGHLIGHT, false, 1.0)
+
+
 ## The thin HUD frame (the top bar, the mode bar, the log, the hints).
 static func bar(cv: CanvasItem, r: Rect2, alpha := 0.95) -> void:
 	if nine(cv, "bar", r, "normal", Color(1, 1, 1, alpha)):

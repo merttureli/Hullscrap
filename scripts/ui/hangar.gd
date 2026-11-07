@@ -438,7 +438,7 @@ func _draw_info(lay: Dictionary, cur: Dictionary) -> void:
 	if not pv.is_empty():
 		var st: Dictionary = pv["stats"]
 		var ok: bool = st["supply"] + 0.0001 >= st["demand"]
-		_stat(x, y, "Power", "%s supply / %s demand" % [_num(st["supply"]), _num(st["demand"])], GOOD if ok else BAD)
+		_stat(x, y, "Power", "%s supply / %s demand" % [Palette.num(st["supply"]), Palette.num(st["demand"])], GOOD if ok else BAD)
 		_stat(x, y + 22.0, "Mass", "%d" % roundi(st["mass"]))
 		_stat(x + 200.0, y + 22.0, "Hull", "%d" % roundi(st["hull"]))
 		var layers: int = st["layers"]

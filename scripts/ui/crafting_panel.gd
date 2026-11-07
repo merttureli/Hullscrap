@@ -22,6 +22,7 @@ const Mods = preload("res://scripts/board/mods.gd")
 const PartCard = preload("res://scripts/ui/part_card.gd")
 const PicCard = preload("res://scripts/ui/pic_card.gd")
 const Thumbs = preload("res://scripts/ui/thumbs.gd")
+const Palette = preload("res://scripts/build/palette.gd")
 
 const STATION_IDS: Array[String] = ["fabricator", "smelter"]  ## the tabs, in order (Tab cycles them)
 const TAB_NAMES := {"fabricator": "Fabricator", "smelter": "Smelter"}
@@ -58,7 +59,6 @@ const PANEL_BG := Color("#1f2630")
 const ROW_BG := Color("#2a3340")
 const EDGE := Color("#cfd6df")
 const EDGE_DIM := Color("#59667a")
-const HIGHLIGHT := Color(1.0, 1.0, 1.0, 0.1)
 const TEXT := Color("#eef2f7")
 const DIM_TEXT := Color("#97a3b3")
 const GOOD := Color("#6bd34a")
@@ -762,7 +762,7 @@ func _draw() -> void:
 		return
 	draw_rect(Rect2(Vector2.ZERO, size), DIM)
 	var p := panel_rect()
-	_panel(p)
+	UiKit.frame(self, p)
 	_text(str(TAB_NAMES[station]).to_upper(), p.position + Vector2(PAD, 36.0), 26, TEXT)
 	_text(message, Vector2(help_rect().end.x + 16.0, p.position.y + 34.0), 16, BAD if message_bad else GOOD)
 	_draw_tabs()
@@ -816,7 +816,7 @@ func help_lines() -> Array[String]:
 func _draw_details() -> void:
 	chips_at = []
 	var r := details_rect()
-	_panel(r, ROW_BG)
+	UiKit.frame(self, r, ROW_BG)
 	var x := r.position.x + 12.0
 	var w := r.size.x - 24.0
 	if help_open:
@@ -1073,7 +1073,7 @@ func upgrade_rect() -> Rect2:
 func _draw_fabricator(s, fab: Dictionary) -> void:
 	var r := side_rect()
 	var box := Rect2(r.position, Vector2(r.size.x, FAB_BOX_H))
-	_panel(box, ROW_BG)
+	UiKit.frame(self, box, ROW_BG)
 	_text("FABRICATOR", box.position + Vector2(10.0, 24.0), 15, AMBER)
 	_text(found_text(), box.position + Vector2(0.0, 24.0), 13, DIM_TEXT, box.size.x - 10.0, HORIZONTAL_ALIGNMENT_RIGHT)
 	var status := "Level %d" % fab["level"]
@@ -1189,7 +1189,7 @@ func upgrade_smelter() -> String:
 func _draw_smelter(s, st: Dictionary) -> void:
 	var r := side_rect()
 	var box := Rect2(r.position, Vector2(r.size.x, box_h()))
-	_panel(box, ROW_BG)
+	UiKit.frame(self, box, ROW_BG)
 	_text("SMELTER", box.position + Vector2(10.0, 24.0), 15, AMBER)
 	var status := "Level %d" % st["level"]
 	var col := GOOD
@@ -1241,7 +1241,7 @@ func wait_text(job: Dictionary) -> String:
 
 func _draw_queue(s) -> void:
 	var q := queue_rect()
-	_panel(q, ROW_BG)
+	UiKit.frame(self, q, ROW_BG)
 	var c = s.crafting
 	var jobs: Array = c.queue_of(station)
 	_text("QUEUE  %d/%d" % [jobs.size(), Crafting.QUEUE_MAX], q.position + Vector2(10.0, 24.0), 15, AMBER)
@@ -1258,7 +1258,7 @@ func _draw_queue(s) -> void:
 		draw_rect(jr, BAD if i == hover_job else EDGE_DIM, false, 2.0 if i == hover_job else 1.0)
 		_text(job_label(job), jr.position + Vector2(8.0, 19.0), 15, TEXT)
 		var waiting: bool = job.has("wait")
-		var note := "click to cancel" if i == hover_job else (wait_text(job) if waiting else "%s / %s s" % [_num(job["progress"]), _num(rec["time"])])
+		var note := "click to cancel" if i == hover_job else (wait_text(job) if waiting else "%s / %s s" % [Palette.num(job["progress"]), Palette.num(rec["time"])])
 		_text(note, Vector2(jr.position.x, jr.position.y + 19.0), 13, BAD if i == hover_job else (AMBER if waiting else DIM_TEXT), jr.size.x - 8.0, HORIZONTAL_ALIGNMENT_RIGHT)
 		var bar := Rect2(jr.position + Vector2(8.0, 30.0), Vector2(jr.size.x - 16.0, 12.0))
 		draw_rect(bar, Color("#0f141a"))
@@ -1269,7 +1269,7 @@ func _draw_queue(s) -> void:
 
 func _draw_cargo(s) -> void:
 	var r := cargo_rect()
-	_panel(r, ROW_BG)
+	UiKit.frame(self, r, ROW_BG)
 	_text("CARGO", r.position + Vector2(10.0, 24.0), 15, AMBER)
 	_text("C/Esc close   ?: help   Tab: next tab   Click: select   Enter / Queue: queue   Count buttons / wheel: how many   Upgrade button   Click a job: cancel",
 		r.position + Vector2(10.0, r.size.y - 10.0), 13, DIM_TEXT)
@@ -1286,18 +1286,6 @@ func _draw_cargo(s) -> void:
 		draw_rect(Rect2(Vector2(x, y - 12.0), Vector2(12.0, 12.0)), Color(0, 0, 0, 0.5), false, 1.0)
 		_text(seg, Vector2(x + 18.0, y), 15, TEXT if s.inventory.count(id) > 0 else DIM_TEXT)
 		x += w
-
-
-## A chunky panel: a slate fill, a 2 px light border and a 1 px inner highlight.
-func _panel(r: Rect2, fill := PANEL_BG) -> void:
-	draw_rect(r, fill)
-	draw_rect(r, EDGE, false, 2.0)
-	draw_rect(r.grow(-3.0), HIGHLIGHT, false, 1.0)
-
-
-## A figure: whole numbers plain, others with one decimal.
-static func _num(v: float) -> String:
-	return "%d" % roundi(v) if is_equal_approx(v, roundf(v)) else "%.1f" % v
 
 
 func _text(text: String, at: Vector2, font_size: int, col: Color, width := -1.0, align := HORIZONTAL_ALIGNMENT_LEFT) -> void:
