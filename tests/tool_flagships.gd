@@ -22,7 +22,7 @@ const SIM_EVERY := 12
 const PLAYER_EVERY := 3
 const OUT := "res://data/packs/flagships_1/ships/flagship_%s.json"
 ## The frame of a flagship: wider and deeper than the generated `large` class (data/enemy_tables.json sizes).
-const FRAME := {"width": 42, "k_mid": 3, "max_interior": 36, "max": {"bow": 6, "flank": 6, "engine": 4, "reactor": 5, "shield": 3, "armour": 4, "crew": 14, "beds": 4}}
+const FRAME := {"width": 42, "k_mid": 4, "max_interior": 36, "max": {"bow": 6, "flank": 6, "engine": 4, "reactor": 5, "shield": 3, "armour": 4, "crew": 14, "beds": 4}}
 
 ## Per race: the fit-out (weapons, engines, shields, systems, reactors, armour layers, crew, aim skill), the hull seed to start trying
 ## from, the ram flag, the crew species (weighted by repetition), the captain, and the morale style of its ai.

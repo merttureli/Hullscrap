@@ -19,7 +19,9 @@ const SPECS := {
 			"laser_burst",
 			"laser_burst",
 			"kett_drone_picket",
-			"kett_drone_picket"
+			"kett_drone_picket",
+			"laser_burst",
+			"laser_burst"
 		],
 		"engines": [
 			"engine_scrap_mk2",
@@ -66,7 +68,7 @@ const SPECS := {
 		"interior": 44,
 		"after_s": 0,
 		"ammo": 400,
-		"yield_hp": 80
+		"yield_hp": 50
 	},
 	"emberkin": {
 		"stage": 5,
@@ -80,6 +82,8 @@ const SPECS := {
 			"pulse_mk3",
 			"pulse_mk3",
 			"pulse_mk3",
+			"laser_burst",
+			"laser_burst",
 			"laser_burst",
 			"laser_burst"
 		],
@@ -126,7 +130,7 @@ const SPECS := {
 		"blurb": "x",
 		"interior": 64,
 		"after_s": 0,
-		"yield_hp": 90
+		"yield_hp": 70
 	},
 	"prismatic": {
 		"stage": 6,
@@ -140,6 +144,8 @@ const SPECS := {
 			"laser_mk3",
 			"laser_mk3",
 			"laser_mk3",
+			"laser_burst",
+			"laser_burst",
 			"laser_burst",
 			"laser_burst"
 		],
@@ -185,7 +191,7 @@ const SPECS := {
 		"blurb": "x",
 		"interior": 66,
 		"after_s": 0,
-		"yield_hp": 90
+		"yield_hp": 60
 	},
 	"basalt": {
 		"stage": 4,
@@ -200,7 +206,9 @@ const SPECS := {
 			"pulse_mk3",
 			"pulse_heavy",
 			"basalt_pumice_flak",
-			"basalt_pumice_flak"
+			"basalt_pumice_flak",
+			"laser_burst",
+			"laser_burst"
 		],
 		"engines": [
 			"engine_mk2",
@@ -250,7 +258,7 @@ const SPECS := {
 		],
 		"blurb": "x",
 		"after_s": 0,
-		"yield_hp": 100
+		"yield_hp": 60
 	},
 	"sporeling": {
 		"stage": 5,
@@ -265,7 +273,9 @@ const SPECS := {
 			"pulse_mk3",
 			"pulse_mk3",
 			"sporeling_pollen_turret",
-			"swarm_pod"
+			"swarm_pod",
+			"laser_burst",
+			"laser_burst"
 		],
 		"engines": [
 			"engine_mk2",
@@ -311,7 +321,7 @@ const SPECS := {
 		"blurb": "x",
 		"after_s": 0,
 		"ammo": 200,
-		"yield_hp": 90,
+		"yield_hp": 70,
 		"interior": 60
 	},
 	"mire": {
@@ -327,6 +337,8 @@ const SPECS := {
 			"pulse_mk3",
 			"pulse_mk3",
 			"mire_mist_projector",
+			"laser_burst",
+			"laser_burst",
 			"laser_burst",
 			"laser_burst"
 		],
@@ -373,7 +385,7 @@ const SPECS := {
 		"blurb": "x",
 		"after_s": 0,
 		"interior": 56,
-		"yield_hp": 100
+		"yield_hp": 70
 	},
 	"fenn": {
 		"stage": 5,
@@ -388,6 +400,8 @@ const SPECS := {
 			"pulse_mk3",
 			"pulse_mk3",
 			"fenn_spark_lattice",
+			"laser_burst",
+			"laser_burst",
 			"laser_burst"
 		],
 		"engines": [
@@ -433,7 +447,7 @@ const SPECS := {
 		"interior": 44,
 		"after_s": 0,
 		"ammo": 200,
-		"yield_hp": 90
+		"yield_hp": 70
 	},
 	"gauntling": {
 		"stage": 4,
@@ -448,6 +462,8 @@ const SPECS := {
 			"pulse_mk3",
 			"pulse_mk3",
 			"gauntling_tesla_picket",
+			"laser_burst",
+			"laser_burst",
 			"laser_burst",
 			"laser_burst"
 		],
@@ -490,7 +506,7 @@ const SPECS := {
 		],
 		"blurb": "x",
 		"after_s": 0,
-		"yield_hp": 90
+		"yield_hp": 60
 	},
 	"grundl": {
 		"stage": 5,
@@ -505,7 +521,9 @@ const SPECS := {
 			"pulse_mk3",
 			"grundl_barge_flak",
 			"grundl_barge_flak",
-			"grundl_barge_flak"
+			"grundl_barge_flak",
+			"laser_burst",
+			"laser_burst"
 		],
 		"engines": [
 			"grundl_hauler_thrusters",
@@ -564,7 +582,9 @@ const SPECS := {
 			"pulse_mk3",
 			"pulse_mk3",
 			"human_flak_screen",
-			"human_flak_screen"
+			"human_flak_screen",
+			"laser_burst",
+			"laser_burst"
 		],
 		"engines": [
 			"engine_mk2",
@@ -608,6 +628,6 @@ const SPECS := {
 		"blurb": "x",
 		"after_s": 0,
 		"ammo": 200,
-		"yield_hp": 90
+		"yield_hp": 60
 	}
 }
