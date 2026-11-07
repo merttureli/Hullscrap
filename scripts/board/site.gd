@@ -648,7 +648,7 @@ func _join(bands: Array, cfg: Dictionary, rng: RandomNumberGenerator) -> String:
 		for rid in by_band[bi]:
 			var want: Array = side_corr.duplicate()
 			if rid != passage and want.size() == 2:
-				_shuffle(want, rng)
+				shuffle(want, rng)
 				if rng.randf() > 0.3:
 					want = [want[0]]
 			for cid in want:
@@ -791,7 +791,7 @@ func _lock_doors(cfg: Dictionary, rng: RandomNumberGenerator) -> void:
 	var live: Array = doors.filter(func(d): return d["lock"] != "gone" and not d["rooms"].has(air))
 	var n_card := rng.randi_range(int(cfg["card"][0]), int(cfg["card"][1]))
 	var dead: Array = live.filter(func(d): return d["rooms"].any(func(r): return rooms[r]["doors"].size() == 1 and not rooms[r]["corridor"]))
-	_shuffle(dead, rng)
+	shuffle(dead, rng)
 	var made := 0
 	for d in dead:
 		if made >= n_card or made >= KEY_NAMES.size():
@@ -801,7 +801,7 @@ func _lock_doors(cfg: Dictionary, rng: RandomNumberGenerator) -> void:
 		made += 1
 	var n_hack := rng.randi_range(int(cfg["hack"][0]), int(cfg["hack"][1]))
 	var rest: Array = live.filter(func(d): return d["lock"] == "")
-	_shuffle(rest, rng)
+	shuffle(rest, rng)
 	for i in mini(n_hack, rest.size()):
 		rest[i]["lock"] = "hack"
 	var open_rooms := _room_graph_reach(air, _lock_ids())  # the rooms only a lock opens
@@ -817,7 +817,8 @@ func _lock_ids() -> Dictionary:
 	return out
 
 
-static func _shuffle(list: Array, rng: RandomNumberGenerator) -> void:
+## Shuffle `list` in place with `rng` (from the last item down): the one shuffle of the site makers (station_gen, the fixtures, the foes).
+static func shuffle(list: Array, rng: RandomNumberGenerator) -> void:
 	for i in range(list.size() - 1, 0, -1):
 		var j := rng.randi() % (i + 1)
 		var t = list[i]
@@ -828,7 +829,7 @@ static func _shuffle(list: Array, rng: RandomNumberGenerator) -> void:
 ## A purpose for every room but the airlock and the corridors: the kind's minimums first, then by weight within its maximums.
 func _assign_purposes(cfg: Dictionary, rng: RandomNumberGenerator) -> void:
 	var open: Array = rooms.filter(func(r): return r["purpose"] == "")
-	_shuffle(open, rng)
+	shuffle(open, rng)
 	var count := {}
 	var weights: Dictionary = cfg["weights"]
 	var mins: Dictionary = cfg["min"]
@@ -1216,7 +1217,7 @@ func _place_marks() -> void:
 	rng.seed = _mix(seed_value, "marks", 0)
 	var n := rng.randi_range(int(span[0]), int(span[1]))
 	var open: Array = rooms.filter(func(r): return r["purpose"] != "gone" and r["purpose"] != "airlock" and not r["corridor"])
-	_shuffle(open, rng)
+	shuffle(open, rng)
 	var kinds_w: Dictionary = mc["weights"]
 	var used := {}
 	while marks.size() < n:

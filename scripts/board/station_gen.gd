@@ -271,7 +271,7 @@ func _lead(i: int) -> bool:
 	for k in insts[i]["links"].size():
 		if int(insts[i]["links"][k]) == -1:
 			ks.append(k)
-	_shuffle(ks)
+	s.shuffle(ks, rng)
 	for k in ks:
 		var n := insts.size()
 		if _grow(i, k, w, false):
@@ -286,11 +286,11 @@ func _attach(mid: String, i: int, k: int) -> bool:
 	var pcells: Array = pc["cells"].map(func(c): return c + insts[i]["off"])
 	var stretch := _roll_stretch(mid)
 	var rots := [0, 1, 2, 3]
-	_shuffle(rots)
+	s.shuffle(rots, rng)
 	for rot in rots:
 		var v := _variant(mid, rot, stretch)
 		var ks: Array = range(v["conns"].size())
-		_shuffle(ks)
+		s.shuffle(ks, rng)
 		for ck in ks:
 			var cc: Dictionary = v["conns"][ck]
 			if cc["type"] != pc["type"] or cc["side"] != -pc["side"] or cc["cells"].size() != pcells.size():
@@ -367,7 +367,7 @@ func _place_required(mid: String) -> void:
 			if str(modules()[m].get("leads", "")) != "" and modules()[m]["tags"].any(func(t): return after.has(t)) and _count_of(m) < _max_of(m):
 				w[m] = 1.0
 	var open := _open()
-	_shuffle(open)
+	s.shuffle(open, rng)
 	for o in open:
 		if _grow(o[0], o[1], w, true):
 			return
@@ -953,7 +953,7 @@ func _lock(scfg: Dictionary) -> void:
 			made += 1
 	var live: Array = s.doors.filter(func(d): return d["lock"] == "" and not d["rooms"].has(air))
 	var dead: Array = live.filter(func(d): return d["rooms"].any(func(r): return s.rooms[r]["doors"].size() == 1 and not s.rooms[r]["corridor"]))
-	_shuffle(dead)
+	s.shuffle(dead, rng)
 	var n_card := rng.randi_range(int(scfg["card"][0]), int(scfg["card"][1]))
 	for d in dead:
 		if n_card <= 0 or made >= KEY_NAMES.size():
@@ -1060,11 +1060,3 @@ static func _pick(w: Dictionary, r: RandomNumberGenerator) -> String:
 		if roll < 0.0 and float(w[k]) > 0.0:
 			return str(k)
 	return str(keys[-1])
-
-
-func _shuffle(list: Array) -> void:
-	for i in range(list.size() - 1, 0, -1):
-		var j := rng.randi() % (i + 1)
-		var t = list[i]
-		list[i] = list[j]
-		list[j] = t
