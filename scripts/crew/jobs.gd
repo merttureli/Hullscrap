@@ -108,7 +108,7 @@ func tick(ship, dt: float, in_combat := false) -> void:
 		m.stun = maxf(m.stun - dt, 0.0)
 		if m.is_down() or stunned:
 			continue
-		if (not ship.intruders.is_empty() or str(m.job.get("type", "")) == "intruder") and not m.is_drone() and Intruders.respond(ship, self, m, dt):
+		if (not ship.intruders.is_empty() or str(m.job.get("type", "")) == "intruder") and not m.is_drone() and Intruders.respond(ship, m, dt):
 			if not m.is_player:
 				m.step(dt)  # (the intruder response: fight what is in reach, go for what is near)
 			continue

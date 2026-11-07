@@ -491,7 +491,7 @@ static func _parse(rows: Array, clear: int) -> Dictionary:
 					out["cells"][c] = "x"
 				"w":
 					out["cells"][c] = "w"
-					out["wins"][c] = _edge(c, w, h)
+					out["wins"][c] = _edge(c, h)
 				"@":
 					out["cells"][c] = "@"
 					out["hatch"].append(c)
@@ -526,7 +526,7 @@ static func _parse(rows: Array, clear: int) -> Dictionary:
 			i += 1
 	var hatch: Array = out["hatch"]
 	if hatch.size() == 2:  # space in front of the hatch stays empty
-		var n := _edge(hatch[0], w, h)
+		var n := _edge(hatch[0], h)
 		for k in range(1, 5):
 			for c in hatch:
 				for side_off in [-1, 0, 1]:
@@ -547,7 +547,7 @@ static func _parse(rows: Array, clear: int) -> Dictionary:
 
 
 ## The outward side of an edge cell.
-static func _edge(c: Vector2i, w: int, h: int) -> Vector2i:
+static func _edge(c: Vector2i, h: int) -> Vector2i:
 	if c.y == 0:
 		return Vector2i.UP
 	if c.y == h - 1:
@@ -688,7 +688,7 @@ func _realize() -> String:
 	# the hatch
 	var dock: Dictionary = insts[0]
 	var h: Array = dock["v"]["hatch"].map(func(c): return c + dock["off"] + off)
-	var n := _edge(dock["v"]["hatch"][0], int(dock["v"]["w"]), int(dock["v"]["h"]))
+	var n := _edge(dock["v"]["hatch"][0], int(dock["v"]["h"]))
 	var air_room := int(s.room_of.get(h[0] - n, -1))
 	if air_room < 0:
 		return "no airlock"

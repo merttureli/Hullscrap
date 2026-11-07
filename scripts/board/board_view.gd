@@ -148,7 +148,6 @@ var _walked := 0.0
 var _anim := {}
 var _aim := 0.0
 var _saved_clear := Color(0.3, 0.3, 0.3)
-var _follow := true  # the camera follows the soldier (frame_all lets go)
 
 
 func _ready() -> void:
@@ -207,7 +206,6 @@ func enter(p_session) -> String:
 	_walked = 0.0
 	_put_away(true)
 	_build_nodes()
-	_follow = true
 	_saved_clear = RenderingServer.get_default_clear_color()
 	RenderingServer.set_default_clear_color(SPACE)
 	var at: Vector2 = session.soldier.pos * CELL
@@ -416,18 +414,6 @@ func _apply_lights_up() -> void:
 		_mod.color = Color.WHITE if lights_up else DARK
 
 
-## Zoom and centre the camera so the whole site is on screen.
-func frame_all() -> void:
-	if cam == null or session == null:
-		return
-	var b: Rect2i = session.site.bounds
-	var size := get_viewport_rect().size if is_inside_tree() else Vector2(1600, 900)
-	var z := minf(size.x / (float(b.size.x + 4) * CELL), size.y / (float(b.size.y + 4) * CELL))
-	cam.zoom = Vector2(z, z)
-	cam.position = (Vector2(b.position) + Vector2(b.size) / 2.0) * CELL
-	_follow = false  # (it follows the soldier again when he walks)
-
-
 # --- the frame ----------------------------------------------------------------------------------------------------
 
 ## One tick of `dt` seconds.
@@ -446,8 +432,6 @@ func step(dt: float) -> void:
 	var before: Vector2 = m.pos
 	if not s.downed:
 		m.move_input(s.site.walk, _wasd(), dt, s.soldier_passable())
-	if m.pos != before and not _follow:
-		_follow = true
 	for e in _afx:
 		e["t"] = float(e["t"]) + dt
 	_afx = _afx.filter(func(e): return float(e["t"]) < AFX_S)
@@ -471,7 +455,7 @@ func step(dt: float) -> void:
 	for far in tracker.last_heard:  # the nearer it is, the higher and faster the beep
 		Audio.fx(self, "tracker_ping_near" if far < 0.25 else ("tracker_ping_mid" if far < 0.6 else "tracker_ping_far"), null, -4.0)
 	feed = feed.filter(func(f): return _clock - float(f["t"]) < FEED_S)
-	if cam != null and _follow:
+	if cam != null:
 		cam.position = cam.position.lerp(m.pos * CELL, 1.0 - exp(-dt * 9.0))
 	if _over != null:
 		_over.queue_redraw()
@@ -1570,10 +1554,9 @@ func _draw_over() -> void:
 	for d in site.doors:
 		if d["lock"] != "" and d["lock"] != "gone" and not session.unlocked.has(d["id"]):
 			_draw_lock(d)
-	var pdefs: Dictionary = Site.config()["props"]
 	for p in site.props:
 		if not p.has("part"):  # (a beaten ship's parts are drawn by her own art)
-			_draw_prop(p, pdefs[p["prop"]])
+			_draw_prop(p)
 	if str(target.get("type", "")) == "container":
 		var tp: Dictionary = site.props[target["id"]]
 		_over.draw_rect(Rect2(Vector2(tp["cell"]) * CELL, Vector2(tp["size"]) * CELL).grow(2.0), Color(1, 1, 1, 0.55), false, 2.0)
@@ -1740,7 +1723,7 @@ func _draw_lock(d: Dictionary) -> void:
 	_over.draw_rect(Rect2(mid + Vector2(-3.0, 1.0), Vector2(6.0, 5.0)), Color(0.05, 0.05, 0.07))
 
 
-func _draw_prop(p: Dictionary, def: Dictionary) -> void:
+func _draw_prop(p: Dictionary) -> void:
 	var o: Vector2 = Vector2(p["cell"]) * CELL
 	var sz: Vector2 = Vector2(p["size"]) * CELL
 	var open: bool = session.opened.has(p["id"])

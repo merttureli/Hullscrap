@@ -153,12 +153,10 @@ static func refusal(ship, uid: int, item: String, cost: int) -> String:
 	var racks := room_racks(ship, uid)
 	var net_stock := 0
 	var moving := false
-	var on_belt := false
 	for net_id in plan.get("touch", {}).get(uid, []):
 		var net: Dictionary = plan["nets"][net_id]
 		for r in net["racks"]:
 			if rack_usable(ship, r):
-				on_belt = true
 				if not racks.has(r):
 					racks.append(r)
 				if item_in(ship, r) == item:
@@ -219,13 +217,6 @@ static func net_speed(ship, net: Dictionary) -> float:
 	for d in net["drives"]:
 		best = maxf(best, drive_speed(ship, d))
 	return best
-
-
-## Is the belt network of `cell` moving (a working drive on it)? For the scrolling treads.
-static func moving_at(ship, cell: Vector2i) -> bool:
-	var plan: Dictionary = ship.belts.analyze(ship)
-	var id: int = plan["net_of"].get(cell, -1)
-	return id >= 0 and net_speed(ship, plan["nets"][id]) > 0.0
 
 
 ## Does the ship hold or carry a belt drive (the first one comes with the belt blueprint)?

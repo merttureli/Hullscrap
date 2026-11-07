@@ -82,7 +82,7 @@ func _draw() -> void:
 			draw_texture_rect(_tex, Rect2(c - Vector2(r, r) * 1.7, Vector2(r, r) * 3.4), false)
 		return
 	if kind == "asteroid_field":
-		_draw_rocks(c, r)
+		_draw_rocks(r)
 		return
 	if kind == "distant_station":
 		_draw_station(c, r)
@@ -105,7 +105,7 @@ func _draw() -> void:
 
 
 ## The rocks of an asteroid field: each tumbles slowly and drifts against the camera at its own PARALLAX.
-func _draw_rocks(c: Vector2, r: float) -> void:
+func _draw_rocks(r: float) -> void:
 	var vp := get_viewport_rect().size
 	var cam := get_viewport().get_camera_2d() if is_inside_tree() else null
 	var cam_pos := cam.get_screen_center_position() if cam != null else Vector2.ZERO

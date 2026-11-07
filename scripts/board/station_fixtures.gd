@@ -83,13 +83,11 @@ static func place(s) -> void:
 			var at := str(rule.get("at", "wall"))
 			if at != "centre":  # (the data's `density` fills the big rooms: a centrepiece stays one)
 				n = int(floor(float(n) * float(cfg.get("density", 1.0)) + rng.randf()))
-			var placed := 0
 			if at == "row":
-				placed = _row(s, r, rule, def, n, mouth, taken, rng)
+				_row(s, r, rule, def, n, mouth, taken, rng)
 			else:
 				for i in n:
-					if _one(s, r, rule, def, at, mouth, taken, rng):
-						placed += 1
+					_one(s, r, rule, def, at, mouth, taken, rng)
 		# the state's dice come last, from the same stream, so where they stand never depends on them
 	for f in s.fixtures:
 		var m: Dictionary = s.modules[int(s.rooms[f["room"]]["module"])]

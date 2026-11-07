@@ -33,7 +33,6 @@ const WARNINGS: Array[String] = ["outgunned", "fuel", "skulls", "toll", "hull", 
 const TIPS: Array[String] = ["first_build", "first_fight", "first_breach", "first_station", "first_fabricator", "first_blueprint", "first_shields",
 	"first_warden", "first_drift_jump", "low_fuel", "first_boarding", "first_mod", "first_rig_bonus", "first_crew", "first_wreck"]
 const MODES: Array[String] = ["full", "warn", "off"]
-const MODE_NAMES := {"full": "Full", "warn": "Warnings only", "off": "Off"}
 const EPS := 1e-6
 
 static var _words := {}
@@ -59,8 +58,6 @@ var _prev := {}  # what the last look saw, for the tips that wait for a change (
 var _jumps := 0  # the campaign's jump counter at the last look (state())
 var armed := {}  ## extra goal id -> true: its `when` came true once, so it stays on the list until met (kept in the profile)
 var _met := {}  # "<stage>:<goal id>" -> was it met at the last look: a goal is news when it goes from false to true
-var _hops_key := ""  # the cache key of the jump counts below
-var _hops := {"exit": -1, "station": -1}
 
 
 func _init(p_words := {}, p_numbers = null) -> void:

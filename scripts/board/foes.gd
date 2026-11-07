@@ -386,11 +386,6 @@ func contacts() -> Array:
 	return out
 
 
-## The cells of the vents the view draws.
-func vent_cells() -> Array:
-	return vents
-
-
 # --- hits and noise --------------------------------------------------------------------------------------------------
 
 ## `amount` damage to foe `f`, struck at `at`.

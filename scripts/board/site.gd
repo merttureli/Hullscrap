@@ -465,7 +465,6 @@ func _try(p_attempt: int) -> String:
 	_rng.seed = _mix(seed_value, kind, p_attempt)
 	var rng := _rng
 	var rw_min: int = int(cfg["room_w"][0])
-	var rw_max: int = int(cfg["room_w"][1])
 	var pattern: String = cfg["bands"][rng.randi() % cfg["bands"].size()]
 	var n_room := pattern.count("R")
 	var bands: Array = []
