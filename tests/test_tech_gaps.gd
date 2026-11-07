@@ -87,7 +87,7 @@ func _shielded(shield_id: String) -> Ship:
 func test_ion_strips_layers_and_locks_the_bubble_times_the_shields_line_vulnerability() -> void:
 	var rows := {}
 	for id in ["shield_mk2", "shield_neon_mk1"]:
-		_duel({"damage_type": "ion", "damage": 1}, _shielded(id))
+		_duel({"damage_type": "ion", "damage": 3.5}, _shielded(id))  # (ion takes double: 7 HP, a tier 2 layer)
 		var co = arena.ships[1]
 		var before := 0.0
 		for x in co.sector_layers:
@@ -102,11 +102,11 @@ func test_ion_strips_layers_and_locks_the_bubble_times_the_shields_line_vulnerab
 	near(rows["shield_neon_mk1"][0], 2.0, "a neon shield (ion_vulnerability 2) loses two layers")
 	near(rows["shield_neon_mk1"][1], 10.0, "and is locked for 10 s")
 	# the lost layers come back, no more
-	_duel({"damage_type": "ion", "damage": 1}, _shielded("shield_neon_mk1"))
+	_duel({"damage_type": "ion", "damage": 3.5}, _shielded("shield_neon_mk1"))
 	var co = arena.ships[1]
 	var full := float(co.layers_cap)
 	_shoot()
-	arena.step(10.0 + (2.0 * 7.0 + 3.0) / 1.75 + 0.1)  # the lock (10 s), then the neon recharge: two layers one after the other (7 + 7 s of base time, 3 more for the emptied sector) at x1.75
+	arena.step(10.0 + (5.0 + 2.0 * 4.0) / 1.75 + 0.1)  # the lock (10 s), then the neon regen: the 5 s break delay and two layers of 4 HP at 1 HP/s, all at x1.75
 	var sum := 0.0
 	for x in co.sector_layers:
 		sum += float(x)
@@ -290,7 +290,7 @@ func test_a_shot_a_shield_stops_splits_into_weaker_shots_that_meet_the_bubble_ag
 	var sector_after := 0.0
 	for x in arena.ships[1].sector_layers:
 		sector_after += float(x)
-	near(sector_before - sector_after, 4.0, "four layers of the sector are gone")
+	near(sector_before - sector_after, 10.0 / 7.0, "10 HP of the sector's 28 are gone (4 for the shot, 2 for each fragment)")
 	eq(_hits().size(), 0, "and nothing reached the hull")
 	eq(arena.projectiles.size(), 0, "no fragment splits again")
 

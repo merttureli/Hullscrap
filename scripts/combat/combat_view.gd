@@ -384,6 +384,11 @@ func _unhandled_input(e: InputEvent) -> void:
 			_say("Moved to %s" % GunBadges.style({"group": moved})["label"])
 		_handled()
 	elif active and e is InputEventMouseButton and e.pressed:
+		if _bar != null and _bar.visible and e.button_index == MOUSE_BUTTON_LEFT and (_bar.head_click(e.position - _bar.position) or (e.alt_pressed and _bar.alt_click(e.position - _bar.position))):
+			_swallow = e.button_index  # a click on a group's header (Ripple / Volley) or an Alt+click on a gun (piercing rounds) does not fire
+			_say(_bar.last_note)
+			_handled()
+			return
 		if _bar != null and _bar.visible and e.button_index == MOUSE_BUTTON_LEFT and _bar.grab(e.position - _bar.position, e.button_index):
 			_swallow = e.button_index  # a left press on a slot takes it in hand (drag it to another section), it does not fire
 			_handled()

@@ -549,7 +549,7 @@ func _draw_bubble(co) -> void:
 		var pts := PackedVector2Array()
 		for p in lines[k]:
 			pts.append(px(p))
-		var up: float = 0.0 if ion else minf(float(st["layers"]), 4.0)
+		var up: float = 0.0 if ion or float(st["layers"]) <= Shields.EPS else 1.0 + 2.0 * clampf(float(st["layers"]) / maxf(float(st["cap"]), 0.001), 0.0, 1.0)  # (by its share of HP)
 		var hit := clampf(1.0 - float(arena.tick - int(co.sector_hit[k])) / 60.0 / HIT_FLASH_S, 0.0, 1.0)
 		var fill := 0.03 + 0.03 * up + 0.14 * hit
 		var alpha := minf(0.22 + 0.17 * up, 0.9)

@@ -8,6 +8,11 @@ Beta 4.1 is a fights, balance and content update on top of Beta 4, from a conten
 - **Roles.** Gunboats, brawlers, escorts, snipers and haulers: the name line says which ("Kett gunboat"). A poor ship looks patched; a rich one looks fine.
 - **No more skulls before a fight.** Event fight choices, radar markers and exit wardens show the enemy ship itself next to yours, her emblem and her name line; the Ledger warns in words only. The fight panel keeps its skull dots.
 
+### Volley, piercing rounds and shield HP
+- **Shields have hit points.** A shield layer is worth shield HP set by its tier (tier 1: 4 HP, tier 2: 7, tier 3: 12). A hit takes its damage off the sector it enters; what is left over goes through to the hull, so a heavy shot bleeds through a weak shield. After a hit a sector waits before it regens (3 s at tier 1, 2 s at tier 3), and a sector knocked to 0 stays down longer (5 s at tier 1, 3 s at tier 3). Ion takes double and locks the regen. The shield diagram and the schematic show each sector's HP.
+- **Volley or Ripple, per fire group.** Click a group's header on the weapon bar (or in the build-mode fire dock) to switch it. Ripple is as before: each gun fires when ready. Volley makes the group wait until all its guns are ready (3 s at most) and fire together, so your shield opens once, not once per gun. A ship that relies on its shield wants Volley; a ship with a weak shield does better to spam. Enemy ships volley with their heavier guns.
+- **Piercing rounds** for the fast kinetic guns (the Rattle Burst): Alt+click the gun to load them. They pass shields, deal 60% damage, armour blunts them, and they cost a round a shot (10 rounds from scrap and titanium at the fabricator; known from the start; sold in stores). A few late enemies carry them. Point defence never opens your shield.
+
 ### Boarding and stations
 - **Board the ship you just beat** as she is: her rooms, holes, parts, bodies and survivors. Kill her crew by draining her air and she stays airless.
 - **Air on foot**: an airless room needs a sealed suit (EVA suit, exosuit, heat suit). Without one, "Board her" is shut when her airlock is airless, and you loot what's sealed or scrap her.

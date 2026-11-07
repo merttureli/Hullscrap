@@ -443,6 +443,7 @@ static func _attempt(faction: String, size: String, rng: RandomNumberGenerator, 
 	var sz: Dictionary = tables()["sizes"][size]
 	var level := 2 if attempt < 4 else (1 if attempt < 7 else 0)
 	var lo := _buy(f, size, budget, rng, ram, shields)
+	lo["budget"] = budget  # (the late-ship rolls of _finish read it)
 	var t: int = int(lo["armour"]) + 1
 	var prow := rng.randi_range(int(f["hull"]["prow"][0]), int(f["hull"]["prow"][1]))
 	var tail := rng.randi_range(int(f["hull"]["tail"][0]), int(f["hull"]["tail"][1]))
@@ -1807,6 +1808,20 @@ static func _finish(ship: Ship, f: Dictionary, faction: String, lo: Dictionary, 
 		var ammo := str(_weapons.def(w).get("ammo", "")) if _weapons.has(w) else ""
 		if ammo != "" and ship.inventory.count(ammo) < AMMO_STOCK:
 			ship.inventory.add(ammo, AMMO_STOCK)
+	var ap: Dictionary = tables().get("piercing", {})  # a late, big-budget ship may load piercing rounds into its rapid kinetic guns (a roll of its own: the rest of the build is untouched)
+	if not ap.is_empty() and float(lo.get("budget", 0.0)) >= float(ap["budget_from"]):
+		var apr := RandomNumberGenerator.new()
+		apr.seed = rng.seed ^ 0xA9
+		var uids: Array = ship.components.instances.keys()
+		uids.sort()
+		var loaded := false
+		for uid in uids:
+			var wid := str(ship.components.instances[uid]["id"])
+			if _weapons.has(wid) and _weapons.can_pierce(_weapons.def(wid)) and apr.randf() < float(ap["chance"]):
+				ship.ap_guns[uid] = true
+				loaded = true
+		if loaded:
+			ship.inventory.add(Weapons.AP_ITEM, int(ap["rounds"]))
 	ship.name = _name_of(f, faction, rng)
 	ship.rng_seed = rng.randi() % 100000 + 1
 	ship.mark_dirty()

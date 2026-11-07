@@ -238,15 +238,16 @@ func test_overclock_on_a_shield_recharges_its_layers_faster() -> void:
 	var a := Arena.new()
 	var co = a.ships[a.add_ship(ship)]
 	co.sector_layers[0] = 0.0
-	co.sector_timers[0] = [Vector2(2.0, 1.0)]
+	co.sector_wait[0] = 0.0
 	Shields.tick(co, 1.4)
-	near(co.sector_layers[0], 0.0, "a layer takes 2 s to come back", 1e-6)
+	var plain: float = co.sector_layers[0]
+	check(plain > 0.0, "it regens")
 	ship.manned[d["part"]] = "Rook"
 	check(CrewAbilities.use(ship, m)["ok"], "overclock the shield")
 	co.sector_layers[0] = 0.0
-	co.sector_timers[0] = [Vector2(2.0, 1.0)]
+	co.sector_wait[0] = 0.0
 	Shields.tick(co, 1.4)
-	near(co.sector_layers[0], 1.0, "overclocked, 1.4 s is enough", 1e-6)
+	check(float(co.sector_layers[0]) > plain * 1.4, "overclocked it regens faster (%s against %s)" % [co.sector_layers[0], plain])
 
 
 func test_overclock_on_the_helm_raises_its_evasion() -> void:

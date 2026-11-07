@@ -313,8 +313,7 @@ func _draw_intent(co, map: Dictionary) -> void:
 		y += ROW_H
 
 
-## Shield pips (a filled one per layer up, the overcharge layer in gold; with several sectors the layers up
-## over all of them), "OPEN" while a sector is open, "ION" when locked, and a ring split into the bubble's
+## The shield HP (a bar and hp/cap over all the sectors, gold while overcharged), "OPEN" while a sector is open, "ION" when locked, and a ring split into the bubble's
 ## sectors: each as bright as it is full, dark while open.
 func _draw_shield(co, at: Vector2) -> void:
 	_text("SHLD", at + Vector2(0, 12), 11, TEXT)
@@ -325,20 +324,19 @@ func _draw_shield(co, at: Vector2) -> void:
 	var open := Shields.open_sectors(co, arena.tick)
 	var any_open := open.has(true)
 	var x := 44.0
-	if co.sectors > 1:
-		var line := "%d / %d" % [co.layers, co.layers_cap * co.sectors]
-		_text(line, at + Vector2(x, 12), 12, ION if ion else PIP)
-		x += ThemeDB.fallback_font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x + 8.0
-	else:
-		for i in co.layers_cap:
-			var c := at + Vector2(44.0 + i * 15.0, 7.0)
-			var extra: bool = co.overcharge_left > 0.0 and i == co.layers_cap - 1
-			var col := GOLD if extra else (ION if ion else PIP)
-			if i < co.layers and not ion:
-				draw_circle(c, 5.5, col if not any_open else col.darkened(0.5))
-			else:
-				draw_arc(c, 5.0, 0.0, TAU, 14, Color(col, 0.55), 1.5)
-		x += minf(co.layers_cap, 6) * 15.0 + 4.0
+	var hp := 0.0
+	var hp_cap := 0.0
+	for k in co.sectors:
+		hp += Shields.hp_of(co, k)
+		hp_cap += Shields.hp_cap_of(co, k)
+	var frac := clampf(hp / maxf(hp_cap, 0.001), 0.0, 1.0)
+	var bar := Rect2(at + Vector2(x, 3.0), Vector2(40.0, 7.0))  # the shield HP as a bar: the whole bubble's HP over its capacity
+	draw_rect(bar, Color(0.05, 0.08, 0.12, 0.9))
+	draw_rect(Rect2(bar.position, Vector2(bar.size.x * frac, bar.size.y)), Color(ION if ion else (GOLD if co.overcharge_left > 0.0 else PIP), 0.9))
+	draw_rect(bar, Color(PIP, 0.5), false, 1.0)
+	var line := "%d/%d" % [roundi(hp), roundi(hp_cap)]
+	_text(line, at + Vector2(x + 45.0, 12), 11, ION if ion else PIP)
+	x += 45.0 + ThemeDB.fallback_font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x + 8.0
 	if ion:
 		_text("ION", at + Vector2(x, 12), 12, ION)
 	elif any_open:
@@ -351,7 +349,7 @@ func _draw_shield(co, at: Vector2) -> void:
 		if n == 1:
 			a0 = -PI / 2.0
 			a1 = a0 + TAU
-		var full := clampf(float(co.sector_layers[k]) / maxf(Shields.cap_of(co, k), 1.0), 0.0, 1.0)
+		var full := clampf(float(co.sector_layers[k]) / maxf(Shields.cap_of(co, k), 0.001), 0.0, 1.0)
 		draw_arc(ring, 8.0, a0, a1, 10, Color("#243242") if open[k] else Color(ION if ion else PIP, 0.25 + 0.7 * full), 3.5, true)
 
 

@@ -547,7 +547,7 @@
       "family": "slug",
       "version": "Long: reaches farther, but needs a steady aim."
     },
-    "slug_chain": {
+    "slug_chain": {"ap_ok": true, 
       "kind": "bolt",
       "damage_type": "kinetic",
       "damage": 5.2,

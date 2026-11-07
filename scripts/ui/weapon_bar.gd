@@ -32,7 +32,7 @@ const GOLD := Color("#ffd24a")
 const KEY_OF := {KEY_SHIFT: "engine", KEY_SPACE: "shield", KEY_E: "utility"}  ## keycode -> ability key
 const KEY_LABEL := {"engine": "SHIFT", "shield": "SPACE", "utility": "E"}
 const SECTIONS := [1, 2, 3, 0]  ## the fire groups left to right: LMB, RMB, Q, AUTO (0)
-const EMPTY_W := 74.0  ## an empty section's width: a slim drop zone under its header
+const EMPTY_W := 92.0  ## an empty section's width: a slim drop zone under its header
 const DRAG_PX := 6.0  ## how far the mouse moves with a slot held before it is a drag
 const REACH_UP := 80.0  ## a drop counts this far above the sections too
 const FLASH_MS := 2200  ## how long a refusal stays in its slot
@@ -138,6 +138,37 @@ func group_at(p: Vector2) -> int:
 		if r.has_point(p):
 			return z["group"]
 	return -1
+
+
+## The fire group whose header is at bar-local `p`, -1 when none (a click on it switches the group between Ripple and Volley).
+func head_at(p: Vector2) -> int:
+	if session == null:
+		return -1
+	var lay := layout()
+	var base := _base(lay)
+	for h in lay["heads"]:
+		if Rect2(h["rect"].position + base, h["rect"].size).has_point(p):
+			return h["group"]
+	return -1
+
+
+## A click on a header switches its group's mode; true when it was on one (it is used up). last_note says what it is now.
+func head_click(p: Vector2) -> bool:
+	var g := head_at(p)
+	if g < 0:
+		return false
+	last_note = "%s: %s" % [GunBadges.style({"group": g})["label"], "VOLLEY: the guns fire together" if session.toggle_volley(g) else "RIPPLE: each gun fires when ready"]
+	return true
+
+
+## Alt+click at bar-local `p` on a gun that can load piercing rounds switches it between Standard and Piercing; true when the click was on a slot.
+func alt_click(p: Vector2) -> bool:
+	var s := slot_at(p)
+	if s.is_empty():
+		return false
+	var why: String = session.toggle_ap(s["w"]["uid"])
+	last_note = why if why != "" else ("%s: piercing rounds" % s["w"]["name"] if session.weapons().any(func(x): return x["uid"] == s["w"]["uid"] and x["ap"]) else "%s: standard rounds" % s["w"]["name"])
+	return true
 
 
 ## A right-click at bar-local `p` on a slot cycles that gun's group (LMB, RMB, Q, AUTO); true when the click was on a slot (it is used up).
@@ -254,7 +285,7 @@ func _draw() -> void:
 	var base := _base(lay)
 	var over: int = group_at(drag["at"]) if not drag.is_empty() and drag["moved"] else -1
 	for h in lay["heads"]:
-		draw_head(self, h["rect"].position + base, h["rect"].size, h["group"], over == h["group"])
+		draw_head(self, h["rect"].position + base, h["rect"].size, h["group"], over == h["group"], session.volley_of(h["group"]))
 	if lay.has("bay_head"):
 		var bh: Rect2 = lay["bay_head"]
 		draw_head(self, bh.position + base, bh.size, 4)
@@ -345,7 +376,7 @@ func _bay_slot(at: Vector2, number: int, b: Dictionary) -> void:
 
 
 ## A section's header at `at`: its colour band, icon and name. `lit` brightens it (a drag is over the section).
-static func draw_head(c: CanvasItem, at: Vector2, sz: Vector2, group: int, lit := false) -> void:
+static func draw_head(c: CanvasItem, at: Vector2, sz: Vector2, group: int, lit := false, volley := false) -> void:
 	var sty := GunBadges.style({"drones": true} if group == 4 else {"group": group})
 	var col: Color = sty["color"]
 	var r := Rect2(at, sz)
@@ -354,6 +385,8 @@ static func draw_head(c: CanvasItem, at: Vector2, sz: Vector2, group: int, lit :
 	if group != 4:  # (the drone header has no mouse icon: a bay launches by its key only)
 		GunBadges.draw_mouse(c, Rect2(r.position + Vector2(3.0, 1.0), Vector2(10.0, r.size.y - 4.0)), group, col)
 	c.draw_string(ThemeDB.fallback_font, r.position + Vector2(17.0 if group != 4 else 6.0, r.size.y - 5.0), str(sty["label"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, col)
+	if group != 4:  # the mode tag: click the header to switch
+		c.draw_string(ThemeDB.fallback_font, r.position + Vector2(0.0, r.size.y - 5.0), "VOLLEY" if volley else "RIPPLE", HORIZONTAL_ALIGNMENT_RIGHT, r.size.x - 3.0, 9, GOLD if volley else Color(col, 0.7))
 
 
 func _slot(at: Vector2, number: int, w: Dictionary, target: Vector2, lifted := false) -> void:
@@ -390,6 +423,12 @@ func _slot(at: Vector2, number: int, w: Dictionary, target: Vector2, lifted := f
 		_text(str(number), c + Vector2(-4.0, 6.0), 16, TEXT)
 	GunBadges.draw_mark(self, at + Vector2(SLOT.x - 14.0, 17.0), 6.0, sty["mark"], gcol)
 	_pips(at + Vector2(7.0, 62.0), w)
+	if w.get("can_ap", false):  # piercing rounds: AP tag (bright when on) and the rounds left
+		var on: bool = w.get("ap", false)
+		draw_rect(Rect2(at + Vector2(SLOT.x - 30.0, 54.0), Vector2(24.0, 12.0)), Color(GOLD, 0.9) if on else Color(GREY, 0.35))
+		_text("AP", at + Vector2(SLOT.x - 27.0, 64.0), 10, Color("#10151c") if on else TEXT)
+		if on:
+			_text(str(w.get("rounds", 0)), at + Vector2(SLOT.x - 58.0, 64.0), 10, GOLD if int(w.get("rounds", 0)) > 0 else BAD, 26.0, HORIZONTAL_ALIGNMENT_RIGHT)
 	var shown := fit_name(str(w["name"]), SLOT.x - 8.0)
 	_text(shown["text"], at + Vector2(5.0, 76.0), mini(shown["size"], 11), TEXT, SLOT.x - 8.0)
 	var label: String = STATUS_TEXT.get(status, status.to_upper())
@@ -507,8 +546,8 @@ func _shield_diagram(at: Vector2, parts: Array) -> void:
 		var mid := -PI / 2.0 + k * width
 		var a0 := mid - width / 2.0 + gap
 		var a1 := mid + width / 2.0 - gap
-		var up: float = 0.0 if ion else minf(float(st["layers"]), 4.0)
-		var frac := clampf(float(st["layers"]) / maxf(float(st["cap"]), 1.0), 0.0, 1.0)
+		var frac := clampf(float(st["layers"]) / maxf(float(st["cap"]), 0.001), 0.0, 1.0)  # the sector's HP over its capacity
+		var up: float = 0.0 if ion or float(st["layers"]) <= 1e-6 else 1.0 + 3.0 * frac
 		if st["open"]:
 			draw_arc(c, DIAG_RING, a0, a1, 12, Color("#243242"), 5.0, true)
 		elif ion:
@@ -522,8 +561,7 @@ func _shield_diagram(at: Vector2, parts: Array) -> void:
 			draw_arc(c, DIAG_RING, a0, a1, 12, Color(PIP, 0.3 + 0.65 * frac), 3.0 + 1.6 * up, true)
 		if st["filling"] and not ion:  # layers on their way back
 			draw_arc(c, DIAG_RING + 8.0, a0, a1, 12, Color(PIP, 0.25 + 0.5 * pulse), 1.5, true)
-		var shown := float(st["layers"])
-		var label := "%d" % floori(shown + 1e-6) if is_equal_approx(shown, roundf(shown)) else "%.1f" % shown
+		var label := "%d" % roundi(float(st["hp"]))  # shield HP of the sector
 		var tp := c + Vector2.from_angle(mid) * (DIAG_RING + 15.0) if n > 1 else c + Vector2(0.0, 24.0)
 		_text(label, tp + Vector2(-4.0 * label.length(), 4.0), 12, Color(TEXT, 0.35 if st["open"] else 1.0), -1.0)
 	var bow := PackedVector2Array([c + Vector2(0.0, -11.0), c + Vector2(7.0, 9.0), c + Vector2(0.0, 5.0), c + Vector2(-7.0, 9.0)])

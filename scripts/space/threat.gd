@@ -54,7 +54,7 @@ static func power(ship, skill: float) -> Dictionary:
 			dmg *= float(cfg["ion_factor"])
 		var hit: float = clampf(float(w["accuracy"]) - float(cfg["turret_miss"]), 0.0, 1.0) if bool(w["turret"]) else float(cfg["fixed_hit"]) * (0.55 + 0.45 * skill)
 		dps += dmg * hit / maxf(float(w["cooldown"]), 0.1)
-	var ehp := (1.0 - Structure.defeat_below()) * Structure.totals(ship).y + Shields.layers_of_ship(ship, powered) * float(cfg["shield_layer_hp"])
+	var ehp := (1.0 - Structure.defeat_below()) * Structure.totals(ship).y + Shields.layers_of_ship(ship, powered) * float(Shields.params_of_ship(ship, powered)["layer_hp"]) * float(cfg["shield_hp_value"])
 	var f := Flight.new()
 	var mass := f.mass_of(ship.grid, ship.components, ship.cables, Stats.mass_mults(ship.components, ship.lines))
 	var thrust := float(f.thrusts_of(Stats.view(ship.components, ship.lines), powered)["fwd"])

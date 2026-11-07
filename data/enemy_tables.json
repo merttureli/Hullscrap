@@ -12,6 +12,7 @@
 		"skill_cost": 4,
 		"skill_step": 0.1
 	},
+	"piercing": {"_doc": "Piercing rounds (docs/GUNS.md 14): a ship built on a budget of budget_from or more (tier 3: the late stages) loads each rapid kinetic gun (Weapons.can_pierce: the Rattle Burst) with piercing rounds at this chance, and carries `rounds` of them.", "budget_from": 100, "chance": 0.2, "rounds": 40},
 	"sizes": {
 		"small": {"width": 18, "k_mid": 1, "max_interior": 16, "max": {"bow": 2, "flank": 0, "engine": 2, "reactor": 1, "shield": 1, "armour": 1, "crew": 3, "beds": 0}},
 		"medium": {"width": 26, "k_mid": 2, "max_interior": 22, "max": {"bow": 3, "flank": 2, "engine": 3, "reactor": 2, "shield": 1, "armour": 2, "crew": 5, "beds": 2}},
@@ -380,7 +381,7 @@
 	"threat": {
 		"cuts": [0.5, 0.85, 1.6, 2.6],
 		"horizon_s": 20,
-		"shield_layer_hp": 20.0,
+		"shield_hp_value": 5.0,
 		"speed_ref": 60.0,
 		"speed_power": 0.3,
 		"player_aim": 0.75,

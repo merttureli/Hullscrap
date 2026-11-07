@@ -121,8 +121,15 @@ static func trace(arena, owner: int, w: Dictionary, p0: Vector2, p1: Vector2, ou
 	if best.is_empty():
 		return false
 	if best["shield"]:
-		Shields.absorb(arena, best["ship"], w, out["end"], (p1 - p0).normalized(), best["sector"])
+		var passed := Shields.absorb(arena, best["ship"], w, out["end"], (p1 - p0).normalized(), best["sector"])
 		Effects.on_shield(arena, owner, best["ship"], w, out["end"], (p1 - p0).normalized())  # a shot that splits on the bubble
+		if passed > 1e-6 and best.has("cell"):  # a heavy shot bleeds through a weak shield: the rest of its damage hits the hull
+			var rest := w.duplicate()
+			rest["damage"] = passed
+			var c: Dictionary = best["cell"]
+			var through := Damage.march(arena, best["ship"], rest, c["a"], c["b"], c["entries"], c["hit"], {})
+			if through.has("bounce"):
+				out["bounce"] = through["bounce"]
 	else:
 		var first := {}
 		var res := Damage.march(arena, best["ship"], w, best["a"], best["b"], best["entries"], best["hit"], first)
@@ -167,7 +174,10 @@ static func _contact(arena, i: int, w: Dictionary, p0: Vector2, p1: Vector2, ski
 	if first < 0 and t_shield == INF:
 		return {}
 	if t_shield <= t_cell:
-		return {"ship": i, "t": t_shield, "shield": true, "sector": hit_sector}
+		var out := {"ship": i, "t": t_shield, "shield": true, "sector": hit_sector}
+		if first >= 0:  # what the shield cannot soak goes on into the hull
+			out["cell"] = {"entries": entries.slice(first), "a": a, "b": b, "hit": hit}
+		return out
 	return {"ship": i, "t": t_cell, "shield": false, "entries": entries.slice(first), "a": a, "b": b, "hit": hit}
 
 

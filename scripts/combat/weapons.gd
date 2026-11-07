@@ -28,6 +28,7 @@ const Effects = preload("res://scripts/combat/effects.gd")
 const Ammo = preload("res://scripts/sim/ammo.gd")
 const Hazards = preload("res://scripts/combat/hazards.gd")
 const Drones = preload("res://scripts/combat/drones.gd")
+const Volley = preload("res://scripts/combat/volley.gd")
 
 const PATH := "res://data/weapons.json"
 const BASE := {"damage_type": "energy", "damage": 1.0, "cooldown": 1.0, "range": 900.0, "arc": 360.0,
@@ -44,6 +45,8 @@ const KIND_DEFAULTS := {
 	"beam": {"duration": 2.0, "tick": 0.25},  # damage is per second, dealt every `tick` seconds
 }
 
+const AP_ITEM := "piercing_rounds"  ## the ammo a gun in Piercing mode spends, one a shot (docs/GUNS.md 14)
+const AP_DAMAGE := 0.6  ## the share of its damage a piercing round deals
 const CHAIN_WINDOW_S := 1.5  ## seconds past its cooldown that a chain gun's next volley still adds a step
 const ON_TARGET_DEG := 4.0  ## a turret fires when its barrel is this close to the lead direction
 const SPEED_EVASION := 0.25  ## evasion of a ship at full speed (docs/CONTENT.md 4)
@@ -345,6 +348,8 @@ func _volley(arena, idx: int, uid: int, m: Dictionary, w: Dictionary, aim: Vecto
 		m["aim"] = clamp_dir(want, m["dir"], float(w["arc"]) * 0.5)
 	else:
 		m["aim"] = fixed_dir(arena, idx, m, aim)
+	if mis == null:
+		w = _piercing(arena, idx, uid, m, w)
 	var origin: Vector2 = muzzle_of(arena, idx, m)  # (the first barrel of a volley: the shot event and the shield drop use it)
 	var dir: Vector2 = Vector2(m["aim"]).rotated(co.flight.angle)
 	arena.log_event("shot", idx, Vector2i(-1, -1), {"weapon": m["id"], "uid": uid, "kind": w["kind"], "origin": origin, "dir": dir})
@@ -371,6 +376,56 @@ func _volley(arena, idx: int, uid: int, m: Dictionary, w: Dictionary, aim: Vecto
 	m["shots"] = int(m.get("shots", 0)) + (1 if w["kind"] == "beam" else int(w["shots"]))
 	Effects.on_fire(arena, idx, uid, m, w)
 	Shields.drop(arena, idx, w, origin, dir)  # after the shots: those in contact this tick were resolved first
+
+
+# --- piercing rounds (docs/GUNS.md 14) ------------------------------------------------------------------------
+
+## Can a gun of weapon entry `w` (a def()) load piercing rounds: a rapid-fire gun (or one whose entry says `ap_ok`: the chain slug gun) that
+## fires bolts or flak of any damage type but ion, and is not point defence.
+static func can_pierce(w: Dictionary) -> bool:
+	return (bool(w.get("rapid", false)) or bool(w.get("ap_ok", false))) and str(w.get("kind", "")) in ["bolt", "flak"] and str(w.get("damage_type", "")) != "ion" and not Volley.is_pd(w)
+
+
+## Is mount `m` (uid `uid`) of ship `idx` set to Piercing (the choice, not whether it has rounds)? A virtual mount keeps it in `m["ap"]`.
+func ap_on(arena, idx: int, uid: int, m: Dictionary) -> bool:
+	if m["virtual"]:
+		return bool(m.get("ap", false))
+	return bool(arena.ships[idx].ship.ap_guns.get(uid, false))
+
+
+## Switch mount `uid` of ship `idx` to Piercing (or back to Standard). False when its gun cannot load them.
+func set_ap(arena, idx: int, uid: int, on: bool) -> bool:
+	var m = arena.ships[idx].mounts.get(uid)
+	if m == null or not can_pierce(def(m["id"])):
+		return false
+	if m["virtual"]:
+		m["ap"] = on
+	elif on:
+		arena.ships[idx].ship.ap_guns[uid] = true
+	else:
+		arena.ships[idx].ship.ap_guns.erase(uid)
+	return true
+
+
+## The stats of the shot(s) mount `uid` fires now: `w` as it is for a Standard gun; for a Piercing one that has the rounds, the shots pass
+## shields, deal AP_DAMAGE of the damage and spend a round each. With too few rounds left the gun falls back to Standard and says so once.
+func _piercing(arena, idx: int, uid: int, m: Dictionary, w: Dictionary) -> Dictionary:
+	if not can_pierce(w) or not ap_on(arena, idx, uid, m):
+		return w
+	var co = arena.ships[idx]
+	var n := int(w["shots"])
+	if co.ship.inventory.count(AP_ITEM) < n:
+		set_ap(arena, idx, uid, false)
+		var gun: String = str(m["id"]) if m["virtual"] else str(co.ship.components.def(m["id"]).get("name", m["id"]))
+		co.ship.log_event("%s is out of piercing rounds: back to standard" % gun)
+		arena.log_event("ap_out", idx, Vector2i(-1, -1), {"uid": uid, "weapon": m["id"]})
+		return w
+	co.ship.inventory.add(AP_ITEM, -n)
+	var out := w.duplicate()
+	out["pass_shields"] = true
+	out["damage"] = float(out["damage"]) * AP_DAMAGE
+	out["ap"] = true
+	return out
 
 
 # --- chain and charge (docs/GUNS.md 6) ----------------------------------------------------------------------

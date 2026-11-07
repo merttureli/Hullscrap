@@ -82,7 +82,11 @@ func _gui_input(e: InputEvent) -> void:
 		return
 	if e is InputEventMouseButton:
 		var p: Vector2 = e.position
-		if e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
+		if e.pressed and e.button_index == MOUSE_BUTTON_LEFT and head_toggle(p):
+			pass
+		elif e.pressed and e.button_index == MOUSE_BUTTON_LEFT and e.alt_pressed and alt_toggle(p):
+			pass
+		elif e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
 			var s := slot_at(p)
 			if not s.is_empty():
 				drag = {"uid": s["w"]["uid"], "grab": p - (s["rect"].position + _base(layout())), "at": p, "start": p, "moved": false}
@@ -99,6 +103,36 @@ func _gui_input(e: InputEvent) -> void:
 		if e.position.distance_to(drag["start"]) >= WeaponBar.DRAG_PX:
 			drag["moved"] = true
 		accept_event()
+
+
+## A click on a group's header switches it between Ripple and Volley (kept with the ship); true when it was on a header.
+func head_toggle(p: Vector2) -> bool:
+	var lay := layout()
+	for h in lay["heads"]:
+		if Rect2(h["rect"].position + _base(lay), h["rect"].size).has_point(p):
+			var g: int = h["group"]
+			if build.ship.volley_groups.has(g):
+				build.ship.volley_groups.erase(g)
+			else:
+				build.ship.volley_groups[g] = true
+			build.queue_redraw()
+			return true
+	return false
+
+
+## Alt+click on a chip of a gun that can load piercing rounds switches Standard / Piercing; true when it was on a chip.
+func alt_toggle(p: Vector2) -> bool:
+	var s := slot_at(p)
+	if s.is_empty():
+		return false
+	var uid: int = s["w"]["uid"]
+	if bool(s["w"].get("can_ap", false)):
+		if build.ship.ap_guns.has(uid):
+			build.ship.ap_guns.erase(uid)
+		else:
+			build.ship.ap_guns[uid] = true
+		build.queue_redraw()
+	return true
 
 
 ## The chip in hand is let go at local `p`: dropped on the section under it. Returns the group, -1 when nothing moved.
@@ -122,7 +156,7 @@ func _draw() -> void:
 	var base := _base(lay)
 	var over: int = group_at(drag["at"]) if not drag.is_empty() and drag["moved"] else -1
 	for h in lay["heads"]:
-		WeaponBar.draw_head(self, h["rect"].position + base, h["rect"].size, h["group"], over == h["group"])
+		WeaponBar.draw_head(self, h["rect"].position + base, h["rect"].size, h["group"], over == h["group"], build.ship.volley_groups.has(h["group"]))
 	for z in lay["zones"]:
 		var gcol: Color = GunBadges.style({"group": z["group"]})["color"]
 		var r: Rect2 = z["rect"]
@@ -161,5 +195,10 @@ func _slot(at: Vector2, sl: Dictionary, lifted: bool) -> void:
 	if sl["number"] <= 9:
 		draw_string(font, at + Vector2(6.0, 22.0), str(sl["number"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, TEXT)
 	GunBadges.draw_mark(self, at + Vector2(SLOT.x - 12.0, 15.0), 5.0, sty["mark"], col)
-	var shown: Dictionary = WeaponBar.fit_name(str(w["name"]), SLOT.x - 44.0)
-	draw_string(font, at + Vector2(20.0, 21.0), shown["text"], HORIZONTAL_ALIGNMENT_LEFT, SLOT.x - 44.0, mini(shown["size"], 11), TEXT)
+	var name_w := SLOT.x - (68.0 if w.get("can_ap", false) else 44.0)  # (the AP tag takes the room before the group mark)
+	var shown: Dictionary = WeaponBar.fit_name(str(w["name"]), name_w)
+	draw_string(font, at + Vector2(20.0, 21.0), shown["text"], HORIZONTAL_ALIGNMENT_LEFT, name_w, mini(shown["size"], 11), TEXT)
+	if w.get("can_ap", false):  # piercing rounds: the AP tag, bright when on
+		var on: bool = w.get("ap", false)
+		draw_rect(Rect2(at + Vector2(SLOT.x - 40.0, 10.0), Vector2(22.0, 11.0)), Color(0.98, 0.82, 0.29, 0.9) if on else Color(0.42, 0.46, 0.53, 0.35))
+		draw_string(font, at + Vector2(SLOT.x - 38.0, 19.0), "AP", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("#10151c") if on else TEXT)

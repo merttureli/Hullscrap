@@ -20,6 +20,7 @@ const Effects = preload("res://scripts/combat/effects.gd")
 const Hazards = preload("res://scripts/combat/hazards.gd")
 const Structure = preload("res://scripts/ship/structure.gd")
 const Drones = preload("res://scripts/combat/drones.gd")
+const Volley = preload("res://scripts/combat/volley.gd")
 
 const SUBSTEP := 1.0 / 60.0
 const CELL := 32.0  ## pixels per grid cell
@@ -50,10 +51,13 @@ class Combatant extends RefCounted:
 	var sectors := 1  ## the bubble's sectors (the best powered generator's stats.sectors: 1, 2, 4 or 8)
 	var weights: Array = [1.0]  ## the balance: one weight per sector, 0..2 in steps of 0.5, adding up to `sectors` (shield_balance.gd)
 	var sector_layers: Array = [0.0]  ## layers up in each sector now
-	var sector_timers: Array = [[]]  ## per sector: Vector2(seconds left, layers) for each used or newly gained layer on its way back
+	var sector_wait: Array = [0.0]  ## per sector: seconds until it regens (regen_delay after a hit, break_delay after it was knocked to 0)
+	var shield_hp := {"layer_hp": 4.0, "regen_delay": 3.0, "regen_rate": 1.0, "break_delay": 5.0}  ## the powered shield parts' numbers (Shields.params_of_ship)
 	var sector_hit: Array = [-1000000]  ## per sector: the tick a shot last hit it (the view flashes it)
 	var ion_lock := 0.0  ## seconds the shields stay offline
 	var sector_open := {}  ## sector -> Vector2i(first tick, last tick) it is open: shots pass, no layer used (after this ship fired through it)
+	var volley := {}  ## fire group -> true when it fires in Volley mode (volley.gd); copied from the ship's choice when it joins
+	var ai_volley := false  ## every non-rapid gun fires in Volley (the enemy pilot's ships; the session sets it)
 	var shape: RefCounted = null  ## shield_shape.gd outline of the bubble, kept by Shields.shape_of
 	var shape_sig: Array = []
 	var ability_rev := -1  ## the ship's Abilities.rev this combatant last computed its thrust and layers for
@@ -84,6 +88,8 @@ var drones: Array = []  ## the drones out (drones.gd)
 var drone_serial := 1
 var tethers: Array = []  ## bow latches: {a, b (ships), la, lb (anchors in each ship's cell coordinates), left (seconds)}
 var hazard := {}  ## the fight's sector hazard, {id, dir} or {} (hazards.gd): set by the caller after add_ship
+var volleys := {}  ## volley.gd: ship x 8 + group -> {idx, group, req, wait, pending}
+var volley_exec := false  ## true while volley.gd fires a gun of a volley
 var tick := 0  ## substeps run so far
 var _acc := 0.0
 
@@ -118,6 +124,7 @@ func add_ship(ship, pos := Vector2.ZERO, angle := 0.0) -> int:
 	co.half = (hi - lo) / 2.0
 	grid.hp_mult = Abilities.wall_hp_mults(ship)  # a Stonehide bay: tougher walls round its room, from the start of the fight
 	co.mounts = weapons.mounts_of(ship)
+	co.volley = ship.volley_groups.duplicate()
 	co.bays = Drones.bays_of(ship)
 	ships.append(co)
 	co.structure = Structure.structure_fraction(co)
@@ -148,7 +155,9 @@ func set_input(idx: int, throttle: float, turn: float, strafe := 0.0) -> void:
 ## Fire mount `uid` of ship `idx` at the world point `aim`. False when it cannot (see Weapons.can_fire).
 ## A weapon with a crew member at its station cools down faster (Jobs.cooldown_mult), and a running
 ## ability can change every cooldown (Abilities.charge_mult).
-func fire(idx: int, uid: int, aim: Vector2) -> bool:
+func fire(idx: int, uid: int, aim: Vector2, force := false) -> bool:
+	if not force and not volley_exec and Volley.mode(self, idx, uid):
+		return Volley.request(self, idx, uid, aim)  # a gun in Volley mode waits for its group (volley.gd)
 	if not weapons.fire(self, idx, uid, aim):
 		return false
 	var co = ships[idx]
@@ -197,6 +206,7 @@ func _substep() -> void:
 				weapons.point_barrel(self, i, uid, aim_points[i])
 	Collisions.step(self, SUBSTEP)
 	weapons.tick_turrets(self)
+	Volley.tick(self)
 	weapons.tick_charge(self)
 	weapons.tick_beams(self)
 	Drones.step(self, SUBSTEP)

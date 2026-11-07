@@ -20,9 +20,14 @@
     "flush_pod": {"name": "Flush pod", "outside": [4, 1], "breech": [2, 2], "aim": "fixed"}
   },
   "shields": {
-    "_doc": "Shield timing (scripts/combat/shields.gd, scripts/sim/abilities.gd). recharge: seconds a used layer takes to come back at normal speed; a part's stats.recharge is its own seconds a layer. The used layers of a sector come back one at a time (the next timer starts when the one before it is back). break_delay: seconds more a sector waits for its first layer once its last whole layer is used. tier_recharge and neon_mult: the stats.recharge a pack's shield follows by tier (x neon_mult on the neon line); tests/test_content.gd checks it.",
+    "_doc": "Shield HP and timing (scripts/combat/shields.gd, scripts/sim/abilities.gd). recharge: seconds a used layer takes to come back at normal speed; a part's stats.recharge is its own seconds a layer. The used layers of a sector come back one at a time (the next timer starts when the one before it is back). break_delay: seconds more a sector waits for its first layer once its last whole layer is used. tier_recharge and neon_mult: the stats.recharge a pack's shield follows by tier (x neon_mult on the neon line); tests/test_content.gd checks it. SHIELD HP (v2): a sector holds layers x weight x layer_hp shield HP; a hit takes its damage off the pool and what is left passes to the hull (an ion hit takes 2x its damage and locks the bubble). tiers[tier] is the row of a shield part of that tier (the part's own stats.layer_hp / regen_delay / regen_rate / break_delay win): layer_hp, regen_delay (seconds after a hit before regen starts), regen_rate (HP a second, times the part's recharge speed shield_base / stats.recharge and the crew), break_delay (seconds a sector knocked to 0 waits instead). recharge and break_delay above are the old per-layer numbers: recharge is still the base speed of stats.recharge, break_delay is read by the part cards only.",
     "recharge": 7.0,
     "break_delay": 3.0,
+    "tiers": {
+      "1": {"layer_hp": 4.0, "regen_delay": 3.0, "regen_rate": 1.0, "break_delay": 5.0},
+      "2": {"layer_hp": 7.0, "regen_delay": 2.5, "regen_rate": 1.6, "break_delay": 4.0},
+      "3": {"layer_hp": 12.0, "regen_delay": 2.0, "regen_rate": 2.6, "break_delay": 3.0}
+    },
     "tier_recharge": {"1": 7.0, "2": 5.5, "3": 4.5},
     "neon_mult": 0.6
   },

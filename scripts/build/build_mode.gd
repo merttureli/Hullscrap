@@ -1239,7 +1239,7 @@ func gun_entries() -> Array:
 			continue
 		var d: Dictionary = _aim().def(inst["id"])
 		out.append({"uid": uid, "id": inst["id"], "name": str(ship.components.def(inst["id"]).get("name", inst["id"])), "number": n, "aim": d["aim"],
-			"group": _aim().group_in(ship.components, uid),
+			"group": _aim().group_in(ship.components, uid), "can_ap": _aim().can_pierce(d), "ap": bool(ship.ap_guns.get(uid, false)) and _aim().can_pierce(d),
 			"pd": d["turret"] and d.get("effects") is Dictionary and d["effects"].has("intercept")})
 	return out
 

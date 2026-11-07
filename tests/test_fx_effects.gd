@@ -298,7 +298,7 @@ func test_frost_slows_the_shield_recharge() -> void:
 		arena.add_ship(target, Vector2(800.0, 0.0))
 		gun = _mount({"cooldown": 0.0, "range": 2000}, Vector2(20.5, 15.5))
 		_shoot()  # the bubble takes its only layer: it comes back after 7 seconds and the 3 of a broken sector
-		check(arena.ships[1].sector_timers[0].size() == 1, "(a layer is coming back)")
+		check(float(arena.ships[1].sector_wait[0]) > 0.0, "(the sector waits to regen)")
 		var entry := {"cooldown": 0.0, "range": 2000, "pass_shields": true, "damage": 0.1}
 		if slow > 0.0:
 			entry["effects"] = {"frost": {"slow": slow, "seconds": 4.0}}
@@ -306,9 +306,9 @@ func test_frost_slows_the_shield_recharge() -> void:
 		arena.ships[0].cooldowns.clear()
 		arena.fire(0, frost, aim)  # gets through the bubble to the wall at (3, 15), and the room's systems are chilled
 		arena.step(1.0)
-		timers.append(float(arena.ships[1].sector_timers[0][0].x))
-	near(timers[0], 9.0, "unfrozen: the layer has 9 of its 10 seconds to go", 0.05)
-	near(timers[1], 9.5, "frozen by half: half a second more", 0.05)
+		timers.append(float(arena.ships[1].sector_wait[0]))
+	near(timers[0], 2.0, "unfrozen: the sector has 2 of its 3 seconds to go before it regens", 0.05)
+	near(timers[1], 2.5, "frozen by half: half a second more", 0.05)
 
 
 # --- corrode ------------------------------------------------------------------------------------------------------------
