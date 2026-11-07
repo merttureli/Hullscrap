@@ -513,6 +513,8 @@ static func _frost(arena, idx: int, id: String, spec: Dictionary, first: Diction
 				uids.append(uid)
 	var at := []
 	for uid in uids:
+		if not co.ship.components.instances.has(uid):
+			continue  # the part this very shot destroyed is gone
 		_timed(arena, "frost:%d:%d" % [idx, uid], {"k": "frost", "ship": idx, "uid": uid, "slow": float(spec["slow"]), "left": float(spec["seconds"]), "acc": 0.0})
 		at.append(arena.cell_to_world(idx, co.ship.components.instances[uid]["anchor"]))
 	_log(arena, idx, first["cell"], "frost", id, {"parts": uids, "at": at})
