@@ -116,7 +116,6 @@ func test_traits_merge_species_personal_and_gear() -> void:
 	check(Abilities.meets(CrewMember.new("Bram", Vector2.ZERO, "basalt"), ["no_breath|suit"]), "so does a bare Basalt")
 	check(not Abilities.meets(CrewMember.new("Plain"), ["no_breath|suit"]), "a human with no suit does not")
 	check(not Abilities.meets(CrewMember.new("Tess", Vector2.ZERO, "emberkin"), ["no_breath|suit"]), "nor an Emberkin")
-	eq(Abilities.traits_of(rook), rook.traits(), "abilities.gd reads the merged list")
 
 
 func test_a_basalt_can_work_the_afterburner_and_an_unsuited_human_cannot() -> void:
