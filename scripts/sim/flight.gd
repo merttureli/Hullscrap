@@ -150,16 +150,6 @@ func mass_props(grid, components, cables, mass_mult := {}) -> Dictionary:
 	return {"mass": maxf(m, MIN_MASS), "com": com, "inertia": maxf(inertia, MIN_MASS * CELL_PX * CELL_PX / 6.0)}
 
 
-## Moment of inertia of the ship about its centre of mass (see mass_props), in mass x px^2.
-func moment_of_inertia(grid, components, cables, mass_mult := {}) -> float:
-	return float(mass_props(grid, components, cables, mass_mult)["inertia"])
-
-
-## Centre of mass of the ship in grid cell coordinates (see mass_props).
-func centre_of_mass(grid, components, cables, mass_mult := {}) -> Vector2:
-	return mass_props(grid, components, cables, mass_mult)["com"]
-
-
 ## Total thrust of the powered engines. `boost`: component uid -> thrust multiplier (default 1.0).
 func thrust_of(components, powered: Dictionary, boost := {}) -> float:
 	var total := 0.0

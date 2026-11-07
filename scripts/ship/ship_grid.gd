@@ -255,16 +255,6 @@ func cost_of(id: String, area := 1.0) -> Dictionary:
 	return cost
 
 
-## Everything built so far, summed per material.
-func total_cost() -> Dictionary:
-	var sum := {}
-	for c in tiles:
-		var cost := cost_of(tiles[c], area_at(c))
-		for m in cost:
-			sum[m] = int(sum.get(m, 0)) + int(cost[m])
-	return sum
-
-
 ## True when tile `id` has the data flag `key` ("solid", "door").
 func tile_flag(id: String, key: String) -> bool:
 	return _flag(id, key)

@@ -141,18 +141,11 @@ func test_save_load_round_trip() -> void:
 	eq(h.load_dict(d), "", "loads")
 	eq(h.tiles, g.tiles, "same tiles")
 	eq(h.hull, g.hull, "same hull")
-	eq(h.total_cost(), g.total_cost(), "same cost")
 	eq(h.load_dict({"version": 99}), "unsupported ship version", "future saves refused")
 
 
-func test_total_cost_sums_materials() -> void:
+func test_a_tile_cost_is_a_dict_of_materials() -> void:
 	var g := _grid()
-	eq(g.total_cost(), {}, "empty ship costs nothing")
-	g.place("wall", Vector2i(4, 5))
-	g.place("wall", Vector2i(7, 5))
-	g.place("door", Vector2i(5, 5))
-	g.place("floor", Vector2i(5, 6))
-	eq(g.total_cost(), {"scrap": 2 + 2 + 2 * 3 + 1, "copper": 2}, "summed per material, a door piece is two cells")
 	eq(g.cost_of("door"), {"scrap": 3, "copper": 1}, "door cost is a dict")
 	eq(g.cost_of("teleporter"), {}, "unknown tiles are free")
 
