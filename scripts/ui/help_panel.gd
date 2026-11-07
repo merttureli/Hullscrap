@@ -10,6 +10,7 @@ extends Control
 const Campaign = preload("res://scripts/space/campaign.gd")
 const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
+const UiKit = preload("res://scripts/ui/ui_kit.gd")
 
 ## Emitted when the panel is closed.
 signal closed
@@ -131,11 +132,8 @@ const TITLE_H := 56.0
 const FONT := 13
 const ROW_GAP := 2.0
 const DIM := Color(0.0, 0.0, 0.0, 0.8)
-const PANEL_BG := Color("#1f2630")
 const ROW_BG := Color("#2a3340")
-const EDGE := Color("#cfd6df")
 const EDGE_DIM := Color("#59667a")
-const HIGHLIGHT := Color(1.0, 1.0, 1.0, 0.1)
 const TEXT := Color("#eef2f7")
 const DIM_TEXT := Color("#97a3b3")
 const GOOD := Color("#6bd34a")
@@ -264,7 +262,7 @@ func _process(_dt: float) -> void:
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), DIM)
 	var p := panel_rect()
-	_panel(p)
+	UiKit.frame(self, p)
 	_text("HOW TO PLAY", p.position + Vector2(PAD, 38.0), 26, TEXT)
 	_text("Everything flies on salvage. Keep the ship alive, keep Ma paid.", p.position + Vector2(PAD + 220.0, 36.0), 15, DIM_TEXT)
 	var cw := column_width()
@@ -326,13 +324,6 @@ func _first_run_box(at: Vector2, w: float) -> float:
 		draw_multiline_string(font, Vector2(box.position.x + 34.0, y + 16.0), steps[i], HORIZONTAL_ALIGNMENT_LEFT, w - 48.0, 16, -1, TEXT)
 		y += font.get_multiline_string_size(steps[i], HORIZONTAL_ALIGNMENT_LEFT, w - 48.0, 16).y + 9.0
 	return box.end.y
-
-
-## A chunky panel: a slate fill, a 2 px light border and a 1 px inner highlight.
-func _panel(r: Rect2, fill := PANEL_BG) -> void:
-	draw_rect(r, fill)
-	draw_rect(r, EDGE, false, 2.0)
-	draw_rect(r.grow(-3.0), HIGHLIGHT, false, 1.0)
 
 
 func _text(text: String, at: Vector2, font_size: int, col: Color) -> void:

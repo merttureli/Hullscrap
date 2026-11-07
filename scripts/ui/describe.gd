@@ -193,21 +193,6 @@ static func keyword(id: String, vals := {}) -> Dictionary:
 	return {"id": id, "label": fill(str(k["label"]), vals).to_upper(), "color": Color(str(k["color"])), "hover": fill(str(k["hover"]), vals)}
 
 
-## The weapon kind ("laser", "bolt", "flak", "missile", "beam") of weapon id `id`, or "" when it is not a weapon.
-static func weapon_kind(id: String) -> String:
-	return str(weapons().def(id)["kind"]) if weapons().has(id) else ""
-
-
-## The kind of weapon `id` as a keyword, and AUTO after it for a turret: what the palette's cards and the weapon bar show.
-static func weapon_tags(id: String) -> Array:
-	if not weapons().has(id):
-		return []
-	var out := [keyword(weapon_kind(id))]
-	if weapons().def(id)["turret"]:
-		out.append(keyword("auto"))
-	return out
-
-
 ## `s` up to its first sentence.
 static func first_sentence(s: String) -> String:
 	var at := -1

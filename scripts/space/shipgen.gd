@@ -55,6 +55,7 @@ static var _defs: Components = null
 static var _lines := {}
 static var _weapons: Weapons = null
 static var _powers := {}  # part id -> its line-adjusted power
+static var _slots := {}  # gun id -> slot_of()
 static var last_failed: Array = []  ## why the attempts of the last build() failed (all of them when it returned null)
 
 
@@ -152,6 +153,12 @@ static func _power(id: String) -> float:
 ## axis), "pd" (a point-defence turret: one leads each flank) or "flank" (turrets, swivels, broadsides, gun strips, flush pods). A gun
 ## with no shape is placed by its aim: a turret on the flank, any other on the bow.
 static func slot_of(id: String) -> String:
+	if not _slots.has(id):
+		_slots[id] = _slot(id)
+	return _slots[id]
+
+
+static func _slot(id: String) -> String:
 	var d := _def(id)
 	_comps()
 	var w := _weapons.def(id)
@@ -560,6 +567,13 @@ static func _menu(items: Array, budget: float) -> Array:
 	return out
 
 
+## _menu of the parts of category `cat`, made once per buy (kept in its _power_ctx).
+static func _sale(ctx: Dictionary, parts: Dictionary, cat: String, budget: float) -> Array:
+	if not ctx["menus"].has(cat):
+		ctx["menus"][cat] = _menu(parts[cat], budget)
+	return ctx["menus"][cat]
+
+
 static func _item(f: Dictionary, cat: String, id: String) -> Dictionary:
 	for m in f["parts"].get(cat, []):
 		if m["id"] == id:
@@ -633,7 +647,7 @@ static func _multi(n: int, count: int, from: int, cur: Array, out: Array) -> voi
 
 
 ## The numbers of the reactor choice for one buy: the menu on sale, the whole menu (for a base ship nothing on sale carries),
-## the most reactors the hull holds, the cost of the free base reactor, and a cache of plans by demand.
+## the most reactors the hull holds, the cost of the free base reactor, a cache of plans by demand and one of the menus (_sale).
 static func _power_ctx(f: Dictionary, mx: Dictionary, budget: float) -> Dictionary:
 	var rad := absf(_power("radiator"))
 	var on_sale: Array = []
@@ -647,7 +661,7 @@ static func _power_ctx(f: Dictionary, mx: Dictionary, budget: float) -> Dictiona
 	for m in f["parts"]["reactors"]:
 		if m["id"] == f["parts"]["base"]["reactor"]:
 			base_cost = float(m["cost"])
-	return {"sale": on_sale, "all": every, "cap": int(mx["reactor"]), "base": base_cost, "cache": {}}
+	return {"sale": on_sale, "all": every, "cap": int(mx["reactor"]), "base": base_cost, "cache": {}, "menus": {}}
 
 
 ## The cost, above the free base reactor, of the cheapest reactors that carry `need` power; -1 when the hull holds none that do.
@@ -685,7 +699,7 @@ static func _options(f: Dictionary, size: String, lo: Dictionary, mx: Dictionary
 	var demand := _demand(f, lo)
 	var here := maxf(_rplan(ctx, demand), 0.0)
 	var raw: Array = []  # [option, demand it adds]
-	for m in _menu(parts["weapons"], budget):
+	for m in _sale(ctx, parts, "weapons", budget):
 		if _slots_ok(lo["weapons"] + [m["id"]], mx):
 			var add := -minf(_power(str(m["id"])), 0.0) + int(m.get("needs", {}).get("radiator", 0)) * absf(_power("radiator"))
 			raw.append([{"cat": "weapons", "id": m["id"], "cost": float(m["cost"]), "weight": float(m.get("weight", 1))}, add])
@@ -693,7 +707,7 @@ static func _options(f: Dictionary, size: String, lo: Dictionary, mx: Dictionary
 		var tiles: Array = f["armour"]["tiles"]
 		var tile := str(tiles[mini(int(lo["armour"]), tiles.size() - 1)])
 		raw.append([{"cat": "armour", "id": tile, "cost": float(f["layer_cost"][size]) * float(f["armour"]["factor"].get(tile, 1.0)), "weight": 1.0}, 0.0])
-	for m in _menu(parts["shields"], budget):
+	for m in _sale(ctx, parts, "shields", budget):
 		var draw := -minf(_power(str(m["id"])), 0.0)
 		if lo["shields"].size() < int(mx["shield"]):
 			raw.append([{"cat": "shield", "id": m["id"], "cost": float(m["cost"]), "weight": float(m.get("weight", 1)), "mode": "add"}, draw])
@@ -706,7 +720,7 @@ static func _options(f: Dictionary, size: String, lo: Dictionary, mx: Dictionary
 	var cur_draw := -minf(_power(str(cur["id"])), 0.0)
 	if lo["engines"].size() < int(mx["engine"]):
 		raw.append([{"cat": "engine", "id": cur["id"], "cost": cur_cost, "weight": 1.0, "mode": "add"}, cur_draw])
-	for m in _menu(parts["engines"], budget):
+	for m in _sale(ctx, parts, "engines", budget):
 		if float(m["cost"]) > cur_cost:
 			var n: int = lo["engines"].size()
 			raw.append([{"cat": "engine", "id": m["id"], "cost": n * (float(m["cost"]) - cur_cost), "weight": 1.0, "mode": "tier"}, n * (-minf(_power(str(m["id"])), 0.0) - cur_draw)])
@@ -714,7 +728,7 @@ static func _options(f: Dictionary, size: String, lo: Dictionary, mx: Dictionary
 		raw.append([{"cat": "crew", "id": "", "cost": float(cfg["crew_cost"]), "weight": 1.0}, 0.0])
 	if float(lo["skill"]) + float(cfg["skill_step"]) <= float(f["ai"]["aim_skill"][1]) + 1e-6:
 		raw.append([{"cat": "skill", "id": "", "cost": float(cfg["skill_cost"]), "weight": 1.0}, 0.0])
-	for m in _menu(parts["systems"], budget):
+	for m in _sale(ctx, parts, "systems", budget):
 		if lo["systems"].count(m["id"]) < (3 if m["id"] == "radiator" else 1):
 			raw.append([{"cat": "systems", "id": m["id"], "cost": float(m["cost"]), "weight": float(m.get("weight", 1))}, -minf(_power(str(m["id"])), 0.0)])
 	var count := {}
@@ -1037,7 +1051,7 @@ static func _construct(f: Dictionary, faction: String, lo: Dictionary, bands: Ar
 				var origin: Vector2i = r["rect"].position if dx >= 0 else Vector2i(r["rect"].end.x, r["rect"].position.y)
 				var id := str(p["id"])
 				items.append({"id": id, "want": origin + Vector2i(dx, int(p["dy"])), "vital": id == lo["helm"] or id == lo["o2"] or _is_reactor(id), "n": items.size()})
-			var stood := _arrange(g, comps, r["rect"], items)
+			_arrange(g, comps, r["rect"], items)
 			left_over.append({"rect": r["rect"], "items": items})
 			for it in items:
 				if it["uid"] >= 0:
@@ -1071,8 +1085,9 @@ static func _arrange(g: ShipGrid, comps: Components, rect: Rect2i, items: Array)
 		it["uid"] = -1
 	var rest: Array = items.duplicate()
 	var next_uid: int = comps._next_uid
+	var room := Lanes.rect_room(g, rect)  # (standing parts changes no tile)
 	while true:
-		if _search(g, comps, rect, _biggest_first(rest), 0, [ARRANGE_NODES]):
+		if _search(g, comps, rect, _biggest_first(rest), 0, [ARRANGE_NODES], room):
 			return rest
 		for it in rest:  # (a failed search leaves nothing standing)
 			it["uid"] = -1
@@ -1106,8 +1121,8 @@ static func _area_of(id: String) -> int:
 	return int(_def(id)["size"][0]) * int(_def(id)["size"][1])
 
 
-## Stand items[i:] one by one; false (with none of items[i:] left standing) when no way keeps the walk.
-static func _search(g: ShipGrid, comps: Components, rect: Rect2i, items: Array, i: int, budget: Array) -> bool:
+## Stand items[i:] one by one; false (with none of items[i:] left standing) when no way keeps the walk. `room`: rect's Lanes.rect_room().
+static func _search(g: ShipGrid, comps: Components, rect: Rect2i, items: Array, i: int, budget: Array, room: Array) -> bool:
 	if i >= items.size():
 		return true
 	var it: Dictionary = items[i]
@@ -1119,9 +1134,9 @@ static func _search(g: ShipGrid, comps: Components, rect: Rect2i, items: Array, 
 		var uid := comps.place(g, it["id"], t[0], t[1])
 		if uid < 0:
 			continue
-		if not Lanes.rect_blocked(g, comps, rect):
+		if not Lanes.rect_blocked(g, comps, rect, room):
 			it["uid"] = uid
-			if _search(g, comps, rect, items, i + 1, budget):
+			if _search(g, comps, rect, items, i + 1, budget, room):
 				return true
 			it["uid"] = -1
 		comps.remove_uid(uid)
@@ -1129,31 +1144,47 @@ static func _search(g: ShipGrid, comps: Components, rect: Rect2i, items: Array, 
 	return false
 
 
-## Where item `it` could stand in `rect` now, best first: [anchor, turn, ...]. The planned spot, then the spots that leave the
+## Where item `it` could stand in `rect` now, best first: [anchor, turn]. The planned spot, then the spots that leave the
 ## least free floor round the part (against a wall or another part), then the nearest.
 static func _tries(comps: Components, rect: Rect2i, it: Dictionary) -> Array:
 	var want: Vector2i = it["want"]
-	var tries: Array = []
+	var by_key := {}  # sort key -> [anchor, turn]: the planned spot first, then the least free floor round, the nearest, turn 0, top to bottom, left to right
 	for rot in [0, 1]:
-		for y in range(rect.position.y, rect.end.y):
-			for x in range(rect.position.x, rect.end.x):
+		var offs: Array[Vector2i] = comps.footprint(it["id"], Vector2i.ZERO, rot)  # (a footprint moves with its anchor)
+		var lo := Vector2i.ZERO if offs.is_empty() else offs[0]
+		var hi := lo
+		var mine := {}
+		for o in offs:
+			mine[o] = true
+			lo = lo.min(o)
+			hi = hi.max(o)
+		var ring: Array[Vector2i] = []  # the cells round the footprint, each once
+		for o in offs:
+			for d in ShipGrid.SIDES:
+				if not mine.has(o + d):
+					mine[o + d] = true
+					ring.append(o + d)
+		# only the anchors that keep the whole footprint in the room
+		for y in range(maxi(rect.position.y, rect.position.y - lo.y), mini(rect.end.y, rect.end.y - hi.y)):
+			for x in range(maxi(rect.position.x, rect.position.x - lo.x), mini(rect.end.x, rect.end.x - hi.x)):
 				var at := Vector2i(x, y)
-				var cells: Array[Vector2i] = comps.footprint(it["id"], at, rot)
-				if cells.any(func(c): return not rect.has_point(c) or comps.at(c) >= 0):
+				var clear := true
+				for o in offs:
+					if comps.at(at + o) >= 0:
+						clear = false
+						break
+				if not clear:
 					continue
-				var free := {}
-				for c in cells:
-					for d in ShipGrid.SIDES:
-						var n: Vector2i = c + d
-						if rect.has_point(n) and comps.at(n) < 0 and not cells.has(n):
-							free[n] = true
-				tries.append([at, rot, 0 if at == want and rot == 0 else 1, free.size(), absi(x - want.x) + absi(y - want.y)])
-	tries.sort_custom(func(a: Array, b: Array) -> bool:
-		for k in [2, 3, 4, 1]:
-			if a[k] != b[k]:
-				return a[k] < b[k]
-		return a[0].y < b[0].y or (a[0].y == b[0].y and a[0].x < b[0].x))
-	return tries
+				var free := 0
+				for o in ring:
+					if rect.has_point(at + o) and comps.at(at + o) < 0:
+						free += 1
+				var dist := absi(x - want.x) + absi(y - want.y)
+				assert(free < 256 and dist < 4096 and x >= 0 and x < 4096 and y >= 0 and y < 4096, "a try out of the sort key's range")
+				by_key[(((((0 if at == want and rot == 0 else 1) * 256 + free) * 4096 + dist) * 2 + rot) * 4096 + y) * 4096 + x] = [at, rot]
+	var keys: Array = by_key.keys()
+	keys.sort()
+	return keys.map(func(k): return by_key[k])
 
 
 static func _is_reactor(id: String) -> bool:
@@ -1581,8 +1612,9 @@ static func _wire(ship: Ship) -> bool:
 	if net.is_empty():
 		return false
 	ship.cables.place(ship.grid, net.keys()[0])
+	var cost := {}  # (cables change no tile)
 	for uid in rest:
-		var path := _route(ship, ship.components.instances[uid]["cells"], net)
+		var path := _route(ship, ship.components.instances[uid]["cells"], net, cost)
 		if path.is_empty() and not _touches(ship.components.instances[uid]["cells"], net):
 			return false
 		for c in path:
@@ -1596,8 +1628,8 @@ static func _touches(cells: Array, net: Dictionary) -> bool:
 
 
 ## The cells of the cheapest cable path from a cell of `starts` to the network, not counting the end cell
-## (a floor cell costs 1, a part or a door 1, a wall 3, open space 50).
-static func _route(ship: Ship, starts: Array, net: Dictionary) -> Array:
+## (a floor cell costs 1, a part or a door 1, a wall 3, open space 50). `cost`: the cells' costs so far (-1 off the grid), kept while no tile changes.
+static func _route(ship: Ship, starts: Array, net: Dictionary, cost := {}) -> Array:
 	var g: ShipGrid = ship.grid
 	var dist := {}
 	var prev := {}
@@ -1622,9 +1654,13 @@ static func _route(ship: Ship, starts: Array, net: Dictionary) -> Array:
 				return path.filter(func(p): return not net.has(p))
 			for s in SIDES:
 				var n: Vector2i = c + s
-				if not g.in_bounds(n):
+				var k: int = cost.get(n, -2)
+				if k == -2:
+					k = _wire_cost(ship, n) if g.in_bounds(n) else -1
+					cost[n] = k
+				if k < 0:
 					continue
-				var nd := d + _wire_cost(ship, n)
+				var nd := d + k
 				if not dist.has(n) or nd < int(dist[n]):
 					dist[n] = nd
 					prev[n] = c

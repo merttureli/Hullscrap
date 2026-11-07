@@ -275,15 +275,6 @@ func test_the_card_shows_keyword_chips_and_explains_one_under_the_mouse() -> voi
 	_done(b)
 
 
-func test_a_weapon_cards_kind_shows_under_its_name_in_the_palette() -> void:
-	var b := _build({"scrap": 200, "laser_turret_mk1": 1, "artemis_mk1": 1})
-	var tags: Array = Describe.weapon_tags("laser_turret_mk1")
-	eq(tags.map(func(k): return k["label"]), ["LASER", "AUTO"], "a turret card: its kind, then AUTO")
-	eq(Describe.weapon_tags("artemis_mk1").map(func(k): return k["label"]), ["MISSILE"], "a missile card: its kind")
-	check(tags[0]["color"] != Describe.weapon_tags("artemis_mk1")[0]["color"], "each kind has its own colour")
-	_done(b)
-
-
 func test_the_selection_card_shows_the_stats_of_the_selected_def() -> void:
 	var b := _build({"scrap": 200, "engine_mk1": 1})
 	b.pick(Palette.part_entry(b.ship, "engine_mk1"))

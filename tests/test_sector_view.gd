@@ -557,7 +557,7 @@ func test_debris_spawns_ahead_of_a_ship_that_outruns_the_current() -> void:
 	check(p["pos"].y < 0.0, "a still ship: pieces come from upstream, the north")
 	var fast := DriftDebris.new(1, cfg)
 	fast.frame_vel = Vector2(0.0, 900.0)
-	check(fast.flow_dir().y < 0.0, "flying south faster than the current, the debris streams north past the ship")
+	check(fast.stream_flow(0).y < 0.0, "flying south faster than the current, the debris streams north past the ship")
 	var q: Dictionary = fast._spawn(ship)
 	check(q["pos"].y > 0.0, "so it appears ahead, to the south")
 	check(q["vel"].y > 0.0, "while it still moves with the current, south")

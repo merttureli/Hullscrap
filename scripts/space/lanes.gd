@@ -36,10 +36,11 @@ static func room_blocked(grid, comps, cells: Dictionary, doors: Array) -> bool:
 		return false
 	var seen := {ports[0]: true}
 	var todo: Array[Vector2i] = [ports[0]]
-	if not _body(grid, comps, cells, ports[0]):
+	var open := {}  # cell -> _open, asked once per cell
+	if not _body(grid, comps, cells, ports[0], open):
 		if ports.size() == 1:  # one door into a room a part fills (a turret): there is no walk to cut, unless a body fits somewhere else
 			for a in cells:
-				if _body(grid, comps, cells, a):
+				if _body(grid, comps, cells, a, open):
 					return true
 			return false
 		return true
@@ -47,7 +48,7 @@ static func room_blocked(grid, comps, cells: Dictionary, doors: Array) -> bool:
 		var a: Vector2i = todo.pop_back()
 		for d in SIDES:
 			var n := a + d
-			if not seen.has(n) and _body(grid, comps, cells, n):
+			if not seen.has(n) and _body(grid, comps, cells, n, open):
 				seen[n] = true
 				todo.append(n)
 	for p in ports:
@@ -56,11 +57,15 @@ static func room_blocked(grid, comps, cells: Dictionary, doors: Array) -> bool:
 	return false
 
 
-static func _body(grid, comps, cells: Dictionary, a: Vector2i) -> bool:
+static func _body(grid, comps, cells: Dictionary, a: Vector2i, open: Dictionary) -> bool:
 	for y in 2:
 		for x in 2:
 			var c := a + Vector2i(x, y)
-			if not cells.has(c) or not _open(grid, comps, c):
+			if not cells.has(c):
+				return false
+			if not open.has(c):
+				open[c] = _open(grid, comps, c)
+			if not open[c]:
 				return false
 	return true
 
@@ -86,13 +91,20 @@ static func doors_round(grid, r: Rect2i) -> Array:
 	return out
 
 
-## Is the room `r` (a rectangle of floor) cut off?
-static func rect_blocked(grid, comps, r: Rect2i) -> bool:
+## The cells (a set) and the door pieces of the rectangle `r`: what rect_blocked reads. Only tiles change them, not parts.
+static func rect_room(grid, r: Rect2i) -> Array:
 	var cells := {}
 	for y in range(r.position.y, r.end.y):
 		for x in range(r.position.x, r.end.x):
 			cells[Vector2i(x, y)] = true
-	return room_blocked(grid, comps, cells, doors_round(grid, r))
+	return [cells, doors_round(grid, r)]
+
+
+## Is the room `r` (a rectangle of floor) cut off? `room`: its rect_room(), when the caller has it and no tile changed since.
+static func rect_blocked(grid, comps, r: Rect2i, room := []) -> bool:
+	if room.is_empty():
+		room = rect_room(grid, r)
+	return room_blocked(grid, comps, room[0], room[1])
 
 
 ## How many rooms of `ship` (floor regions between walls and doors) are cut off.

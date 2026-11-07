@@ -51,7 +51,6 @@ func _line_tide(exit_id := "", stage := 1) -> Tide:
 func test_the_front_moves_one_step_of_the_axis_per_jump_after_the_grace() -> void:
 	var t := _line_tide()
 	eq(t.axis_len, 1000.0, "the axis is the farthest node's px from the entry")
-	eq(t.per_step(), 100.0, "1000 px over 10 jumps")
 	eq(t.front(), 0.0, "at the start the front has not moved")
 	t.advance(2)
 	eq(t.front(), 0.0, "the grace holds it")

@@ -636,11 +636,6 @@ func tick_jump(dt: float, hostiles_near: bool, ship) -> String:
 
 # --- sectors ------------------------------------------------------------------------------------------------
 
-## The region of node `id`: every node of the map is in the current region (region_id); "" for a node the map does not have.
-func region_of(id: String) -> String:
-	return region_id if drift.has(id) else ""
-
-
 ## The sector of node `id`: made from the region seed, the node and the region's data the first time it is asked for, the
 ## same every time. null for a node the map does not have.
 func sector_at(id: String):
@@ -1054,13 +1049,6 @@ func _drone_parts(enemy) -> int:
 	if str(enemy.get_meta("shipgen", {}).get("faction", "")) in ["kett", "gauntling"]:
 		n += 1
 	return n
-
-
-## The salvage event that follows a won fight (a wreck_field one), or {}.
-func salvage_event(ship) -> Dictionary:
-	var ev := events.pick(self, {"id": current, "type": "wreck_field", "place": ""}, ship)
-	events_seen += int(not ev.is_empty())
-	return ev
 
 
 # --- crew --------------------------------------------------------------------------------------------------------

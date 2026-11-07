@@ -24,12 +24,11 @@ signal board_requested(spec: Dictionary, ev: Dictionary)
 ## of the boarding session (events.gd result "npc"), `acted` whether any outcome did something.
 signal talk_done(ops: Array, acted: bool)
 
-const Session = preload("res://scripts/combat/combat_session.gd")
 const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
-const Shipgen = preload("res://scripts/space/shipgen.gd")
 const FoeInfo = preload("res://scripts/space/foe_info.gd")
 const FoePic = preload("res://scripts/ui/foe_pic.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
+const UiKit = preload("res://scripts/ui/ui_kit.gd")
 
 const WIDTH := 940.0
 const PAD := 26.0
@@ -41,11 +40,9 @@ const ROW_TEXT_W := 90.0  ## px kept free at the right of a row's text
 const TEXT_SIZE := 18
 const ROW_SIZE := 17
 const DIM := Color(0.0, 0.0, 0.0, 0.55)
-const PANEL_BG := Color("#1f2630")
 const ROW_BG := Color("#2a3340")
 const EDGE := Color("#cfd6df")
 const EDGE_DIM := Color("#59667a")
-const HIGHLIGHT := Color(1.0, 1.0, 1.0, 0.1)
 const TEXT := Color("#eef2f7")
 const DIM_TEXT := Color("#97a3b3")
 const GOOD := Color("#6bd34a")
@@ -288,12 +285,8 @@ func choice_rect(i: int) -> Rect2:
 
 # --- layout -------------------------------------------------------------------------------------------------------
 
-func _font() -> Font:
-	return ThemeDB.fallback_font
-
-
 func _wrapped(text: String, width: float, font_size: int) -> float:
-	return _font().get_multiline_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, width, font_size).y if text != "" else 0.0
+	return UiKit.font().get_multiline_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, width, font_size).y if text != "" else 0.0
 
 
 ## Where everything goes for the page now: {panel, text (Rect2), rows (the choices), lines (y of each
@@ -308,7 +301,7 @@ func layout() -> Dictionary:
 	y += text_h + GAP * 1.5
 	if page == "choices":
 		for v in view:
-			var h := maxf((v["lines"].size() * _font().get_height(ROW_SIZE) if v.has("lines") else _wrapped(_row_label(v), inner - ROW_TEXT_W, ROW_SIZE)) + 2.0 * ROW_PAD, 40.0)
+			var h := maxf((v["lines"].size() * UiKit.font().get_height(ROW_SIZE) if v.has("lines") else _wrapped(_row_label(v), inner - ROW_TEXT_W, ROW_SIZE)) + 2.0 * ROW_PAD, 40.0)
 			out["rows"].append(Rect2(Vector2(PAD, y), Vector2(inner, h)))
 			y += h + ROW_GAP
 		if message != "":
@@ -383,18 +376,12 @@ func _set_tag(v: Dictionary, tag: String, color: Color) -> void:
 	var para := TextParagraph.new()  # the tag's spaces do not break, so it never splits over two lines
 	para.width = WIDTH - 2.0 * PAD - ROW_TEXT_W
 	var text := "%s %s" % [_row_label(v), str(v["tag"]).replace(" ", "\u00a0")]
-	para.add_string(text, _font(), ROW_SIZE)
+	para.add_string(text, UiKit.font(), ROW_SIZE)
 	var lines := []
 	for k in para.get_line_count():
 		var span := para.get_line_range(k)
 		lines.append(text.substr(span.x, span.y - span.x).replace("\u00a0", " ").strip_edges(false, true))
 	v["lines"] = lines
-
-
-## A number that changes when the ship's hull, parts, damage or power do (what its threat rating depends on).
-static func ship_key(ship) -> int:
-	ship.refresh()
-	return hash([ship.grid.tiles.hash(), ship.components.instances.hash(), ship.power_state.hash()])
 
 
 # --- drawing -------------------------------------------------------------------------------------------------------
@@ -403,12 +390,12 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), DIM)
 	var lay := layout()
 	var p: Rect2 = lay["panel"]
-	_panel(p)
+	UiKit.frame(self, p)
 	_text(title.to_upper(), p.position + Vector2(PAD, 36.0), 22, AMBER)
 	draw_line(p.position + Vector2(PAD, TITLE_H - 6.0), p.position + Vector2(p.size.x - PAD, TITLE_H - 6.0), EDGE_DIM, 1.0)
 	var t: Rect2 = lay["text"]
 	if t.size.y > 0.0:
-		draw_multiline_string(_font(), t.position + Vector2(0.0, 16.0), str(event.get("text", "")) if page == "choices" else str(result.get("text", "")),
+		draw_multiline_string(UiKit.font(), t.position + Vector2(0.0, 16.0), str(event.get("text", "")) if page == "choices" else str(result.get("text", "")),
 			HORIZONTAL_ALIGNMENT_LEFT, t.size.x, TEXT_SIZE, -1, TEXT)
 	if page == "choices":
 		for i in view.size():
@@ -428,18 +415,18 @@ func _draw_row(i: int, r: Rect2) -> void:
 	var col := DIM_TEXT if v["grey"] else (CYAN if v["blue"] else TEXT)
 	_text("%d" % (i + 1), r.position + Vector2(14.0, ROW_PAD + 15.0), ROW_SIZE, AMBER if not v["grey"] else EDGE_DIM)
 	if not v.has("lines"):
-		draw_multiline_string(_font(), r.position + Vector2(44.0, ROW_PAD + 14.0), _row_label(v), HORIZONTAL_ALIGNMENT_LEFT, r.size.x - ROW_TEXT_W, ROW_SIZE, -1, col)
+		draw_multiline_string(UiKit.font(), r.position + Vector2(44.0, ROW_PAD + 14.0), _row_label(v), HORIZONTAL_ALIGNMENT_LEFT, r.size.x - ROW_TEXT_W, ROW_SIZE, -1, col)
 		return
 	var lines: Array = v["lines"]  # the text wrapped with its threat tag at the end, which has a colour of its own
 	for k in lines.size():
-		var at := r.position + Vector2(44.0, ROW_PAD + 14.0 + k * _font().get_height(ROW_SIZE))
+		var at := r.position + Vector2(44.0, ROW_PAD + 14.0 + k * UiKit.font().get_height(ROW_SIZE))
 		var line := str(lines[k])
 		if k < lines.size() - 1:
 			_text(line, at, ROW_SIZE, col)
 			continue
 		var head := line.substr(0, line.length() - str(v["tag"]).length())
 		_text(head, at, ROW_SIZE, col)
-		_text(str(v["tag"]), at + Vector2(_font().get_string_size(head, HORIZONTAL_ALIGNMENT_LEFT, -1, ROW_SIZE).x, 0.0), ROW_SIZE, v["tag_color"])
+		_text(str(v["tag"]), at + Vector2(UiKit.font().get_string_size(head, HORIZONTAL_ALIGNMENT_LEFT, -1, ROW_SIZE).x, 0.0), ROW_SIZE, v["tag_color"])
 
 
 func _draw_result(lay: Dictionary) -> void:
@@ -457,7 +444,7 @@ func _draw_result(lay: Dictionary) -> void:
 		draw_rect(lr, Color("#10151c"))
 		draw_rect(lr, EDGE_DIM, false, 1.0)
 		_text("DATA PAD: %s" % l.get("title", ""), lr.position + Vector2(12.0, 24.0), 15, AMBER)
-		draw_multiline_string(_font(), lr.position + Vector2(12.0, 46.0), str(l.get("text", "")), HORIZONTAL_ALIGNMENT_LEFT, lr.size.x - 24.0, 15, -1, DIM_TEXT)
+		draw_multiline_string(UiKit.font(), lr.position + Vector2(12.0, 46.0), str(l.get("text", "")), HORIZONTAL_ALIGNMENT_LEFT, lr.size.x - 24.0, 15, -1, DIM_TEXT)
 	var b: Rect2 = lay["button"]
 	var fighting := str(result.get("fight", "")) != ""
 	var ended := str(result.get("ending", "")) != "" and not fighting
@@ -482,12 +469,5 @@ static func tone_of(line: String) -> int:
 	return -sign if line.begins_with("Debt") else sign
 
 
-## A chunky panel: a slate fill, a 2 px light border and a 1 px inner highlight.
-func _panel(r: Rect2, fill := PANEL_BG) -> void:
-	draw_rect(r, fill)
-	draw_rect(r, EDGE, false, 2.0)
-	draw_rect(r.grow(-3.0), HIGHLIGHT, false, 1.0)
-
-
 func _text(text: String, at: Vector2, font_size: int, col: Color) -> void:
-	draw_string(_font(), at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, col)
+	draw_string(UiKit.font(), at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, col)

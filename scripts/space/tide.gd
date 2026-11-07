@@ -81,11 +81,6 @@ static func make(drift, entry_id: String, cfg := {}, exit_id := "", stage := 1):
 
 # --- the front ----------------------------------------------------------------------------------------------
 
-## px the front moves per step.
-func per_step() -> float:
-	return axis_len / float(jumps_to_cross)
-
-
 ## Where the front is after `s` steps, px along the axis (0 until the grace is used up).
 func front_at(s: int) -> float:
 	return float(maxi(s - grace, 0)) * axis_len / float(jumps_to_cross)
@@ -94,11 +89,6 @@ func front_at(s: int) -> float:
 ## Where the front is now.
 func front() -> float:
 	return front_at(steps)
-
-
-## The node's px along the axis (0 for an unknown node).
-func projection(id: String) -> float:
-	return float(_proj.get(id, 0.0))
 
 
 func holds(id: String) -> bool:

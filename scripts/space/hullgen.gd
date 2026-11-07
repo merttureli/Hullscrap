@@ -410,7 +410,6 @@ static func raster(outline: Array) -> Dictionary:
 		hi = hi.max(p)
 	var y0 := floori(lo.y)
 	var y1 := ceili(hi.y)
-	var x0 := floori(lo.x)
 	var cut := {}  # cells a slanted edge crosses
 	var crossings: Array = []  # per row: the x where an edge crosses the row's middle line
 	for _y in range(y0, y1):

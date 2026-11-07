@@ -8,3 +8,4 @@
 art/**/*.import
 /build/
 /version.txt
+__pycache__/

@@ -108,7 +108,7 @@ func blocks() -> Array:
 		lines = lines.slice(0, 2)
 		out.append(["lore", lines.size() * LINE + 4.0, {"lines": lines}])
 	if not inf["cost"].is_empty() or inf["note"] != "":
-		var cost := _cost(inf, e, w)
+		var cost := _cost(inf, w)
 		out.append(["cost", cost["h"], cost])
 	var over := _sum(out) - available_height()
 	if over > 0.0:  # a long description: the picture gives up room so the cost still shows
@@ -139,7 +139,7 @@ func _grid(stats: Array, w: float) -> Array:
 
 ## The cost line: "Cost", each material with its icon, the fabricator level, and the note (how to get one) on the same
 ## line when it fits, else under it: {mats ([[id, n]]), level, per, note, wrapped (the note is on its own line), h}.
-func _cost(inf: Dictionary, e: Dictionary, w: float) -> Dictionary:
+func _cost(inf: Dictionary, w: float) -> Dictionary:
 	var mats := []
 	var x := 40.0
 	for m in inf["cost"]:

@@ -8,16 +8,16 @@ extends Control
 ## Emitted with the id of the button pressed: "new" or "menu".
 signal chosen(id: String)
 
+const UiKit = preload("res://scripts/ui/ui_kit.gd")
+
 const BUTTONS: Array = [{"id": "new", "label": "New run", "key": KEY_N}, {"id": "menu", "label": "Main menu", "key": KEY_M}]
 const ROWS: Array = [["Jumps made", "jumps"], ["Credits", "credits"], ["Debt left", "debt"], ["Crew alive", "crew"], ["Events seen", "events"], ["Fights won", "fights"]]
 const PANEL := Vector2(560.0, 520.0)
 const BTN := Vector2(240.0, 48.0)
 const DIM := Color(0.0, 0.0, 0.0, 0.8)
-const PANEL_BG := Color("#1f2630")
 const ROW_BG := Color("#2a3340")
 const EDGE := Color("#cfd6df")
 const EDGE_DIM := Color("#59667a")
-const HIGHLIGHT := Color(1.0, 1.0, 1.0, 0.1)
 const TEXT := Color("#eef2f7")
 const DIM_TEXT := Color("#97a3b3")
 const BAD := Color("#e0413b")
@@ -127,7 +127,7 @@ func button_at(p: Vector2) -> int:
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), DIM)
 	var p := panel_rect()
-	_panel(p)
+	UiKit.frame(self, p)
 	_centered("YOUR SHIP IS SCRAP", p.position.y + 74.0, 38, BAD)
 	_centered(str(stats.get("ship", "")), p.position.y + 112.0, 22, AMBER)
 	var y := p.position.y + 150.0
@@ -151,13 +151,6 @@ func _draw() -> void:
 		var k := OS.get_keycode_string(BUTTONS[i]["key"])
 		_text(k, b.position + Vector2(b.size.x - 28.0, 30.0), 15, AMBER if hot else DIM_TEXT)
 	_centered("The save is gone: death is final.", p.end.y - 16.0, 14, DIM_TEXT)
-
-
-## A chunky panel: a slate fill, a 2 px light border and a 1 px inner highlight.
-func _panel(r: Rect2, fill := PANEL_BG) -> void:
-	draw_rect(r, fill)
-	draw_rect(r, EDGE, false, 2.0)
-	draw_rect(r.grow(-3.0), HIGHLIGHT, false, 1.0)
 
 
 func _centered(text: String, y: float, font_size: int, col: Color) -> void:

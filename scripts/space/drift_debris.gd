@@ -135,11 +135,6 @@ func stream_flow(i := 0) -> Vector2:
 	return f.normalized() if f.length() > 1.0 else own
 
 
-## The way the main current's pieces cross the view.
-func flow_dir() -> Vector2:
-	return stream_flow(0)
-
-
 ## What the next piece is picked from: each stream's share of the pieces times how much faster its flow past the ship is than
 ## the stream itself, clamped to spawn.flow_min (1 when the data has none) to 6 (the main current has the share the side streams leave). Their sum
 ## scales the spawn rate.

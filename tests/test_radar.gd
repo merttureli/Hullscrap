@@ -5,7 +5,6 @@ extends "res://tests/base_test.gd"
 
 const Campaign = preload("res://scripts/space/campaign.gd")
 const Radar = preload("res://scripts/space/radar.gd")
-const Sector = preload("res://scripts/space/sector.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Wall = preload("res://tests/fixture_wall.gd")
 

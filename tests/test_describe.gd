@@ -173,10 +173,6 @@ func test_a_part_gets_its_keywords() -> void:
 	check(_labels("basalt_magma_spitter", ship).has("QUIRK"), "a part's own quirk is a chip (its hover says it)")
 	var hover: String = Describe.of("laser_mk1", ship)["keywords"].filter(func(k): return k["id"] == "laser")[0]["hover"]
 	eq(hover, "Hits instantly. Shields block it.", "a keyword's hover line")
-	var kind := Describe.weapon_tags("laser_turret_mk1")
-	eq(kind.map(func(k): return k["label"]), ["LASER", "AUTO"], "the palette's tags: the kind, and AUTO for a turret")
-	eq(Describe.weapon_tags("engine_mk1"), [], "an engine has none")
-	eq(Describe.weapon_kind("artemis_mk1"), "missile", "the kind the weapon bar colours by")
 
 
 func test_the_numbers_come_from_the_data() -> void:

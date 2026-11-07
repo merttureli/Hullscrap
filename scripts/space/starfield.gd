@@ -15,7 +15,6 @@ const SPACE := Color("#05070c")
 @export var count := 260
 
 var stars: Array = []  # [unit position, depth 0.2..1, radius]
-var t := 0.0
 var region := ""  ## the nebula drawn: clans, concord, lumen, boneyard, gate, or "" for none
 var cam_pos := Vector2.ZERO  ## the camera's place in the world; the layers move against it
 var _offset := Vector2.ZERO  # the drift integrated over time, so a drift that changes (debris_view.gd follows the current) never makes the sky jump
@@ -36,7 +35,6 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	t += delta
 	_offset += drift * delta
 	var cam := get_viewport().get_camera_2d() if is_inside_tree() else null
 	if cam != null:

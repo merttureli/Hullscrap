@@ -21,6 +21,7 @@ signal ledger_changed(mode: String)
 
 const Profile = preload("res://scripts/ui/profile.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
+const UiKit = preload("res://scripts/ui/ui_kit.gd")
 
 enum Mode { MAIN, PAUSE }
 
@@ -49,9 +50,7 @@ const GAP := 12.0
 const DIM := Color(0.0, 0.0, 0.0, 0.7)
 const PANEL_BG := Color("#1f2630")
 const ROW_BG := Color("#2a3340")
-const EDGE := Color("#cfd6df")
 const EDGE_DIM := Color("#59667a")
-const HIGHLIGHT := Color(1.0, 1.0, 1.0, 0.1)
 const TEXT := Color("#eef2f7")
 const DIM_TEXT := Color("#97a3b3")
 const GOOD := Color("#6bd34a")
@@ -368,15 +367,8 @@ func _draw_pause() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), DIM)
 	var top := _top()
 	var p := Rect2(Vector2((size.x - BTN.x) / 2.0 - 28.0, top - 78.0), Vector2(BTN.x + 56.0, 78.0 + list().size() * (BTN.y + GAP) + 28.0 + (28.0 if note != "" else 0.0) + SOUND_H + LEDGER_H))
-	_panel(p)
+	UiKit.frame(self, p)
 	_centered("PAUSED", top - 32.0, 26, TEXT)
-
-
-## A chunky panel: a slate fill, a 2 px light border and a 1 px inner highlight.
-func _panel(r: Rect2, fill := PANEL_BG) -> void:
-	draw_rect(r, fill)
-	draw_rect(r, EDGE, false, 2.0)
-	draw_rect(r.grow(-3.0), HIGHLIGHT, false, 1.0)
 
 
 func _centered(text: String, y: float, font_size: int, col: Color) -> void:

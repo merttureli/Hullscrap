@@ -14,6 +14,7 @@ const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
 const Backstory = preload("res://scripts/crew/backstory.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
 const Shops = preload("res://scripts/space/shops.gd")
+const UiKit = preload("res://scripts/ui/ui_kit.gd")
 
 const MARGIN := 40.0
 const PAD := 18.0
@@ -25,11 +26,8 @@ const STORY_SIZE := 13  ## font size of the story under a recruit
 const COL_GAP := 14.0
 const COL_SPLIT: Array[float] = [0.36, 0.30, 0.34]
 const DIM := Color(0.0, 0.0, 0.0, 0.62)
-const PANEL_BG := Color("#1f2630")
 const ROW_BG := Color("#2a3340")
-const EDGE := Color("#cfd6df")
 const EDGE_DIM := Color("#59667a")
-const HIGHLIGHT := Color(1.0, 1.0, 1.0, 0.1)
 const TEXT := Color("#eef2f7")
 const DIM_TEXT := Color("#97a3b3")
 const GOOD := Color("#6bd34a")
@@ -270,7 +268,7 @@ func _draw() -> void:
 	var s = map.ship()
 	draw_rect(Rect2(Vector2.ZERO, size), DIM)
 	var p := panel_rect()
-	_panel(p)
+	UiKit.frame(self, p)
 	var n: Dictionary = c.node(station)
 	var title := str(_cfg().get("name", "")) if station.begins_with(c.SHOP_PREFIX) else (str(n["name"]) if str(n["name"]) != "" else "Scrapper trader")
 	_text(title.to_upper(), p.position + Vector2(PAD, 38.0), 26, TEXT)
@@ -330,13 +328,6 @@ func _draw_column(col: int, credits: int) -> void:
 func _right(text: String, r: Rect2, font_size: int, col: Color, baseline: float) -> void:
 	var w := ThemeDB.fallback_font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
 	_text(text, Vector2(r.end.x - w - 10.0, r.position.y + baseline), font_size, col)
-
-
-## A chunky panel: a slate fill, a 2 px light border and a 1 px inner highlight.
-func _panel(r: Rect2, fill := PANEL_BG) -> void:
-	draw_rect(r, fill)
-	draw_rect(r, EDGE, false, 2.0)
-	draw_rect(r.grow(-3.0), HIGHLIGHT, false, 1.0)
 
 
 func _text(text: String, at: Vector2, font_size: int, col: Color) -> void:

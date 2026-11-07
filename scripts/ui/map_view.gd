@@ -35,6 +35,7 @@ const RunStart = preload("res://scripts/space/run_start.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
 const WreckSite = preload("res://scripts/board/wreck_site.gd")
 const Boarding = preload("res://scripts/board/boarding.gd")
+const UiKit = preload("res://scripts/ui/ui_kit.gd")
 
 const MARGIN := 40.0
 const TITLE_H := 64.0
@@ -42,11 +43,9 @@ const FOOT_H := 96.0
 const PAD := 18.0
 const NODE_R := 13.0
 const DIM := Color(0.0, 0.0, 0.0, 0.7)
-const PANEL_BG := Color("#1f2630")
 const SPACE_BG := Color("#0b0f16")
 const EDGE := Color("#cfd6df")
 const EDGE_DIM := Color("#59667a")
-const HIGHLIGHT := Color(1.0, 1.0, 1.0, 0.1)
 const TEXT := Color("#eef2f7")
 const DIM_TEXT := Color("#97a3b3")
 const GOOD := Color("#6bd34a")
@@ -86,7 +85,6 @@ var _fighting := false  # a fight of ours is on
 var _boarding := false  # the soldier is aboard another vessel
 var _board_ev := {}  # the page he went aboard from: it opens again when he is back
 var _after_win := {}  # the after_win of the event that started it
-var _fight_node := ""  # the type of the node it was started at
 var _queue: Array[Callable] = []  # what comes after the event panel is done
 var panel_only := false  ## shown only to hold the event or station panel of a sector POI: no map is drawn
 var _poi := ""  # the id of the POI whose event is up (open_poi), "" when none
@@ -573,7 +571,6 @@ func _start_fight(value: String, after_win: Dictionary) -> void:
 		session.arena.hazard = campaign.hazard_at(campaign.current)  # the node's sector hazard, if any (hazards.gd)
 	_fighting = true
 	_after_win = after_win
-	_fight_node = str(campaign.node(campaign.current)["type"])
 	visible = false
 
 
@@ -811,7 +808,7 @@ func _draw() -> void:
 		return
 	draw_rect(Rect2(Vector2.ZERO, size), DIM)
 	var p := panel_rect()
-	_panel(p)
+	UiKit.frame(self, p)
 	_text("THE DRIFT", p.position + Vector2(PAD, 38.0), 26, TEXT)
 	_draw_status(p)
 	var m := map_rect()
@@ -944,7 +941,7 @@ func _draw_tip(id: String) -> void:
 	var box := Rect2(node_pos(id) + Vector2(18.0, -18.0), Vector2(w + 20.0, 12.0 + 20.0 * lines.size()))
 	if box.end.x > size.x - 10.0:
 		box.position.x -= box.size.x + 36.0
-	_panel(box, Color("#10151c"))
+	UiKit.frame(self, box, Color("#10151c"))
 	for i in lines.size():
 		_text(lines[i], box.position + Vector2(10.0, 22.0 + 20.0 * i), 14, TEXT if i == 0 else (AMBER if lines[i].begins_with("Hazard:") else DIM_TEXT))
 
@@ -1011,13 +1008,6 @@ func _draw_foot(p: Rect2) -> void:
 ## The region's tint (its palette), for the map's background and the stage line.
 func _tint() -> Color:
 	return Color(str(campaign.region_data.get("palette", {}).get("tint", "#cfd6df")))
-
-
-## A chunky panel: a slate fill, a 2 px light border and a 1 px inner highlight.
-func _panel(r: Rect2, fill := PANEL_BG) -> void:
-	draw_rect(r, fill)
-	draw_rect(r, EDGE, false, 2.0)
-	draw_rect(r.grow(-3.0), HIGHLIGHT, false, 1.0)
 
 
 func _text(text: String, at: Vector2, font_size: int, col: Color) -> void:

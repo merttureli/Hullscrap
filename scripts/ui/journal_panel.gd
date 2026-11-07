@@ -4,12 +4,12 @@ extends Control
 ## J opens it from the map; Esc, J or Enter close it, Up / Down / PgUp / PgDn / the wheel scroll it by an entry.
 ## While open it takes every key and click. In the style of the help panel (help_panel.gd).
 
-## Emitted when the panel is closed.
 const Audio = preload("res://scripts/audio/audio.gd")
 const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
 const Advisor = preload("res://scripts/sim/advisor.gd")
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
 
+## Emitted when the panel is closed.
 signal closed
 
 const WIDTH := 980.0
@@ -21,11 +21,8 @@ const GAP := 14.0
 const TITLE_SIZE := 17
 const TEXT_SIZE := 15
 const DIM := Color(0.0, 0.0, 0.0, 0.8)
-const PANEL_BG := Color("#1f2630")
 const ROW_BG := Color("#2a3340")
-const EDGE := Color("#cfd6df")
 const EDGE_DIM := Color("#59667a")
-const HIGHLIGHT := Color(1.0, 1.0, 1.0, 0.1)
 const TEXT := Color("#eef2f7")
 const DIM_TEXT := Color("#97a3b3")
 const AMBER := Color("#e1a136")
@@ -186,7 +183,7 @@ func _process(_dt: float) -> void:
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), DIM)
 	var p := panel_rect()
-	_panel(p)
+	UiKit.frame(self, p)
 	var all := listed()
 	_text("JOURNAL", p.position + Vector2(PAD, 40.0), 26, TEXT)
 	for i in 2:
@@ -211,13 +208,6 @@ func _draw() -> void:
 	if top + shown.size() < all.size():
 		_text("v more (Down / wheel)", Vector2(p.end.x - PAD - 150.0, p.end.y - 12.0), 13, DIM_TEXT)
 	_text("Tab: logs / Ledger    J / Esc / Enter: close    Up / Down / wheel: scroll", Vector2(p.position.x + PAD, p.end.y - 12.0), 13, DIM_TEXT)
-
-
-## A chunky panel: a slate fill, a 2 px light border and a 1 px inner highlight.
-func _panel(r: Rect2, fill := PANEL_BG) -> void:
-	draw_rect(r, fill)
-	draw_rect(r, EDGE, false, 2.0)
-	draw_rect(r.grow(-3.0), HIGHLIGHT, false, 1.0)
 
 
 func _text(text: String, at: Vector2, font_size: int, col: Color) -> void:

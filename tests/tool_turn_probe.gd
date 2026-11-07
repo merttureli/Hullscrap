@@ -27,7 +27,6 @@ func _run() -> void:
 	for f in DirAccess.get_files_at("res://data/packs/flagships_1/ships"):
 		if f.ends_with(".json"):
 			_probe(f.trim_suffix(".json"), Session.load_ship("res://data/packs/flagships_1/ships/" + f), dummy)
-	var light: Dictionary = rows[0]
 	print("| ship | mass | thrust | 90 deg turn s | top speed px/s | hold gap px | light orbit 90 deg s |")
 	print("|---|---|---|---|---|---|---|")
 	for r in rows:

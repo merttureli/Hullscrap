@@ -57,7 +57,6 @@ static func budget_of(faction: String, stage: int) -> float:
 ## [{size, stage, seed, budget, ship}] of every combination.
 static func gather(faction: String, seeds: int) -> Array:
 	var rows: Array = []
-	var f: Dictionary = Shipgen.tables()["factions"][faction]
 	for size in SIZES:
 		if Shipgen.at_least(faction, size) != size:
 			continue
@@ -155,7 +154,6 @@ static func report(faction: String, rows: Array) -> String:
 	var lines := PackedStringArray()
 	lines.append("=== %s: %d ships ===" % [faction, rows.size()])
 	var keys := {}
-	var occs: Array = []
 	var fams := {}
 	for r in rows:
 		keys[silhouette_key(r["ship"])] = true
@@ -202,7 +200,6 @@ func sheet(faction: String, rows: Array, path: String) -> void:
 	var maxw := {}
 	var maxh := {}
 	for r in rows:
-		var o: Array = r["occ"] if r.has("occ") else occupancy(r["ship"])
 		# the box of everything drawn: hull area of the ship, outside halves included
 		var hb: Rect2 = hull_box(r["ship"])
 		r["box"] = hb

@@ -35,6 +35,7 @@ const Mounts = preload("res://scripts/ship/mounts.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const Visuals = preload("res://scripts/view/visuals.gd")
 const TileArt = preload("res://scripts/view/tile_art.gd")
+const Art = preload("res://scripts/view/art.gd")
 const GlowLayer = preload("res://scripts/view/glow_layer.gd")
 const MapView = preload("res://scripts/ui/map_view.gd")
 const ShieldPanel = preload("res://scripts/ui/shield_panel.gd")
@@ -127,6 +128,9 @@ var _door_open := {}  # a door piece's first cell -> whether it was open when la
 var _frame_key := -1  # hull.hash() the cached frame art below was made for
 var _frame_rects: Array[Rect2] = []  # the frame as long row runs (px from the grid's corner)
 var _frame_lines := PackedVector2Array()  # its grid lines, as long segments in pairs of points
+var _tiles: Node2D  # the frame and every tile but the doors, drawn behind this node and only again when they change (_sync_tiles)
+var _tiles_key := []  # what _tiles was drawn from
+var _door_cells: Array[Vector2i] = []  # the door cells, in tile order: _draw draws the doors every frame (they slide and are heard)
 
 var ship: Ship:
 	get:
@@ -157,6 +161,10 @@ var _focus_seen := {}  # damaged cells the wrench has already shown, so pressing
 
 
 func _ready() -> void:
+	_tiles = Node2D.new()
+	_tiles.show_behind_parent = true
+	_tiles.draw.connect(_draw_tiles)
+	add_child(_tiles)
 	_glow = GlowLayer.new()
 	add_child(_glow)
 	sim = get_node_or_null("../ShipSim")
@@ -947,11 +955,6 @@ func _load() -> void:
 
 # --- HUD (scripts/ui/hud.gd draws it; these are the words and numbers it reads) ---
 
-## A power figure: whole numbers plain, line-adjusted ones (5.4) with one decimal.
-func _num(v: float) -> String:
-	return Palette.num(v)
-
-
 ## The air where the soldier stands: {pressure: 0..1, or -1 in a doorway or with no soldier yet; breach: the room is open to space}.
 func player_o2() -> Dictionary:
 	var player = crew.get("player") if crew != null else null
@@ -1017,11 +1020,12 @@ func _draw() -> void:
 	if ship == null:
 		return
 	_glow_quads = []
-	if build_on:  # the empty frame you can build in shows only in build mode, not while flying
-		_draw_frame()
+	_sync_tiles()
 	var open_doors := ShipSim.open_door_cells(ship)  # doors someone opened, and doors a body is in
-	for c in grid.tiles:
-		_draw_tile(c, grid.tiles[c], open_doors)
+	for c in _door_cells:
+		var piece := grid.door_piece(c)
+		if piece[0] == c:  # the piece is drawn once, from its first cell
+			_draw_door(piece, grid.defs.color(grid.tiles[c]), open_doors.has(c))
 	if build_on or show_power:
 		_draw_cables(_network_tints() if show_power else {})
 	BeltArt.draw(self, ship, _origin(), CELL, _clock)  # the conveyor belts and the ammo riding them
@@ -1081,18 +1085,41 @@ func _draw_upgrade_card() -> void:
 		UiKit.text(self, "Click again to upgrade" if inf["can"] else "Not enough materials yet", o + Vector2(10, y) * k, maxi(1, roundi(12.0 * k)), UiKit.GOOD if inf["can"] else UiKit.DIM_TEXT)
 
 
+## Redraw the _tiles layer when what it shows changed: another ship, a tile or a shape, the build mode (and the hull it frames), the art.
+func _sync_tiles() -> void:
+	var key := [grid, grid.tiles, grid.shapes, build_on, grid.hull if build_on else {}, _origin(), Art.root]
+	if key == _tiles_key or _tiles == null:
+		return
+	_tiles_key = key.duplicate(true)
+	_door_cells.clear()
+	for c in grid.tiles:
+		if grid.defs.get_def(grid.tiles[c]).get("door", false):
+			_door_cells.append(c)
+	_tiles.queue_redraw()
+
+
+## The _tiles layer: the empty frame you can build in (only in build mode, not while flying), then the tiles but the doors.
+func _draw_tiles() -> void:
+	if ship == null:
+		return
+	if build_on:
+		_draw_frame(_tiles)
+	for c in grid.tiles:
+		_draw_tile(_tiles, c, grid.tiles[c])
+
+
 ## The empty frame: a few long row runs and grid lines made once per hull (a round frame has 2600 cells), moved to the grid.
-func _draw_frame() -> void:
+func _draw_frame(cv: CanvasItem) -> void:
 	var key := grid.hull.hash()
 	if key != _frame_key:
 		_frame_key = key
 		_make_frame_art()
-	draw_set_transform(_origin())
+	cv.draw_set_transform(_origin())
 	for r in _frame_rects:
-		draw_rect(r, FRAME_FILL)
+		cv.draw_rect(r, FRAME_FILL)
 	if not _frame_lines.is_empty():
-		draw_multiline(_frame_lines, FRAME_LINE, 1.0)
-	draw_set_transform(Vector2.ZERO)
+		cv.draw_multiline(_frame_lines, FRAME_LINE, 1.0)
+	cv.draw_set_transform(Vector2.ZERO)
 
 
 ## Runs [from, to) of consecutive ints in `xs`.
@@ -1135,19 +1162,17 @@ func _make_frame_art() -> void:
 
 
 ## Placeholder look: flat shapes until real art lands (see docs/PLAN.md, milestone 8).
-func _draw_tile(c: Vector2i, id: String, open_doors: Dictionary) -> void:
+func _draw_tile(cv: CanvasItem, c: Vector2i, id: String) -> void:
 	var r := cell_rect(c)
 	var col: Color = grid.defs.color(id)
 	var def: Dictionary = grid.defs.get_def(id)
 	if def.get("door", false):
-		var piece := grid.door_piece(c)
-		if piece[0] == c:  # the piece is drawn once, from its first cell
-			_draw_door(piece, col, open_doors.has(c))
-	elif def.get("solid", false):
-		TileArt.solid_cell(self, r, grid, c, id, col)
-	elif not TileArt.floor_tile(self, r, c):
-		draw_rect(r, col)
-		draw_rect(r.grow(-1), col.lightened(0.05), false, 1.0)
+		return  # (_draw draws the doors)
+	if def.get("solid", false):
+		TileArt.solid_cell(cv, r, grid, c, id, col)
+	elif not TileArt.floor_tile(cv, r, c):
+		cv.draw_rect(r, col)
+		cv.draw_rect(r.grow(-1), col.lightened(0.05), false, 1.0)
 
 
 ## A door piece: floor under it, then two leaves that meet in the middle when closed and slide back
@@ -1308,7 +1333,7 @@ func _draw_power() -> void:
 		for uid in n["members"]:
 			draw_rect(_cells_rect(ship.components.instances[uid]["cells"]).grow(-1), col, false, 2.0)
 		var at: Vector2 = cell_rect(n["cells"][0]).position + Vector2(0, -4)
-		var text := "supply %s / demand %s" % [_num(n["supply"]), _num(n["demand"])]
+		var text := "supply %s / demand %s" % [Palette.num(n["supply"]), Palette.num(n["demand"])]
 		draw_string(font, at + Vector2(1, 1), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color(0, 0, 0, 0.8))
 		draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, col.lightened(0.35))
 

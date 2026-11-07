@@ -111,7 +111,6 @@ func fight(name: String, bay: bool, kit: String, e: Dictionary, cap: float) -> D
 		if n % SIM_EVERY == 0:
 			sim.step(SIM_EVERY * STEP)
 	var shots := 0
-	var lost := 0
 	var downs := 0
 	for ev in a.events:
 		if ev["type"] == "drone_shot" and ev["ship"] == Session.PLAYER:
