@@ -132,3 +132,13 @@ func test_the_mode_is_saved_with_the_ship_and_an_old_save_is_ripple() -> void:
 	c.volley_groups[2] = true
 	eq(c.load_dict(d), "", "an old save loads")
 	eq([c.volley_groups, c.ap_guns], [{}, {}], "as Ripple and Standard")
+
+
+func test_a_rapid_gun_never_joins_a_volley() -> void:
+	_duel([1.0], true)
+	arena.weapons.defs["vgr"] = {"kind": "bolt", "damage_type": "kinetic", "damage": 1, "rapid": true, "gimbal": 180, "cooldown": 0.5, "range": 2000}
+	var uid := arena.add_mount(0, "vgr", Vector2(20.5, 15.5))
+	check(not Volley.mode(arena, 0, uid), "a rapid gun in a Volley group still ripples")
+	check(arena.fire(0, uid, Vector2(800.0, 0.0)), "it fires at once")
+	arena.ships[0].ai_volley = true
+	check(not Volley.mode(arena, 0, uid), "and so does an enemy's")

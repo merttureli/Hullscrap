@@ -380,9 +380,10 @@ func _volley(arena, idx: int, uid: int, m: Dictionary, w: Dictionary, aim: Vecto
 
 # --- piercing rounds (docs/GUNS.md 14) ------------------------------------------------------------------------
 
-## Can a gun of weapon entry `w` (a def()) load piercing rounds: a rapid-fire gun that fires kinetic bolts or slugs, and is not point defence.
+## Can a gun of weapon entry `w` (a def()) load piercing rounds: a rapid-fire gun (or one whose entry says `ap_ok`: the chain slug gun) that
+## fires bolts or flak of any damage type but ion, and is not point defence.
 static func can_pierce(w: Dictionary) -> bool:
-	return bool(w.get("rapid", false)) and str(w.get("kind", "")) == "bolt" and str(w.get("damage_type", "")) == "kinetic" and not Volley.is_pd(w)
+	return (bool(w.get("rapid", false)) or bool(w.get("ap_ok", false))) and str(w.get("kind", "")) in ["bolt", "flak"] and str(w.get("damage_type", "")) != "ion" and not Volley.is_pd(w)
 
 
 ## Is mount `m` (uid `uid`) of ship `idx` set to Piercing (the choice, not whether it has rounds)? A virtual mount keeps it in `m["ap"]`.

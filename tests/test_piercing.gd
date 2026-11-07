@@ -51,14 +51,14 @@ func _count(type: String) -> int:
 	return arena.events.filter(func(e): return e["type"] == type).size()
 
 
-func test_only_rapid_kinetic_bolt_guns_can_load_them() -> void:
+func test_every_rapid_bolt_or_flak_gun_but_ion_and_point_defence_can_load_them() -> void:
 	var ids := []
 	for id in Content.list("weapons").map(func(e): return str(e["id"])):
 		if arena_can(id):
 			ids.append(id)
 	ids.sort()
-	check("rattle_burst_scrap" in ids, "the rapid kinetic bolt guns: " + str(ids))
-	check(not ("kett_drone_picket" in ids) and not ("laser_turret_mk1" in ids) and not ("pd_mk2" in ids) and not ("artemis_mk1" in ids) and not ("pulse_light" in ids), "lasers, point defence, missiles and energy bolts cannot: " + str(ids))
+	eq(ids, ["fenn_twitch_cannon", "prismatic_glimmer_turret", "pulse_light", "rattle_burst_scrap", "slug_chain", "sovereign_turret"], "the rapid bolt guns and the chain slug gun")
+	check(not arena_can("kett_drone_picket") and not arena_can("pd_mk2") and not arena_can("laser_turret_mk1") and not arena_can("artemis_mk1") and not arena_can("slug_gun"), "point defence, lasers, missiles and the plain slug gun cannot")
 
 
 func arena_can(id: String) -> bool:

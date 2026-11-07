@@ -7,7 +7,7 @@ extends RefCounted
 ## cooling they fire together, spread over STAGGER_S (a short stagger for the look). Guns that are unpowered, jammed, out of arc ... do not
 ## hold the volley up. The shots leave within a fraction of a second, so the sector they cross opens once (shields.gd merges the windows)
 ## and the ship's shield stays up longer; the mode has no bonus of its own (docs/GUNS.md 14).
-## Point defence (intercept) never joins a volley. Deterministic: no randomness here.
+## Point defence (intercept) and rapid guns never join a volley. Deterministic: no randomness here.
 
 const STAGGER_S := 0.15  ## the volley's shots leave over this long
 const MAX_WAIT_S := 3.0  ## the longest the guns wait for the slowest one
@@ -29,8 +29,10 @@ static func mode(arena, idx: int, uid: int) -> bool:
 	var w: Dictionary = arena.weapons.def(m["id"])
 	if is_pd(w):
 		return false
+	if bool(w.get("rapid", false)):
+		return false  # a rapid gun is a spam weapon by nature: it always ripples
 	if co.ai_volley:
-		return not bool(w.get("rapid", false))
+		return true
 	return not co.volley.is_empty() and bool(co.volley.get(arena.weapons.mount_group(arena, idx, uid), false))
 
 
