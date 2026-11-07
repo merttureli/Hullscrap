@@ -239,9 +239,7 @@ func test_a_station_node_always_has_its_station_beacon() -> void:
 func test_every_node_is_in_its_regions_and_its_sector_follows_the_region() -> void:
 	var c := Campaign.new(3)
 	for id in c.drift.ids():
-		eq(c.region_of(id), "clan_space", "%s: in Clan space" % id)
 		eq(c.sector_at(id).region, "clan_space", "%s: its sector knows" % id)
-	eq(c.region_of("nowhere"), "", "a node the map does not have is in no region")
 	c.enter_region("boneyard")
 	var r: Dictionary = c.region_data
 	var wreck := _of_type(c, "wreck_field")

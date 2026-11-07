@@ -636,11 +636,6 @@ func tick_jump(dt: float, hostiles_near: bool, ship) -> String:
 
 # --- sectors ------------------------------------------------------------------------------------------------
 
-## The region of node `id`: every node of the map is in the current region (region_id); "" for a node the map does not have.
-func region_of(id: String) -> String:
-	return region_id if drift.has(id) else ""
-
-
 ## The sector of node `id`: made from the region seed, the node and the region's data the first time it is asked for, the
 ## same every time. null for a node the map does not have.
 func sector_at(id: String):
