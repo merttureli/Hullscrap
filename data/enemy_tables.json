@@ -381,7 +381,7 @@
 	"threat": {
 		"cuts": [0.5, 0.85, 1.6, 2.6],
 		"horizon_s": 20,
-		"shield_hp_value": 1.0,
+		"shield_hp_value": 5.0,
 		"speed_ref": 60.0,
 		"speed_power": 0.3,
 		"player_aim": 0.75,
