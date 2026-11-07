@@ -223,7 +223,7 @@ func test_a_roled_ship_is_built_like_its_role() -> void:
 			if shields.has(role): shields[role] += m["shields"].size()
 	check(guns["gunboat"] > guns["hauler"], "a gunboat carries more guns than a hauler (%.1f vs %.1f)" % [guns["gunboat"] / 40.0, guns["hauler"] / 40.0])
 	check(armour["brawler"] > armour["gunboat"], "a brawler wears more armour than a gunboat")
-	check(shields["escort"] > shields["gunboat"], "an escort has more shield than a gunboat")
+	check(shields["escort"] >= shields["gunboat"], "an escort has no less shield than a gunboat (%d vs %d)" % [shields["escort"], shields["gunboat"]])  # (both sit at the 2 shield cap of a large ship; it was 80 vs 79 before the lane rule)
 
 
 func test_a_higher_budget_looks_stronger_whatever_the_role() -> void:
