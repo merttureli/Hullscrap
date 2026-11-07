@@ -392,8 +392,12 @@ func cover_between(a: Vector2, b: Vector2) -> int:
 
 ## The body anchors reachable from `from` on the walk grid; `open` is a Callable(door cell) -> bool for the locked doors.
 func reach(from: Vector2i, open: Callable) -> Dictionary:
+	var free := {}  # the cells a body may cover (Pathfinder.walkable through `open`), each asked once: a 2x2 body is then four lookups
+	for c in walk.tiles:
+		if Pathfinder.walkable(walk, c, open):
+			free[c] = true
 	var seen := {}
-	if not Pathfinder.body_ok(walk, from, open):
+	if not (free.has(from) and free.has(from + Vector2i.RIGHT) and free.has(from + Vector2i.DOWN) and free.has(from + Vector2i.ONE)):
 		return seen
 	seen[from] = true
 	var queue: Array[Vector2i] = [from]
@@ -403,7 +407,7 @@ func reach(from: Vector2i, open: Callable) -> Dictionary:
 		head += 1
 		for d in SIDES:
 			var n: Vector2i = a + d
-			if not seen.has(n) and Pathfinder.body_ok(walk, n, open):
+			if not seen.has(n) and free.has(n) and free.has(n + Vector2i.RIGHT) and free.has(n + Vector2i.DOWN) and free.has(n + Vector2i.ONE):
 				seen[n] = true
 				queue.append(n)
 	return seen
