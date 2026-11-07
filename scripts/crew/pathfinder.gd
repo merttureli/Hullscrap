@@ -44,6 +44,19 @@ static func body_ok(grid: ShipGrid, anchor: Vector2i, door_passable: Callable = 
 	return true
 
 
+## body_ok, with each cell's walkable() kept in `memo` (cell -> bool) for the rest of one search: a cell is shared by up to
+## four anchors, and a search asks again about the ones it turned down. The grid and the doors must not change meanwhile.
+static func body_ok_memo(grid: ShipGrid, anchor: Vector2i, memo: Dictionary, door_passable: Callable = Callable(), body := BODY, climb := false) -> bool:
+	for y in body:
+		for x in body:
+			var c := anchor + Vector2i(x, y)
+			if not memo.has(c):
+				memo[c] = walkable(grid, c, door_passable, climb)
+			if not memo[c]:
+				return false
+	return true
+
+
 ## The anchor of the body whose centre is nearest to `p` (cell units), whether or not it is usable.
 static func anchor_of(p: Vector2, body := BODY) -> Vector2i:
 	if body == BODY:
@@ -70,7 +83,8 @@ static func body_cells(anchor: Vector2i, body := BODY) -> Array[Vector2i]:
 ## is not usable (see body_ok) or no route exists.
 static func find_path(grid: ShipGrid, from: Vector2i, to: Vector2i, door_passable: Callable = Callable(), body := BODY, climb := false) -> Array[Vector2i]:
 	var path: Array[Vector2i] = []
-	if not body_ok(grid, from, door_passable, body, climb) or not body_ok(grid, to, door_passable, body, climb):
+	var memo := {}
+	if not body_ok_memo(grid, from, memo, door_passable, body, climb) or not body_ok_memo(grid, to, memo, door_passable, body, climb):
 		return path
 	var g_cost := {from: 0}
 	var came_from := {}
@@ -90,7 +104,7 @@ static func find_path(grid: ShipGrid, from: Vector2i, to: Vector2i, door_passabl
 		var g: int = g_cost[cur] + 1
 		for d in ShipGrid.SIDES:
 			var n := cur + d
-			if closed.has(n) or g >= g_cost.get(n, FAR) or not body_ok(grid, n, door_passable, body, climb):
+			if closed.has(n) or g >= g_cost.get(n, FAR) or not body_ok_memo(grid, n, memo, door_passable, body, climb):
 				continue
 			g_cost[n] = g
 			came_from[n] = cur
