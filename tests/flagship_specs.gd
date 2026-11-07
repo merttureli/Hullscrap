@@ -19,9 +19,7 @@ const SPECS := {
 			"laser_burst",
 			"laser_burst",
 			"kett_drone_picket",
-			"kett_drone_picket",
-			"laser_burst",
-			"laser_burst"
+			"kett_drone_picket"
 		],
 		"engines": [
 			"engine_scrap_mk2",
@@ -43,7 +41,7 @@ const SPECS := {
 			"reactor_mk2"
 		],
 		"armour": 2,
-		"aim": 0.8,
+		"aim": 0.9,
 		"beds": 3,
 		"hull_seed": 11,
 		"morale": "flagship_kett",
@@ -83,8 +81,6 @@ const SPECS := {
 			"pulse_mk3",
 			"pulse_mk3",
 			"laser_burst",
-			"laser_burst",
-			"laser_burst",
 			"laser_burst"
 		],
 		"engines": [
@@ -108,7 +104,7 @@ const SPECS := {
 			"reactor_mk2"
 		],
 		"armour": 3,
-		"aim": 0.9,
+		"aim": 0.95,
 		"beds": 3,
 		"hull_seed": 21,
 		"morale": "flagship_emberkin",
@@ -144,8 +140,6 @@ const SPECS := {
 			"laser_mk3",
 			"laser_mk3",
 			"laser_mk3",
-			"laser_burst",
-			"laser_burst",
 			"laser_burst",
 			"laser_burst"
 		],
@@ -206,9 +200,7 @@ const SPECS := {
 			"pulse_mk3",
 			"pulse_heavy",
 			"basalt_pumice_flak",
-			"basalt_pumice_flak",
-			"laser_burst",
-			"laser_burst"
+			"basalt_pumice_flak"
 		],
 		"engines": [
 			"engine_mk2",
@@ -273,9 +265,7 @@ const SPECS := {
 			"pulse_mk3",
 			"pulse_mk3",
 			"sporeling_pollen_turret",
-			"swarm_pod",
-			"laser_burst",
-			"laser_burst"
+			"swarm_pod"
 		],
 		"engines": [
 			"engine_mk2",
@@ -298,7 +288,7 @@ const SPECS := {
 			"reactor_mk1"
 		],
 		"armour": 2,
-		"aim": 0.85,
+		"aim": 0.95,
 		"beds": 3,
 		"hull_seed": 51,
 		"prow_add": 3,
@@ -337,8 +327,6 @@ const SPECS := {
 			"pulse_mk3",
 			"pulse_mk3",
 			"mire_mist_projector",
-			"laser_burst",
-			"laser_burst",
 			"laser_burst",
 			"laser_burst"
 		],
@@ -400,8 +388,6 @@ const SPECS := {
 			"pulse_mk3",
 			"pulse_mk3",
 			"fenn_spark_lattice",
-			"laser_burst",
-			"laser_burst",
 			"laser_burst"
 		],
 		"engines": [
@@ -424,7 +410,7 @@ const SPECS := {
 			"reactor_mk2"
 		],
 		"armour": 2,
-		"aim": 0.9,
+		"aim": 0.95,
 		"beds": 3,
 		"hull_seed": 71,
 		"morale": "flagship_fenn",
@@ -462,8 +448,6 @@ const SPECS := {
 			"pulse_mk3",
 			"pulse_mk3",
 			"gauntling_tesla_picket",
-			"laser_burst",
-			"laser_burst",
 			"laser_burst",
 			"laser_burst"
 		],
@@ -521,9 +505,7 @@ const SPECS := {
 			"pulse_mk3",
 			"grundl_barge_flak",
 			"grundl_barge_flak",
-			"grundl_barge_flak",
-			"laser_burst",
-			"laser_burst"
+			"grundl_barge_flak"
 		],
 		"engines": [
 			"grundl_hauler_thrusters",
@@ -582,9 +564,7 @@ const SPECS := {
 			"pulse_mk3",
 			"pulse_mk3",
 			"human_flak_screen",
-			"human_flak_screen",
-			"laser_burst",
-			"laser_burst"
+			"human_flak_screen"
 		],
 		"engines": [
 			"engine_mk2",
