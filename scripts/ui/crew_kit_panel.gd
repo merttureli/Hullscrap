@@ -299,12 +299,8 @@ func hover_add(r: Rect2, lines: Array, edge: Color) -> void:
 		_hover.append([r, lines, edge])
 
 
-func _font() -> Font:
-	return ThemeDB.fallback_font
-
-
 func _text(text: String, at: Vector2, font_size: int, col: Color) -> void:
-	draw_string(_font(), at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, col)
+	draw_string(UiKit.font(), at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, col)
 
 
 # --- drawing -----------------------------------------------------------------------------------------------------------------
