@@ -16,18 +16,19 @@ const ShipGrid = preload("res://scripts/ship/ship_grid.gd")
 const NO_CELL := Vector2i(-1, -1)  ## "none found"; real cells and anchors are never negative
 const BODY := 2  ## a crew body covers BODY x BODY cells
 const FAR := 1 << 30
+const NO_DEF := {}  # (the def of a tile id the grid's defs do not know)
 
 
 ## Can a crew member stand on `c`? `door_passable` is a Callable(cell) -> bool for door cells;
 ## an invalid (default) Callable means every door is passable but a locked one (grid.door_locked: the doors of an
 ## abandoned room), which only a valid Callable that says yes lets through (the player's soldier walks in).
 static func walkable(grid: ShipGrid, c: Vector2i, door_passable: Callable = Callable(), climb := false) -> bool:
-	var id := grid.get_tile(c)
+	var id: String = grid.tiles.get(c, "")  # (grid.get_tile and defs.get_def read in place: every cell of every path comes here)
 	if id == "":
 		return false
 	if climb and grid.tile_flag(id, "solid"):
 		return true
-	var def: Dictionary = grid.defs.get_def(id) if grid.defs != null else {}
+	var def: Dictionary = grid.defs.by_id.get(id, NO_DEF) if grid.defs != null else NO_DEF
 	if def.get("door", false):
 		if grid.door_locked.has(c):
 			return door_passable.is_valid() and bool(door_passable.call(c))
