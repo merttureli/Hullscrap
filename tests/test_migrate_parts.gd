@@ -1,7 +1,7 @@
 extends "res://tests/base_test.gd"
 ## Ship save version 7 (playtest 2, P2): the tier 1-2 weapons, engines, reactors and shields took less room inside, so a save made
 ## before it holds those parts at their old size. scripts/ship/migrate_parts.gd re-anchors them when Ship.load_dict meets a save
-## below version 7, and keeps the power (and the belts) reaching them; tests/tool_migrate_parts.gd moved the shipped designs.
+## below version 7, and keeps the power (and the belts) reaching them; a one-off tool (since removed) moved the shipped designs.
 
 const Wall = preload("res://tests/fixture_wall.gd")
 const Ship = preload("res://scripts/ship/ship.gd")

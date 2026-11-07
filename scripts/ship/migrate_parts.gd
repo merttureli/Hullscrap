@@ -2,7 +2,7 @@ extends RefCounted
 ## Ship save version 7 (playtest 2, P2): the tier 1-2 weapons, engines, reactors, shields and the medbay take less room inside
 ## the ship. A save older than 7 holds those parts at their old size, anchored by the inside half's top-left; migrate() gives each
 ## one its new anchor and keeps the power (and the belts) reaching it, so an old ship loads whole. Ship.load_dict calls it for
-## every save below version 7; tests/tool_migrate_parts.gd runs it over the shipped designs. Pure data in, data out (no nodes).
+## every save below version 7 (a one-off tool, since removed, moved the shipped designs). Pure data in, data out (no nodes).
 
 const Mounts = preload("res://scripts/ship/mounts.gd")
 
