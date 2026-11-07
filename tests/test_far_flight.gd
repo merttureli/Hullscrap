@@ -4,7 +4,6 @@ extends "res://tests/base_test.gd"
 ## engine out of action (overheated until it cools, or a malfunction until it is mended): the speed then settles at the share
 ## of the thrust that is left.
 
-const Campaign = preload("res://scripts/space/campaign.gd")
 const Helm = preload("res://scripts/space/helm.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const Sector = preload("res://scripts/space/sector.gd")
@@ -20,10 +19,9 @@ func _ship() -> Ship:
 	return s
 
 
-## The speed a ship settles at holding W toward `dir` for `seconds` from `at`, in the sector of node n01 of a fresh campaign, with `rig` called on
+## The speed a ship settles at holding W toward `dir` for `seconds` from `at`, in a generated boneyard sector, with `rig` called on
 ## the ship first. Returns {v, mass, fwd}.
 func _hold_w(at: Vector2, dir: Vector2, seconds: float, rig := Callable(), hostile := false) -> Dictionary:
-	var c := Campaign.new(1, Campaign.config().duplicate(true))
 	var ship := _ship()
 	if rig.is_valid():
 		rig.call(ship)

@@ -6,7 +6,6 @@ extends "res://tests/base_test.gd"
 const Campaign = preload("res://scripts/space/campaign.gd")
 const BuildMode = preload("res://scripts/build/build_mode.gd")
 const CombatView = preload("res://scripts/combat/combat_view.gd")
-const EventPanel = preload("res://scripts/ui/event_panel.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 const MapView = preload("res://scripts/ui/map_view.gd")
 const Salvage = preload("res://scripts/space/salvage.gd")
@@ -171,7 +170,6 @@ func test_the_event_panel_tags_fight_choices_with_the_enemy_not_skulls() -> void
 	var d := _screen()
 	var map: MapView = d["map"]
 	var c: Campaign = map.campaign
-	var ship = map.ship()
 	var rng_before := c.rng.state
 	map.event_panel.open_event(_event())
 	var view: Array = map.event_panel.view

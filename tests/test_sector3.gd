@@ -325,7 +325,7 @@ func test_q_hauls_debris_toward_the_nearest_intake() -> void:
 		var e := d.take_events()
 		check(e.size() == 1 and e[0]["uid"] == case[2], "into the nearest intake (uid %d): %s" % [case[2], str(e)])
 	var off := _lone_dd()
-	var q := off.add_piece("scrap_chunk_s", emitter + Vector2(-30.0, -200.0), Vector2.ZERO)
+	off.add_piece("scrap_chunk_s", emitter + Vector2(-30.0, -200.0), Vector2.ZERO)
 	_run(off, ship, 8.0)
 	check(off.picked == 0, "with Q up the same piece is not drawn in")
 	check(off.beam_lines.is_empty() and off.beams_on.is_empty(), "no beam shows")
@@ -378,7 +378,6 @@ func test_a_tractor_that_cannot_work_or_has_no_intake_hauls_nothing() -> void:
 	var t := _tractor_rig()
 	var ship: Ship = t[0]["ship"]
 	var origin := DriftDebris._origin(ship)
-	var emitter: Vector2 = Tractor.beams(ship, origin)[0]["at"]
 	ship.components.instances[t[3]]["out_hp"] = 0  # the emitter is shot off
 	eq(Tractor.beams(ship, origin), [], "a shot-off emitter: no beam")
 	ship.repair(t[3])

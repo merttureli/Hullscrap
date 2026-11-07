@@ -2,8 +2,6 @@ extends "res://tests/base_test.gd"
 ## The "Choose your ship" picker without a screen: its cards, 1/2/3 and click, Esc, the Y/N question,
 ## N in play mode (BuildMode) and what choosing does to the ship, the crew, the camera and the build palette.
 
-const Structure = preload("res://scripts/ship/structure.gd")
-const StructureUtil = preload("res://tests/structure_util.gd")
 const ShipPicker = preload("res://scripts/ui/ship_picker.gd")
 const ShipSim = preload("res://scripts/sim/ship_sim.gd")
 const BuildMode = preload("res://scripts/build/build_mode.gd")

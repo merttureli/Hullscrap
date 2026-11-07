@@ -3,7 +3,6 @@ extends "res://tests/base_test.gd"
 
 const Ship = preload("res://scripts/ship/ship.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
-const Weapons = preload("res://scripts/combat/weapons.gd")
 const DESIGNS := "res://data/ships/starter_rustbucket.json"
 
 func _ship(_key: String) -> Ship:

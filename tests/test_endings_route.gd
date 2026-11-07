@@ -9,7 +9,6 @@ extends "res://tests/base_test.gd"
 const Campaign = preload("res://scripts/space/campaign.gd")
 const Content = preload("res://scripts/data/content.gd")
 const Endings = preload("res://scripts/space/endings.gd")
-const Events = preload("res://scripts/space/events.gd")
 const Regions = preload("res://scripts/space/regions.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")

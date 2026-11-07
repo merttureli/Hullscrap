@@ -4,7 +4,6 @@ extends "res://tests/base_test.gd"
 
 const BuildMode = preload("res://scripts/build/build_mode.gd")
 const Balance = preload("res://scripts/combat/shield_balance.gd")
-const CombatView = preload("res://scripts/combat/combat_view.gd")
 const Fixture = preload("res://tests/fixture_ship.gd")
 const ShieldPanel = preload("res://scripts/ui/shield_panel.gd")
 const Ship = preload("res://scripts/ship/ship.gd")

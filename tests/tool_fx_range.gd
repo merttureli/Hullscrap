@@ -6,8 +6,6 @@ extends SceneTree
 ## Each panel: a courier (left, below) shoots the Rustfang raider (above) with a virtual gun whose entry is in PANELS, a
 ## moment after the hit.
 
-const Ship = preload("res://scripts/ship/ship.gd")
-const Session = preload("res://scripts/combat/combat_session.gd")
 const Projectiles = preload("res://scripts/combat/projectiles.gd")
 const Damage = preload("res://scripts/combat/damage.gd")
 

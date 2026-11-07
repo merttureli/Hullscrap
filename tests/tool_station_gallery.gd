@@ -5,7 +5,6 @@ extends SceneTree
 
 const Site = preload("res://scripts/board/site.gd")
 const Fixtures = preload("res://scripts/board/station_fixtures.gd")
-const Races = preload("res://scripts/board/station_races.gd")
 
 const SEEDS := [101, 2207, 3319, 4421, 5531, 6649, 7757, 8863]
 const OPTS := [{"region": "clan_space"}, {"region": "human_core"}, {"region": "boneyard"}, {"region": "fenn_bazaar"}, {"region": "clan_space", "state": "half"},
