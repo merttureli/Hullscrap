@@ -13,13 +13,12 @@ const SPECS := {
 		"role": "hive-queen",
 		"weapons": [
 			"kett_hive_swarm_launcher",
-			"kett_hive_swarm_launcher",
 			"kett_chitin_thrower",
-			"kett_chitin_thrower",
-			"laser_burst",
-			"laser_burst",
 			"kett_drone_picket",
-			"kett_drone_picket"
+			"pulse_mk3",
+			"pulse_mk3",
+			"pulse_mk3",
+			"pulse_mk3"
 		],
 		"engines": [
 			"engine_scrap_mk2",
@@ -63,7 +62,7 @@ const SPECS := {
 			"Pip"
 		],
 		"blurb": "x",
-		"interior": 44,
+		"interior": 56,
 		"after_s": 0,
 		"ammo": 400,
 		"yield_hp": 110
@@ -382,13 +381,11 @@ const SPECS := {
 		"role": "bazaar-barge",
 		"weapons": [
 			"fenn_market_missile",
-			"fenn_market_missile",
 			"pulse_mk3",
 			"pulse_mk3",
 			"pulse_mk3",
 			"pulse_mk3",
-			"fenn_spark_lattice",
-			"laser_burst"
+			"fenn_spark_lattice"
 		],
 		"engines": [
 			"fenn_haggle_engine",
@@ -444,11 +441,9 @@ const SPECS := {
 			"gauntling_arc_hammer",
 			"gauntling_arc_hammer",
 			"gauntling_arc_hammer",
-			"gauntling_arc_hammer",
 			"pulse_mk3",
 			"pulse_mk3",
 			"gauntling_tesla_picket",
-			"laser_burst",
 			"laser_burst"
 		],
 		"engines": [
@@ -559,11 +554,9 @@ const SPECS := {
 		"weapons": [
 			"human_concord_railgun",
 			"human_concord_railgun",
-			"human_volley_rack",
 			"pulse_mk3",
 			"pulse_mk3",
 			"pulse_mk3",
-			"human_flak_screen",
 			"human_flak_screen"
 		],
 		"engines": [
