@@ -10,7 +10,6 @@ const Unlocks = preload("res://scripts/space/unlocks.gd")
 const Sector = preload("res://scripts/space/sector.gd")
 const Regions = preload("res://scripts/space/regions.gd")
 
-const PATH := "res://data/endings.json"
 const KEYS: Array[String] = ["id", "title", "epilogue", "base_score", "par_jumps", "override", "reason"]
 const DEFAULT_SCORE := {"credits_per_point": 10, "per_crew": 50, "per_poi": 10, "per_landmark": 100, "per_jump_over": 1, "par_jumps": 40}
 

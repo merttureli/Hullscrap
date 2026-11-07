@@ -12,7 +12,6 @@ extends Control
 ## dashed at 0 (arrow keys shift the balance, End makes it even; combat_view.gd takes those keys).
 ## Reads a CombatSession; it takes the three ability keys, and combat_view.gd hands it the mouse (grab, motion, release, click).
 
-const Describe = preload("res://scripts/ui/describe.gd")
 const GunBadges = preload("res://scripts/ui/gun_badges.gd")
 const Thumbs = preload("res://scripts/ui/thumbs.gd")
 const Art = preload("res://scripts/view/art.gd")

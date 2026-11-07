@@ -24,9 +24,7 @@ signal board_requested(spec: Dictionary, ev: Dictionary)
 ## of the boarding session (events.gd result "npc"), `acted` whether any outcome did something.
 signal talk_done(ops: Array, acted: bool)
 
-const Session = preload("res://scripts/combat/combat_session.gd")
 const BreachPrompt = preload("res://scripts/ui/breach_prompt.gd")
-const Shipgen = preload("res://scripts/space/shipgen.gd")
 const FoeInfo = preload("res://scripts/space/foe_info.gd")
 const FoePic = preload("res://scripts/ui/foe_pic.gd")
 const Audio = preload("res://scripts/audio/audio.gd")
@@ -389,12 +387,6 @@ func _set_tag(v: Dictionary, tag: String, color: Color) -> void:
 		var span := para.get_line_range(k)
 		lines.append(text.substr(span.x, span.y - span.x).replace("\u00a0", " ").strip_edges(false, true))
 	v["lines"] = lines
-
-
-## A number that changes when the ship's hull, parts, damage or power do (what its threat rating depends on).
-static func ship_key(ship) -> int:
-	ship.refresh()
-	return hash([ship.grid.tiles.hash(), ship.components.instances.hash(), ship.power_state.hash()])
 
 
 # --- drawing -------------------------------------------------------------------------------------------------------

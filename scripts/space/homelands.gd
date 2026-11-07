@@ -131,12 +131,6 @@ static func wonder_of(race: String) -> Dictionary:
 	return out
 
 
-## The wonder that sits in region `region_id` ({} for none): its home race's.
-static func wonder_in(region_id: String) -> Dictionary:
-	var cap := capital_in(region_id)
-	return {} if cap.is_empty() else wonder_of(str(cap["race"]))
-
-
 ## The races that have a wonder, sorted.
 static func wonder_races() -> Array:
 	var ids: Array = config()["wonders"].keys()

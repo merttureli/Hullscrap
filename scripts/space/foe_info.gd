@@ -1,10 +1,8 @@
 extends RefCounted
 ## What the player is told about an enemy before the fight (Beta 3: no skulls, no numbers: the ship says it). Given a design (a generated spec
-## or a design file) it gives the ship itself, its name line ("Kett lancer", "Rustfang raider"), its emblem and colours (Shipgen.style_of), and,
-## for the Ledger, a sentence in words when she outguns you. Threat itself stays (budgets, the AI, the advisor): this only never shows it.
+## or a design file) it gives the ship itself, its name line ("Kett lancer", "Rustfang raider"), its emblem and colours (Shipgen.style_of).
+## Threat itself stays (budgets, the AI, the advisor): this never shows it.
 
-const Shipgen = preload("res://scripts/space/shipgen.gd")
-const Threat = preload("res://scripts/space/threat.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
 const Flagships = preload("res://scripts/space/flagships.gd")
 
@@ -32,14 +30,3 @@ static func of(design: String) -> Dictionary:
 	if look.is_empty():
 		return {"ship": foe, "line": str(foe.name), "emblem": {}, "palette": {}, "race": "", "boss": boss}
 	return {"ship": foe, "line": str(look["line"]), "emblem": look["emblem"], "palette": look["palette"], "race": str(look["race"]), "boss": boss}
-
-
-## The Ledger's sentence about an enemy that outguns `mine`, in words and with no number; "" when she does not. Only a big mismatch speaks.
-static func mismatch_words(foe, mine) -> String:
-	if foe == null or mine == null:
-		return ""
-	var e := Threat.power(foe, float(foe.get_meta("ai", {}).get("aim_skill", 0.6)))
-	var p := Threat.power(mine, float(Threat.config()["player_aim"]))
-	if float(e["power"]) < 1.6 * float(p["power"]):
-		return ""
-	return "She carries more guns than you." if float(e["dps"]) / maxf(float(p["dps"]), 0.01) >= float(e["ehp"]) / maxf(float(p["ehp"]), 0.01) else "Her hull is thicker than yours."

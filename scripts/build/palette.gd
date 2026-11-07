@@ -207,11 +207,6 @@ static func num(v: float) -> String:
 	return "%d" % roundi(v) if is_equal_approx(v, roundf(v)) else "%.1f" % v
 
 
-## Power with its sign: "+8", "-2", "0".
-static func power_text(v: float) -> String:
-	return ("+" if v > 0.0 else "") + num(v)
-
-
 ## The one line a tab shows when it has no card.
 static func empty_text(tab: int) -> String:
 	return EMPTY_TEXT[clampi(tab, 0, EMPTY_TEXT.size() - 1)]
@@ -230,10 +225,6 @@ static func glance(e: Dictionary, ship) -> Dictionary:
 			elif r[0] == "Mass":
 				out["stats"].append({"icon": "st_mass", "text": str(r[1]), "what": "Mass"})
 	return out
-
-
-static func size_text(s: Vector2i) -> String:
-	return "%dx%d" % [s.x, s.y]
 
 
 ## What the selection card says about card `e` on `ship`: {title, line (its name), tier, what (one short line), stats ([label,

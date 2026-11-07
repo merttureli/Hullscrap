@@ -96,11 +96,6 @@ func front() -> float:
 	return front_at(steps)
 
 
-## The node's px along the axis (0 for an unknown node).
-func projection(id: String) -> float:
-	return float(_proj.get(id, 0.0))
-
-
 func holds(id: String) -> bool:
 	return _holds.has(id)
 

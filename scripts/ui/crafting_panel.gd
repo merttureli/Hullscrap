@@ -64,7 +64,6 @@ const DIM_TEXT := Color("#97a3b3")
 const GOOD := Color("#6bd34a")
 const BAD := Color("#e0413b")
 const AMBER := Color("#e1a136")
-const BLUE := Color("#4fa3ff")
 
 var sim: Node  ## the ShipSim whose player ship is worked on
 var station := "fabricator"  ## the tab shown: the station whose recipes and queue are on screen

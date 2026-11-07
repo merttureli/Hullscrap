@@ -1056,13 +1056,6 @@ func _drone_parts(enemy) -> int:
 	return n
 
 
-## The salvage event that follows a won fight (a wreck_field one), or {}.
-func salvage_event(ship) -> Dictionary:
-	var ev := events.pick(self, {"id": current, "type": "wreck_field", "place": ""}, ship)
-	events_seen += int(not ev.is_empty())
-	return ev
-
-
 # --- crew --------------------------------------------------------------------------------------------------------
 
 ## A name for a new `species` crew member nobody aboard has: from the name pools (crew -> species ->
