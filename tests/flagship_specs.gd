@@ -63,9 +63,9 @@ const SPECS := {
 		],
 		"blurb": "x",
 		"interior": 56,
-		"after_s": 0,
+		"after_s": 210,
 		"ammo": 400,
-		"yield_hp": 110
+		"yield_hp": 30
 	},
 	"emberkin": {
 		"stage": 5,
@@ -124,8 +124,8 @@ const SPECS := {
 		],
 		"blurb": "x",
 		"interior": 64,
-		"after_s": 0,
-		"yield_hp": 100
+		"after_s": 210,
+		"yield_hp": 30
 	},
 	"prismatic": {
 		"stage": 6,
@@ -183,8 +183,8 @@ const SPECS := {
 		],
 		"blurb": "x",
 		"interior": 66,
-		"after_s": 0,
-		"yield_hp": 40
+		"after_s": 210,
+		"yield_hp": 10
 	},
 	"basalt": {
 		"stage": 4,
@@ -248,8 +248,8 @@ const SPECS := {
 			"Mott-ba"
 		],
 		"blurb": "x",
-		"after_s": 0,
-		"yield_hp": 90
+		"after_s": 210,
+		"yield_hp": 40
 	},
 	"sporeling": {
 		"stage": 5,
@@ -308,9 +308,9 @@ const SPECS := {
 			"Mott-sp"
 		],
 		"blurb": "x",
-		"after_s": 0,
+		"after_s": 210,
 		"ammo": 200,
-		"yield_hp": 50,
+		"yield_hp": 15,
 		"interior": 60
 	},
 	"mire": {
@@ -370,9 +370,9 @@ const SPECS := {
 			"Moss"
 		],
 		"blurb": "x",
-		"after_s": 0,
+		"after_s": 210,
 		"interior": 56,
-		"yield_hp": 120
+		"yield_hp": 25
 	},
 	"fenn": {
 		"stage": 5,
@@ -428,9 +428,9 @@ const SPECS := {
 		],
 		"blurb": "x",
 		"interior": 44,
-		"after_s": 0,
+		"after_s": 210,
 		"ammo": 200,
-		"yield_hp": 50
+		"yield_hp": 10
 	},
 	"gauntling": {
 		"stage": 4,
@@ -484,8 +484,8 @@ const SPECS := {
 			"Spark-5"
 		],
 		"blurb": "x",
-		"after_s": 0,
-		"yield_hp": 65
+		"after_s": 210,
+		"yield_hp": 35
 	},
 	"grundl": {
 		"stage": 5,
@@ -542,9 +542,9 @@ const SPECS := {
 			"Mott-gr"
 		],
 		"blurb": "x",
-		"after_s": 0,
+		"after_s": 210,
 		"ammo": 600,
-		"yield_hp": 600
+		"yield_hp": 250
 	},
 	"human": {
 		"stage": 4,
@@ -599,8 +599,8 @@ const SPECS := {
 			"Pvt. Lindqvist"
 		],
 		"blurb": "x",
-		"after_s": 0,
+		"after_s": 210,
 		"ammo": 200,
-		"yield_hp": 35
+		"yield_hp": 15
 	}
 }
