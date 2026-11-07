@@ -89,7 +89,14 @@ func test_a_beaten_ships_site_keeps_her_rooms_holes_parts_and_hatch() -> void:
 
 func test_a_destroyed_part_is_wreckage() -> void:
 	var ship = WreckSite.load_ship(_enemy(7))
-	var uid: int = ship.components.instances.keys()[2]
+	var uid: int = -1  # (a plain part, the third one: the order they stand in follows the lane rule's biggest first)
+	var seen := 0
+	for u in ship.components.instances:
+		if ship.components.instances[u]["out_cells"].is_empty():
+			seen += 1
+			uid = u
+			if seen == 3:
+				break
 	var cells: Array = ship.components.instances[uid]["cells"].duplicate()
 	ship.components.instances.erase(uid)
 	ship.components.wrecks.append({"id": "reactor_mk1", "cells": cells})
