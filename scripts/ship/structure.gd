@@ -69,7 +69,7 @@ static func totals(ship) -> Vector2:
 			if has_hp[id]:
 				var m: float = grid.max_hp_of(c)
 				top += m
-				cur += clampf(grid.hp_of(c), 0.0, m)
+				cur += clampf(float(grid.hp.get(c, m)), 0.0, m)  # (hp_of(c), with the max already in hand)
 		for c in grid.breached:
 			top += breached_max(grid, c)
 	var comps = ship.components

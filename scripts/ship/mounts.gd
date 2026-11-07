@@ -266,11 +266,6 @@ static func _read_barrel(def: Dictionary) -> Dictionary:
 
 # --- angled mounts --------------------------------------------------------------------------------
 
-## The angle (degrees clockwise from up) the placed mount (or ghost) `inst` faces: its `angle`, else rot x 90.
-static func angle_of(inst: Dictionary) -> float:
-	return float(inst.get("angle", posmod(int(inst.get("rot", 0)), 4) * 90))
-
-
 ## Does `inst` sit on a slope (its angle is not its quarter turn)?
 static func is_angled(inst: Dictionary) -> bool:
 	return inst.has("angle") and absf(wrapf(float(inst["angle"]) - posmod(int(inst.get("rot", 0)), 4) * 90.0, -180.0, 180.0)) > 0.01

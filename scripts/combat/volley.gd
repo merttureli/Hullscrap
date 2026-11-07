@@ -36,11 +36,6 @@ static func mode(arena, idx: int, uid: int) -> bool:
 	return not co.volley.is_empty() and bool(co.volley.get(arena.weapons.mount_group(arena, idx, uid), false))
 
 
-## The group of ship `idx` is in Volley mode (what the header shows).
-static func group_on(arena, idx: int, group: int) -> bool:
-	return bool(arena.ships[idx].volley.get(group, false))
-
-
 ## Mount `uid` wants to fire at `aim` (arena.fire() in Volley mode): remember it for its group. Always false: tick() fires.
 static func request(arena, idx: int, uid: int, aim: Vector2) -> bool:
 	if arena.weapons.can_fire(arena, idx, uid, aim) != "":

@@ -9,6 +9,7 @@ const VERSION := 2  # 2 adds door states; version 1 saves still load (all doors 
 # Cell shapes (shapes, breached_shapes) are optional keys too, written only for cells that are not a full square.
 const Shapes = preload("res://scripts/ship/shapes.gd")
 const SIDES: Array[Vector2i] = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
+const NO_DEF := {}  ## the def of a tile id the defs do not know (read only)
 
 var size: Vector2i
 var defs  # tile_defs.gd instance, or null for a rule-less grid
@@ -129,7 +130,7 @@ func place_door(id: String, c: Vector2i, axis: Vector2i) -> bool:
 ## A door cell that is part of no valid piece (an old save, hand-written test data) is a piece of one.
 func door_piece(c: Vector2i) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
-	if not _flag(get_tile(c), "door"):
+	if not _flag(tiles.get(c, ""), "door"):
 		return out
 	for axis in [Vector2i.RIGHT, Vector2i.DOWN]:
 		var run := _door_run(c, axis)
@@ -199,7 +200,7 @@ func max_hp_of(c: Vector2i) -> float:
 
 ## Current hp of the tile on `c`; 0 where there is no tile.
 func hp_of(c: Vector2i) -> float:
-	return hp.get(c, max_hp_of(c))
+	return hp[c] if hp.has(c) else max_hp_of(c)
 
 
 ## Shoot the tile on `c` open: the cell becomes empty (so rooms see a hole there) and `breached`
@@ -252,16 +253,6 @@ func cost_of(id: String, area := 1.0) -> Dictionary:
 		for m in raw:  # JSON numbers are floats
 			cost[str(m)] = int(raw[m]) if area >= 1.0 else ceili(float(raw[m]) * area - 1e-9)
 	return cost
-
-
-## Everything built so far, summed per material.
-func total_cost() -> Dictionary:
-	var sum := {}
-	for c in tiles:
-		var cost := cost_of(tiles[c], area_at(c))
-		for m in cost:
-			sum[m] = int(sum.get(m, 0)) + int(cost[m])
-	return sum
 
 
 ## True when tile `id` has the data flag `key` ("solid", "door").
@@ -388,11 +379,11 @@ static func _shape_values(d: Dictionary, key: String):
 
 
 func _flag(id: String, key: String) -> bool:
-	return defs != null and bool(defs.get_def(id).get(key, false))
+	return defs != null and bool(defs.by_id.get(id, NO_DEF).get(key, false))  # (defs.get_def in place: the door rules ask this a lot)
 
 
 func _is_solid(c: Vector2i) -> bool:
-	return _flag(get_tile(c), "solid")
+	return _flag(tiles.get(c, ""), "solid")
 
 
 ## The two cells a piece starting at `c` takes along `axis`.
@@ -403,11 +394,11 @@ static func _piece_at(c: Vector2i, axis: Vector2i) -> Array[Vector2i]:
 ## The contiguous door cells through `c` along `axis`, lowest first.
 func _door_run(c: Vector2i, axis: Vector2i) -> Array[Vector2i]:
 	var first := c
-	while _flag(get_tile(first - axis), "door"):
+	while _flag(tiles.get(first - axis, ""), "door"):
 		first -= axis
 	var run: Array[Vector2i] = []
 	var p := first
-	while _flag(get_tile(p), "door"):
+	while _flag(tiles.get(p, ""), "door"):
 		run.append(p)
 		p += axis
 	return run

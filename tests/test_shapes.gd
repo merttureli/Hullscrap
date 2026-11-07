@@ -264,9 +264,6 @@ func test_cost_is_rounded_up_per_cell() -> void:
 	eq(g.cost_of("wall", 0.25), {"scrap": 1}, "a quarter rounds up to 1")
 	eq(g.cost_of("heavy_armor", 0.5), {"scrap": 3, "titanium": 1}, "heavy armour 6 and 2 halved")
 	eq(g.cost_of("heavy_armor", 0.75), {"scrap": 5, "titanium": 2}, "three quarters rounds up")
-	g.force_tile(Vector2i(7, 7), "heavy_armor", {"shape": "tri"})
-	g.force_tile(Vector2i(8, 7), "wall")
-	eq(g.total_cost(), {"scrap": 5, "titanium": 1}, "the total counts shapes by area")
 
 
 # --- building --------------------------------------------------------------------------------------
@@ -376,15 +373,14 @@ func test_centre_of_mass_and_moment_of_inertia() -> void:
 	near(props["com"].y, 5.5, "and mid-height")
 	# each wall: mass 2 at 0.5 cells from the centre plus a plate's own m/6 -> 2 x 2 x (0.25 + 1/6) cells^2, 32 px a cell
 	near(props["inertia"], 4.0 * (0.25 + 1.0 / 6.0) * 1024.0, "inertia about the centre of mass", 1e-3)
-	near(f.moment_of_inertia(g, comps, cables), props["inertia"], "the helper agrees")
-	eq(f.centre_of_mass(g, comps, cables), props["com"], "and so does centre_of_mass")
 	var g2 := _grid()  # the same pair moved: the same inertia about the new centre
 	g2.force_tile(Vector2i(2, 8), "wall")
 	g2.force_tile(Vector2i(3, 8), "wall")
-	near(f.moment_of_inertia(g2, comps, cables), props["inertia"], "does not depend on where it is", 1e-3)
+	near(f.mass_props(g2, comps, cables)["inertia"], props["inertia"], "does not depend on where it is", 1e-3)
 	g2.force_tile(Vector2i(12, 8), "wall")
-	check(f.moment_of_inertia(g2, comps, cables) > 50.0 * props["inertia"], "a far outlier makes a flywheel")
-	check(f.centre_of_mass(g2, comps, cables).x > 5.0, "and drags the centre of mass")
+	var far := f.mass_props(g2, comps, cables)
+	check(float(far["inertia"]) > 50.0 * props["inertia"], "a far outlier makes a flywheel")
+	check(far["com"].x > 5.0, "and drags the centre of mass")
 	var g3 := _grid()  # a triangle's mass sits at its own centre (the slope side is lighter)
 	g3.force_tile(Vector2i(5, 5), "wall", {"shape": "tri"})  # bottom-left half: centroid (1/3, 2/3)
 	var p3 := f.mass_props(g3, comps, cables)

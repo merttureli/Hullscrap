@@ -286,10 +286,18 @@ func unlock_door(id: int) -> void:
 func free_anchors(id: int) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
 	var r: Rect2i = rooms[id]["rect"]
-	for y in range(r.position.y, r.end.y - 1):
-		for x in range(r.position.x, r.end.x - 1):
-			if Pathfinder.body_ok(walk, Vector2i(x, y)) and (not rooms[id].has("cells") or _body_in(id, Vector2i(x, y))):
-				out.append(Vector2i(x, y))
+	var w := r.size.x
+	var ok := PackedByteArray()  # each cell of the room looked at once (Pathfinder.body_ok asks for every cell of every body)
+	ok.resize(w * r.size.y)
+	for y in r.size.y:
+		for x in w:
+			ok[y * w + x] = 1 if Pathfinder.walkable(walk, r.position + Vector2i(x, y)) else 0
+	var shaped: bool = rooms[id].has("cells")
+	for y in r.size.y - 1:
+		for x in w - 1:
+			var i := y * w + x
+			if ok[i] and ok[i + 1] and ok[i + w] and ok[i + w + 1] and (not shaped or _body_in(id, r.position + Vector2i(x, y))):
+				out.append(r.position + Vector2i(x, y))
 	return out
 
 
@@ -313,7 +321,7 @@ func centre_of_room(id: int) -> Vector2:
 func air_of(id: int) -> float:
 	if id < 0 or id >= rooms.size():
 		return 1.0
-	return float(rooms[id].get("air", config()["kinds"].get(kind, {}).get("air", 1.0)))
+	return float(rooms[id]["air"]) if rooms[id].has("air") else float(config()["kinds"].get(kind, {}).get("air", 1.0))
 
 
 ## The pressure at point `p` (cells); 1 where there is no room (a doorway, a hole).
@@ -384,8 +392,12 @@ func cover_between(a: Vector2, b: Vector2) -> int:
 
 ## The body anchors reachable from `from` on the walk grid; `open` is a Callable(door cell) -> bool for the locked doors.
 func reach(from: Vector2i, open: Callable) -> Dictionary:
+	var free := {}  # the cells a body may cover (Pathfinder.walkable through `open`), each asked once: a 2x2 body is then four lookups
+	for c in walk.tiles:
+		if Pathfinder.walkable(walk, c, open):
+			free[c] = true
 	var seen := {}
-	if not Pathfinder.body_ok(walk, from, open):
+	if not (free.has(from) and free.has(from + Vector2i.RIGHT) and free.has(from + Vector2i.DOWN) and free.has(from + Vector2i.ONE)):
 		return seen
 	seen[from] = true
 	var queue: Array[Vector2i] = [from]
@@ -395,7 +407,7 @@ func reach(from: Vector2i, open: Callable) -> Dictionary:
 		head += 1
 		for d in SIDES:
 			var n: Vector2i = a + d
-			if not seen.has(n) and Pathfinder.body_ok(walk, n, open):
+			if not seen.has(n) and free.has(n) and free.has(n + Vector2i.RIGHT) and free.has(n + Vector2i.DOWN) and free.has(n + Vector2i.ONE):
 				seen[n] = true
 				queue.append(n)
 	return seen
@@ -465,7 +477,6 @@ func _try(p_attempt: int) -> String:
 	_rng.seed = _mix(seed_value, kind, p_attempt)
 	var rng := _rng
 	var rw_min: int = int(cfg["room_w"][0])
-	var rw_max: int = int(cfg["room_w"][1])
 	var pattern: String = cfg["bands"][rng.randi() % cfg["bands"].size()]
 	var n_room := pattern.count("R")
 	var bands: Array = []
@@ -637,7 +648,7 @@ func _join(bands: Array, cfg: Dictionary, rng: RandomNumberGenerator) -> String:
 		for rid in by_band[bi]:
 			var want: Array = side_corr.duplicate()
 			if rid != passage and want.size() == 2:
-				_shuffle(want, rng)
+				shuffle(want, rng)
 				if rng.randf() > 0.3:
 					want = [want[0]]
 			for cid in want:
@@ -780,7 +791,7 @@ func _lock_doors(cfg: Dictionary, rng: RandomNumberGenerator) -> void:
 	var live: Array = doors.filter(func(d): return d["lock"] != "gone" and not d["rooms"].has(air))
 	var n_card := rng.randi_range(int(cfg["card"][0]), int(cfg["card"][1]))
 	var dead: Array = live.filter(func(d): return d["rooms"].any(func(r): return rooms[r]["doors"].size() == 1 and not rooms[r]["corridor"]))
-	_shuffle(dead, rng)
+	shuffle(dead, rng)
 	var made := 0
 	for d in dead:
 		if made >= n_card or made >= KEY_NAMES.size():
@@ -790,7 +801,7 @@ func _lock_doors(cfg: Dictionary, rng: RandomNumberGenerator) -> void:
 		made += 1
 	var n_hack := rng.randi_range(int(cfg["hack"][0]), int(cfg["hack"][1]))
 	var rest: Array = live.filter(func(d): return d["lock"] == "")
-	_shuffle(rest, rng)
+	shuffle(rest, rng)
 	for i in mini(n_hack, rest.size()):
 		rest[i]["lock"] = "hack"
 	var open_rooms := _room_graph_reach(air, _lock_ids())  # the rooms only a lock opens
@@ -806,7 +817,8 @@ func _lock_ids() -> Dictionary:
 	return out
 
 
-static func _shuffle(list: Array, rng: RandomNumberGenerator) -> void:
+## Shuffle `list` in place with `rng` (from the last item down): the one shuffle of the site makers (station_gen, the fixtures, the foes).
+static func shuffle(list: Array, rng: RandomNumberGenerator) -> void:
 	for i in range(list.size() - 1, 0, -1):
 		var j := rng.randi() % (i + 1)
 		var t = list[i]
@@ -817,7 +829,7 @@ static func _shuffle(list: Array, rng: RandomNumberGenerator) -> void:
 ## A purpose for every room but the airlock and the corridors: the kind's minimums first, then by weight within its maximums.
 func _assign_purposes(cfg: Dictionary, rng: RandomNumberGenerator) -> void:
 	var open: Array = rooms.filter(func(r): return r["purpose"] == "")
-	_shuffle(open, rng)
+	shuffle(open, rng)
 	var count := {}
 	var weights: Dictionary = cfg["weights"]
 	var mins: Dictionary = cfg["min"]
@@ -1205,7 +1217,7 @@ func _place_marks() -> void:
 	rng.seed = _mix(seed_value, "marks", 0)
 	var n := rng.randi_range(int(span[0]), int(span[1]))
 	var open: Array = rooms.filter(func(r): return r["purpose"] != "gone" and r["purpose"] != "airlock" and not r["corridor"])
-	_shuffle(open, rng)
+	shuffle(open, rng)
 	var kinds_w: Dictionary = mc["weights"]
 	var used := {}
 	while marks.size() < n:

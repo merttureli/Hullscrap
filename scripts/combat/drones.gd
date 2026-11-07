@@ -32,7 +32,6 @@ const EVASION := 0.12  ## the chance a turret's tracer misses a drone, on top of
 const LIMPET_REACH := 2660.0  ## an enemy throws limpets and pods only when the foe is this near
 const LIMPET_SIGHT := 3.6  ## point defence and turrets engage a flying limpet or pod from this many times their usual reach
 const AI_SKILL := 0.75  ## how often the enemy picks its best-predicted throw
-const DRONE_EVENTS := ["drone_launch", "drone_shot", "drone_hit", "drone_down", "drone_home", "drone_recall"]
 
 static var _kits := {}
 static var _key := ""

@@ -26,6 +26,7 @@ const KEY_NAMES: Array[String] = ["red", "blue", "green", "amber"]
 const BREACH_MAX := 2  ## modules that lost their air, at most
 
 static var _cfg := {}
+static var _variants := {}  # "mid|rot|x|y" -> _variant(): the modules are data, so each turn and stretch is parsed once
 static var race_rooms := true  ## a test switches it off to compare two stations of different builders: a race's own room is a different layout
 static var forced_module := ""  ## a test or a tool sets it: a module every station must have (besides its type's)
 
@@ -54,6 +55,7 @@ static func config() -> Dictionary:
 					merged[k] = def[k]
 				data["modules"][mid] = merged
 		_cfg = data
+		_variants = {}
 	return _cfg
 
 
@@ -269,7 +271,7 @@ func _lead(i: int) -> bool:
 	for k in insts[i]["links"].size():
 		if int(insts[i]["links"][k]) == -1:
 			ks.append(k)
-	_shuffle(ks)
+	s.shuffle(ks, rng)
 	for k in ks:
 		var n := insts.size()
 		if _grow(i, k, w, false):
@@ -284,11 +286,11 @@ func _attach(mid: String, i: int, k: int) -> bool:
 	var pcells: Array = pc["cells"].map(func(c): return c + insts[i]["off"])
 	var stretch := _roll_stretch(mid)
 	var rots := [0, 1, 2, 3]
-	_shuffle(rots)
+	s.shuffle(rots, rng)
 	for rot in rots:
 		var v := _variant(mid, rot, stretch)
 		var ks: Array = range(v["conns"].size())
-		_shuffle(ks)
+		s.shuffle(ks, rng)
 		for ck in ks:
 			var cc: Dictionary = v["conns"][ck]
 			if cc["type"] != pc["type"] or cc["side"] != -pc["side"] or cc["cells"].size() != pcells.size():
@@ -365,7 +367,7 @@ func _place_required(mid: String) -> void:
 			if str(modules()[m].get("leads", "")) != "" and modules()[m]["tags"].any(func(t): return after.has(t)) and _count_of(m) < _max_of(m):
 				w[m] = 1.0
 	var open := _open()
-	_shuffle(open)
+	s.shuffle(open, rng)
 	for o in open:
 		if _grow(o[0], o[1], w, true):
 			return
@@ -445,6 +447,13 @@ func _roll_stretch(mid: String) -> Dictionary:
 ## "w" window, "@" hatch}, room ({cell: room number}), conns: [{side, cells (in order along the wall), type ("door" or "hall")}], wins ({cell: normal}),
 ## inner ([[cell, cell]]: the inner doors), hatch ([cell, cell]), keep (cells to keep empty), w, h}.
 static func _variant(mid: String, rot: int, stretch := {}) -> Dictionary:
+	var key := "%s|%d|%d|%d" % [mid, posmod(rot, 4), int(stretch.get("x", -1)), int(stretch.get("y", -1))]
+	if not _variants.has(key):
+		_variants[key] = _parse_variant(mid, rot, stretch)
+	return _variants[key]  # (shared: nothing writes to a variant)
+
+
+static func _parse_variant(mid: String, rot: int, stretch: Dictionary) -> Dictionary:
 	var def: Dictionary = modules()[mid]
 	var rows: Array = def["cells"].duplicate()
 	var st: Dictionary = def.get("stretch", {})
@@ -491,7 +500,7 @@ static func _parse(rows: Array, clear: int) -> Dictionary:
 					out["cells"][c] = "x"
 				"w":
 					out["cells"][c] = "w"
-					out["wins"][c] = _edge(c, w, h)
+					out["wins"][c] = _edge(c, h)
 				"@":
 					out["cells"][c] = "@"
 					out["hatch"].append(c)
@@ -526,7 +535,7 @@ static func _parse(rows: Array, clear: int) -> Dictionary:
 			i += 1
 	var hatch: Array = out["hatch"]
 	if hatch.size() == 2:  # space in front of the hatch stays empty
-		var n := _edge(hatch[0], w, h)
+		var n := _edge(hatch[0], h)
 		for k in range(1, 5):
 			for c in hatch:
 				for side_off in [-1, 0, 1]:
@@ -547,7 +556,7 @@ static func _parse(rows: Array, clear: int) -> Dictionary:
 
 
 ## The outward side of an edge cell.
-static func _edge(c: Vector2i, w: int, h: int) -> Vector2i:
+static func _edge(c: Vector2i, h: int) -> Vector2i:
 	if c.y == 0:
 		return Vector2i.UP
 	if c.y == h - 1:
@@ -688,7 +697,7 @@ func _realize() -> String:
 	# the hatch
 	var dock: Dictionary = insts[0]
 	var h: Array = dock["v"]["hatch"].map(func(c): return c + dock["off"] + off)
-	var n := _edge(dock["v"]["hatch"][0], int(dock["v"]["w"]), int(dock["v"]["h"]))
+	var n := _edge(dock["v"]["hatch"][0], int(dock["v"]["h"]))
 	var air_room := int(s.room_of.get(h[0] - n, -1))
 	if air_room < 0:
 		return "no airlock"
@@ -944,7 +953,7 @@ func _lock(scfg: Dictionary) -> void:
 			made += 1
 	var live: Array = s.doors.filter(func(d): return d["lock"] == "" and not d["rooms"].has(air))
 	var dead: Array = live.filter(func(d): return d["rooms"].any(func(r): return s.rooms[r]["doors"].size() == 1 and not s.rooms[r]["corridor"]))
-	_shuffle(dead)
+	s.shuffle(dead, rng)
 	var n_card := rng.randi_range(int(scfg["card"][0]), int(scfg["card"][1]))
 	for d in dead:
 		if n_card <= 0 or made >= KEY_NAMES.size():
@@ -1051,11 +1060,3 @@ static func _pick(w: Dictionary, r: RandomNumberGenerator) -> String:
 		if roll < 0.0 and float(w[k]) > 0.0:
 			return str(k)
 	return str(keys[-1])
-
-
-func _shuffle(list: Array) -> void:
-	for i in range(list.size() - 1, 0, -1):
-		var j := rng.randi() % (i + 1)
-		var t = list[i]
-		list[i] = list[j]
-		list[j] = t

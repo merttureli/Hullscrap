@@ -83,13 +83,11 @@ static func place(s) -> void:
 			var at := str(rule.get("at", "wall"))
 			if at != "centre":  # (the data's `density` fills the big rooms: a centrepiece stays one)
 				n = int(floor(float(n) * float(cfg.get("density", 1.0)) + rng.randf()))
-			var placed := 0
 			if at == "row":
-				placed = _row(s, r, rule, def, n, mouth, taken, rng)
+				_row(s, r, rule, def, n, mouth, taken, rng)
 			else:
 				for i in n:
-					if _one(s, r, rule, def, at, mouth, taken, rng):
-						placed += 1
+					_one(s, r, rule, def, at, mouth, taken, rng)
 		# the state's dice come last, from the same stream, so where they stand never depends on them
 	for f in s.fixtures:
 		var m: Dictionary = s.modules[int(s.rooms[f["room"]]["module"])]
@@ -103,9 +101,9 @@ static func place(s) -> void:
 ## One fixture: the candidates by `at` in a random order, the first that fits. True when placed.
 static func _one(s, r: Dictionary, rule: Dictionary, def: Dictionary, at: String, mouth: Dictionary, taken: Dictionary, rng: RandomNumberGenerator) -> bool:
 	var size := Vector2i(int(def["size"][0]), int(def["size"][1]))
-	var cands := _cands(r["rect"], size, at, int(rule.get("inset", 0)), rng)
+	var cands := _cands(s, r["rect"], size, at, int(rule.get("inset", 0)), rng)
 	if at == "centre":  # (a centrepiece that finds no place in the middle takes any other)
-		cands.append_array(_cands(r["rect"], size, "free", 0, rng))
+		cands.append_array(_cands(s, r["rect"], size, "free", 0, rng))
 	for c in cands:
 		if _fits(s, r, rule, def, c, mouth, taken):
 			_commit(s, r, def, str(rule["fixture"]), c, taken)
@@ -120,11 +118,7 @@ static func _row(s, r: Dictionary, rule: Dictionary, def: Dictionary, n: int, mo
 	var inset := int(rule.get("inset", 0))
 	var rect: Rect2i = r["rect"]
 	var walls := [0, 1, 2, 3]
-	for i in range(3, 0, -1):
-		var j := rng.randi() % (i + 1)
-		var t = walls[i]
-		walls[i] = walls[j]
-		walls[j] = t
+	s.shuffle(walls, rng)
 	for w in walls:
 		var horizontal: bool = w < 2
 		var sz := size if horizontal else Vector2i(size.y, size.x)
@@ -164,7 +158,7 @@ static func _row(s, r: Dictionary, rule: Dictionary, def: Dictionary, n: int, mo
 
 
 ## The places `at` (wall, corner, centre, free) for a fixture of `size` in `rect`, shuffled: [{cell, size, dir}].
-static func _cands(rect: Rect2i, size: Vector2i, at: String, inset: int, rng: RandomNumberGenerator) -> Array:
+static func _cands(s, rect: Rect2i, size: Vector2i, at: String, inset: int, rng: RandomNumberGenerator) -> Array:
 	var out: Array = []
 	var flip := Vector2i(size.y, size.x)
 	match at:
@@ -192,11 +186,7 @@ static func _cands(rect: Rect2i, size: Vector2i, at: String, inset: int, rng: Ra
 						out.append({"cell": Vector2i(x, y), "size": sz, "dir": Vector2i.DOWN})
 	if at == "centre":  # (the middle first)
 		return out
-	for i in range(out.size() - 1, 0, -1):
-		var j := rng.randi() % (i + 1)
-		var t = out[i]
-		out[i] = out[j]
-		out[j] = t
+	s.shuffle(out, rng)
 	return out
 
 

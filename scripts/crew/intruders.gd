@@ -160,7 +160,7 @@ static func _sabotage(ship, uid: int, hp: float, ion: bool) -> void:
 # --- the crew's answer ---------------------------------------------------------------------------
 
 ## The intruder response for crew member `m` (the soldier too): true when they are busy with one (fighting or on the way), so they take no other job this tick.
-static func respond(ship, jobs, m, dt: float) -> bool:
+static func respond(ship, m, dt: float) -> bool:
 	var c := cfg()
 	var foe = null
 	var best := INF

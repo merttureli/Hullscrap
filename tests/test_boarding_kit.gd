@@ -664,8 +664,10 @@ func test_the_loadout_screen_sets_kits_before_going_aboard() -> void:
 func test_mods_drop_at_about_one_and_a_half_per_station_and_mk3_comes_late_and_from_stations() -> void:
 	var mods := 0
 	var stations := 60
+	var sites := []  # (made once: Loot.resolve only reads a site, so each stage below rolls the loot of the same stations)
 	for sd in stations:
-		var site = Site.make(500 + sd, "station", {"faction": "clans"})
+		sites.append(Site.make(500 + sd, "station", {"faction": "clans"}))
+	for site in sites:
 		for id in site.containers():
 			var r := Loot.resolve(site, id, {"tier": 1, "stage": 2})
 			for item in r["items"]:
@@ -693,8 +695,7 @@ func test_mods_drop_at_about_one_and_a_half_per_station_and_mk3_comes_late_and_f
 	var per_run := 0.0
 	for stage in range(4, 9):
 		var t3_found := 0
-		for sd in stations:
-			var site = Site.make(500 + sd, "station", {"faction": "clans"})
+		for site in sites:
 			for id in site.containers():
 				for item in Loot.resolve(site, id, {"tier": 1, "stage": stage})["items"]:
 					if Mods.is_item(str(item)) and int(Mods.parse(str(item))["tier"]) == 3:

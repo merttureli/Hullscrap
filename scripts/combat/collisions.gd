@@ -57,7 +57,8 @@ static func step(arena, dt: float) -> void:
 
 ## The collision cells of ship `idx`, rebuilt when its grid changed: {sig, cells (outer solid cells in
 ## (y, x) order), info (cell -> {p: polygon in grid coordinates, n: outward edge normals, e: per edge,
-## is it exposed (not a face shared with a solid neighbour), ctr: the cell's middle from the pivot in px}), radius (px from the pivot)}.
+## is it exposed (not a face shared with a solid neighbour), ctr: the cell's middle from the pivot in px}), radius (px from the pivot), ctr_r (the
+## largest ctr length)}.
 static func hit_cells(arena, idx: int) -> Dictionary:
 	var co = arena.ships[idx]
 	var g = co.ship.grid
@@ -82,6 +83,7 @@ static func hit_cells(arena, idx: int) -> Dictionary:
 	cells.sort_custom(func(a, b): return a.y < b.y or (a.y == b.y and a.x < b.x))
 	var info := {}
 	var far := 0.0
+	var far_ctr := 0.0
 	for c in cells:
 		var sh: Dictionary = g.shape_of(c)
 		var shape := str(sh["shape"]) if not sh.is_empty() else "full"
@@ -96,7 +98,8 @@ static func hit_cells(arena, idx: int) -> Dictionary:
 			far = maxf(far, (poly[k] - co.pivot).length())
 			exposed.append(_exposed(g, solid, c, local[k], local[(k + 1) % local.size()]))
 		info[c] = {"p": poly, "n": nrm, "e": exposed, "ctr": (Vector2(c) + Vector2(0.5, 0.5) - co.pivot) * CELL}
-	co.hit_cache = {"sig": sig, "cells": cells, "info": info, "radius": far * CELL + 1.0}
+		far_ctr = maxf(far_ctr, info[c]["ctr"].length())
+	co.hit_cache = {"sig": sig, "cells": cells, "info": info, "radius": far * CELL + 1.0, "ctr_r": far_ctr}
 	return co.hit_cache
 
 

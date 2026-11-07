@@ -733,6 +733,11 @@ func _in_range(arena, idx: int, m: Dictionary, w: Dictionary, target: int) -> bo
 	var from := muzzle_of(arena, idx, m)
 	var hc := Collisions.hit_cells(arena, target)
 	var reach := float(w["range"])
+	var gap := from.distance_to(tc.flight.pos)  # (no cell is nearer than gap - ctr_r or farther than gap + ctr_r: 1 px spares the rounding)
+	if gap > reach + float(hc["ctr_r"]) + 1.0:
+		return false
+	if gap + float(hc["ctr_r"]) + 1.0 < reach and not hc["cells"].is_empty():
+		return true
 	for c in hc["cells"]:
 		if from.distance_to(tc.flight.pos + Vector2(hc["info"][c]["ctr"]).rotated(tc.flight.angle)) <= reach:
 			return true

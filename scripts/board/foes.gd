@@ -343,11 +343,7 @@ func _make_vents(rng: RandomNumberGenerator) -> void:
 	var site = s.site
 	var rooms: Array = site.rooms.filter(func(r): return r["purpose"] != "gone" and r["purpose"] != "airlock" and not r["corridor"])
 	var want := rng.randi_range(int(Site.config()["spawn"]["crawler"]["vents"][0]), int(Site.config()["spawn"]["crawler"]["vents"][1]))
-	for i in range(rooms.size() - 1, 0, -1):  # shuffled by the rng
-		var j := rng.randi() % (i + 1)
-		var t = rooms[i]
-		rooms[i] = rooms[j]
-		rooms[j] = t
+	Site.shuffle(rooms, rng)
 	for r in rooms:
 		if vents.size() >= want:
 			break
@@ -384,11 +380,6 @@ func contacts() -> Array:
 		if not f["dead"] and not f["hidden"] and f["team"] == "foe":
 			out.append({"pos": f["m"].pos, "moving": f["moved"]})
 	return out
-
-
-## The cells of the vents the view draws.
-func vent_cells() -> Array:
-	return vents
 
 
 # --- hits and noise --------------------------------------------------------------------------------------------------

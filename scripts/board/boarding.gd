@@ -585,7 +585,7 @@ func _air_look(dt: float) -> void:
 	_door_note -= dt
 	if _door_note <= 0.0:
 		for d in site.doors:
-			if Air.door_refuses(site, d, soldier) and soldier.pos.distance_to(site.door_centre(d)) <= 2.2:
+			if soldier.pos.distance_to(site.door_centre(d)) <= 2.2 and Air.door_refuses(site, d, soldier):
 				_door_note = 3.0
 				events.append({"type": "line", "text": Air.NO_SUIT_DOOR})
 				break

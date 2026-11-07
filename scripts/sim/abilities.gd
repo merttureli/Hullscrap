@@ -30,6 +30,7 @@ const Fire = preload("res://scripts/sim/fire.gd")
 const CrewMember = preload("res://scripts/crew/crew_member.gd")
 const PartEffects = preload("res://scripts/sim/part_effects.gd")
 const CrewFx = preload("res://scripts/crew/crew_fx.gd")
+const TraitSet = preload("res://scripts/crew/traits.gd")
 
 const KEYS: Array[String] = ["engine", "shield", "utility"]  ## the combat keys: Shift, Space and Q
 const EFFECTS: Array[String] = PartEffects.EFFECTS  ## the keys of an ability's `effects` that something reads
@@ -504,26 +505,10 @@ static func hud_line(ship) -> String:
 
 # --- operators ------------------------------------------------------------------------------------
 
-## The crew member manning part `uid` (ship.manned) who is up and about, or null.
-static func operator_of(ship, uid: int):
-	var who = ship.manned.get(uid)
-	if who == null:
-		return null
-	for m in ship.crew:
-		if m.name == who and not m.is_down():
-			return m
-	return null
-
-
-## The traits of a crew member: their species', their own (data/crew.json `traits`, by name) and
-## those of worn gear, merged (CrewMember.traits()); [] when they have none.
-static func traits_of(member) -> Array:
-	return member.traits()
-
-
-## Does `member` have, for every entry of `needs`, at least one of its traits ("a|b" is either)?
+## Does `member` have, for every entry of `needs`, at least one of its traits ("a|b" is either): their species', their own and
+## their worn gear's (CrewMember.traits())?
 static func meets(member, needs: Array) -> bool:
-	var have := traits_of(member)
+	var have: Array = member.traits()
 	for need in needs:
 		var ok := false
 		for alt in str(need).split("|"):
@@ -537,7 +522,7 @@ static func _operator_reason(ship, uid: int, a: Dictionary) -> String:
 	var needs: Array = a.get("operator_needs", [])
 	if needs.is_empty():
 		return ""
-	var who = operator_of(ship, uid)
+	var who = TraitSet.operator_of(ship, uid)
 	if who != null and meets(who, needs):
 		return ""
 	var parts := PackedStringArray()

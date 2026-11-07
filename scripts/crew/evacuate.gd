@@ -166,6 +166,7 @@ static func path_to(ship, m, accept: Callable, from := Pathfinder.NO_CELL) -> Ar
 	if start == Pathfinder.NO_CELL or accept.call(start):
 		return out
 	var came := {start: start}
+	var memo := {}  # (Pathfinder.body_ok_memo: each cell asked once)
 	var queue: Array[Vector2i] = [start]
 	var i := 0
 	while i < queue.size() and i < MAX_SEARCH:
@@ -173,7 +174,7 @@ static func path_to(ship, m, accept: Callable, from := Pathfinder.NO_CELL) -> Ar
 		i += 1
 		for d in SIDES:
 			var n: Vector2i = a + d
-			if came.has(n) or not Pathfinder.body_ok(grid, n, Callable(), m.body_size):
+			if came.has(n) or not Pathfinder.body_ok_memo(grid, n, memo, Callable(), m.body_size):
 				continue
 			came[n] = a
 			if accept.call(n):
