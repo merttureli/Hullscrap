@@ -66,7 +66,7 @@ const SPECS := {
 		"interior": 44,
 		"after_s": 0,
 		"ammo": 400,
-		"yield_hp": 50
+		"yield_hp": 110
 	},
 	"emberkin": {
 		"stage": 5,
@@ -126,7 +126,7 @@ const SPECS := {
 		"blurb": "x",
 		"interior": 64,
 		"after_s": 0,
-		"yield_hp": 70
+		"yield_hp": 85
 	},
 	"prismatic": {
 		"stage": 6,
@@ -185,7 +185,7 @@ const SPECS := {
 		"blurb": "x",
 		"interior": 66,
 		"after_s": 0,
-		"yield_hp": 60
+		"yield_hp": 40
 	},
 	"basalt": {
 		"stage": 4,
@@ -250,7 +250,7 @@ const SPECS := {
 		],
 		"blurb": "x",
 		"after_s": 0,
-		"yield_hp": 60
+		"yield_hp": 120
 	},
 	"sporeling": {
 		"stage": 5,
@@ -259,8 +259,8 @@ const SPECS := {
 		"role": "bloom",
 		"weapons": [
 			"sporeling_spore_cannon",
-			"sporeling_spore_cannon",
 			"sporeling_rot_pod",
+			"pulse_mk3",
 			"pulse_mk3",
 			"pulse_mk3",
 			"pulse_mk3",
@@ -311,7 +311,7 @@ const SPECS := {
 		"blurb": "x",
 		"after_s": 0,
 		"ammo": 200,
-		"yield_hp": 70,
+		"yield_hp": 35,
 		"interior": 60
 	},
 	"mire": {
@@ -373,7 +373,7 @@ const SPECS := {
 		"blurb": "x",
 		"after_s": 0,
 		"interior": 56,
-		"yield_hp": 70
+		"yield_hp": 150
 	},
 	"fenn": {
 		"stage": 5,
@@ -433,7 +433,7 @@ const SPECS := {
 		"interior": 44,
 		"after_s": 0,
 		"ammo": 200,
-		"yield_hp": 70
+		"yield_hp": 35
 	},
 	"gauntling": {
 		"stage": 4,
@@ -490,7 +490,7 @@ const SPECS := {
 		],
 		"blurb": "x",
 		"after_s": 0,
-		"yield_hp": 60
+		"yield_hp": 75
 	},
 	"grundl": {
 		"stage": 5,
@@ -549,7 +549,7 @@ const SPECS := {
 		"blurb": "x",
 		"after_s": 0,
 		"ammo": 600,
-		"yield_hp": 300
+		"yield_hp": 350
 	},
 	"human": {
 		"stage": 4,
@@ -608,6 +608,6 @@ const SPECS := {
 		"blurb": "x",
 		"after_s": 0,
 		"ammo": 200,
-		"yield_hp": 60
+		"yield_hp": 50
 	}
 }
