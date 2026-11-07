@@ -192,11 +192,12 @@ func _dist(a: String, b: String) -> float:
 
 ## The other node ids, nearest to `id` first (ties by id).
 func _nearest(id: String) -> Array:
-	var out: Array = ids().filter(func(o): return o != id)
-	out.sort_custom(func(x, y):
-		var dx := _dist(id, x)
-		var dy := _dist(id, y)
-		return dx < dy or (dx == dy and x < y))
+	var d := {}  # id -> its distance, worked out once
+	for n in nodes:
+		if n["id"] != id:
+			d[n["id"]] = _dist(id, n["id"])
+	var out: Array = d.keys()
+	out.sort_custom(func(x, y): return d[x] < d[y] or (d[x] == d[y] and x < y))
 	return out
 
 
@@ -237,6 +238,9 @@ func _link(rng: RandomNumberGenerator, cfg: Dictionary) -> void:
 	var lane_max := int(m["lane_max"])
 	var clearance := float(m["clearance"])
 	var length := float(m["lane_length"])
+	var near := {}  # id -> _nearest(id): no node moves while the lanes are laid
+	for n in nodes:
+		near[n["id"]] = _nearest(n["id"])
 	# 1. every node asks for 2 lanes, sometimes 3 or 4, to its nearest neighbours that can take one
 	for n in nodes:
 		var id: String = n["id"]
@@ -246,7 +250,7 @@ func _link(rng: RandomNumberGenerator, cfg: Dictionary) -> void:
 			if rng.randf() < float(m["lane_fourth"]):
 				want += 1
 		want = mini(want, lane_max)
-		for o in _nearest(id):
+		for o in near[id]:
 			if degree(id) >= want:
 				break
 			if linked(id, o) or degree(o) >= lane_max or _dist(id, o) > length or _bad_lane(id, o, clearance):
@@ -256,7 +260,7 @@ func _link(rng: RandomNumberGenerator, cfg: Dictionary) -> void:
 	for n in nodes:
 		var id: String = n["id"]
 		for strict in [true, false]:
-			for o in _nearest(id):
+			for o in near[id]:
 				if degree(id) >= lane_min:
 					break
 				if linked(id, o) or degree(o) >= lane_max or (strict and _bad_lane(id, o, clearance)):
