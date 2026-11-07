@@ -168,7 +168,7 @@ func build(race: String, sp: Dictionary, seed_value: int) -> Ship:
 						diff.append("%s %d/%d" % [id, int(got.get(id, 0)), int(want[id])])
 				print("  seed %d attempt %d: dropped %s; power %s" % [seed_value, attempt, str(diff), str(net.map(func(n): return "%s/%s" % [str(n["supply"]), str(n["demand"])]))])
 			continue  # a mount that found no clean wall is dropped silently by Shipgen: a flagship keeps every part it was drawn with
-		var why :=Shipgen.validate(ship, float(f["hull"].get("max_fill", Shipgen.MAX_FILL)) + 0.01)
+		var why :=Shipgen.validate(ship, minf(float(f["hull"].get("max_fill", Shipgen.MAX_FILL)) + 0.01, 0.9))  # (tests/test_flagships.gd checks 0.9)
 		if not why.is_empty():
 			if args.has("v"):
 				print("  seed %d attempt %d: invalid %s" % [seed_value, attempt, str(why[0])])

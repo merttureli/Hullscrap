@@ -219,7 +219,7 @@ const SPECS := {
 			"basalt_vacuum_forge",
 			"reactor_mk1"
 		],
-		"armour": 4,
+		"armour": 3,
 		"aim": 0.85,
 		"beds": 3,
 		"hull_seed": 41,
@@ -249,7 +249,8 @@ const SPECS := {
 		],
 		"blurb": "x",
 		"after_s": 210,
-		"yield_hp": 60
+		"yield_hp": 60,
+		"interior": 54
 	},
 	"sporeling": {
 		"stage": 5,
