@@ -148,7 +148,7 @@ func test_the_styles_weights_come_from_the_data() -> void:
 	var want := {
 		"default": {"surrender": 0.7, "flee": 0.2, "fight": 0.1}, "rustfang": {"surrender": 0.6, "flee": 0.25, "fight": 0.15},
 		"ram": {"surrender": 0.0, "flee": 0.4, "fight": 0.6}, "concord": {"surrender": 0.4, "flee": 0.4, "fight": 0.2},
-		"hollow": {"surrender": 0.0, "flee": 0.0, "fight": 1.0}, "ghost": {"surrender": 0.0, "flee": 1.0, "fight": 0.0},
+		"hollow": {"surrender": 0.0, "flee": 0.0, "fight": 1.0}, "ghost": {"surrender": 0.0, "flee": 1.0, "fight": 0.0}, "warden": {"surrender": 0.8, "flee": 0.2, "fight": 0.0},
 		"no such style": {"surrender": 0.7, "flee": 0.2, "fight": 0.1},
 	}
 	for style in want:
@@ -253,17 +253,104 @@ func test_a_fading_ghost_obeys_the_engine_helm_and_crew_holds() -> void:
 	eq(s.state(), "escaped", "repaired: it finishes the fade")
 
 
-func test_the_hollows_ships_fade_and_the_wardens_never_break() -> void:
+func test_the_hollows_ships_fade_and_the_wardens_stand_aside() -> void:  # (the wardens were `hollow`, never breaking, until fights-end 2026-11)
 	var ghost := Shipgen.from_spec(Shipgen.spec("hollow", "small", 7, 40.0))
 	var warden := Shipgen.from_spec(Shipgen.spec("wardens", "small", 7, 40.0))
 	eq(str(ghost.get_meta("ai", {}).get("morale", "")), "ghost", "a Hollow ship is a ghost")
-	eq(str(warden.get_meta("ai", {}).get("morale", "")), "hollow", "a Lattice warden keeps the style that never breaks")
+	eq(str(warden.get_meta("ai", {}).get("morale", "")), "warden", "a Lattice warden flies the guardians' style")
 	var s := Session.new()
 	s.start(Session.load_ship(PIRATE), Session.load_ship(Shipgen.spec("hollow", "small", 7, 40.0)), 3)
 	eq(s.morale.style, "ghost", "and the fight is told so")
 	var w := Session.new()
 	w.start(Session.load_ship(PIRATE), Session.load_ship(Shipgen.spec("wardens", "small", 7, 40.0)), 3)
-	eq(w.morale.style, "hollow", "the warden's too")
+	eq(w.morale.style, "warden", "the warden's too")
+	var beacon := Shipgen.build("hollow", "small", 7, 0.4, {"warden": true})
+	eq(str(beacon.get_meta("ai", {}).get("morale", "")), "hollow", "the Hollow's own beacon warden still never breaks")
+
+
+func test_a_beaten_warden_stands_aside_or_withdraws_and_never_fights_on() -> void:
+	var said := {}
+	for seed_value in 12:
+		var w := Session.new()
+		w.start(Session.load_ship(PIRATE), Session.load_ship(Shipgen.spec("wardens", "small", 11 + seed_value, 40.0)), seed_value + 1)
+		StructureUtil.tough(w.arena.ships[Session.PLAYER])
+		w.arena.autofire[Session.PLAYER] = false
+		_hurt(w, 0.3)
+		_run(w, 0.1)
+		check(w.morale.state in ["offering", "fleeing"], "seed %d: a beaten warden yields or withdraws (%s)" % [seed_value + 1, w.morale.state])
+		said[w.morale.state] = true
+		if w.morale.state == "offering":
+			var line := w.morale.say("surrender")
+			check(Morale.config()["lines"]["wardens"]["surrender"].has(line), "in a guardian's words: " + line)
+			check(w.morale.offer.has("credits") and int(w.morale.offer["credits"]) <= 25, "a lane's small toll, not a ransom: %s" % str(w.morale.offer))
+	check(said.has("offering"), "most stand aside")
+
+
+# --- the disarmed and the cornered (fights-end 2026-11) ------------------------------------------------------
+
+func test_a_disarmed_enemy_never_fights_on() -> void:
+	var fought := 0
+	for seed_value in 10:
+		var s := _session(seed_value + 1)
+		_style(s, {"surrender": 0.5, "flee": 0.0, "fight": 0.5})
+		_set_status(s, _parts(s, "weapon"), "disabled")
+		_run(s, 5.3)
+		eq(s.morale.state, "offering", "seed %d: no weapon for 5 s, it yields (never fights on)" % (seed_value + 1))
+		var t := _session(seed_value + 1)
+		_style(t, {"surrender": 0.5, "flee": 0.0, "fight": 0.5})
+		_hurt(t, 0.3)
+		_run(t, 0.1)
+		fought += int(t.morale.state == "fighting_on")
+	check(fought > 0, "while an armed one of the same style broken by damage still fights on now and then (%d of 10)" % fought)
+	var h := _session()
+	_with_style(h, "hollow")
+	_set_status(h, _parts(h, "weapon"), "disabled")
+	_run(h, 5.3)
+	eq(h.morale.state, "fighting_on", "the hollow, which can neither yield nor run, fights on unarmed")
+	eq(Morale.config()["unarmed_fight"], 0.0, "unarmed_fight is in the data")
+
+
+func test_a_ship_fighting_on_breaks_once_more_when_it_loses_every_weapon() -> void:
+	var s := _session()
+	_style(s, {"surrender": 0.0, "flee": 0.0, "fight": 1.0})
+	_hurt(s, 0.3)
+	_run(s, 0.1)
+	eq(s.morale.state, "fighting_on", "it fights on")
+	s.morale.cfg["styles"]["test"] = {"surrender": 0.0, "flee": 1.0, "fight": 1.0}  # (now it could also run)
+	_set_status(s, _parts(s, "weapon"), "disabled")
+	_run(s, 4.5)
+	eq(s.morale.state, "fighting_on", "4.5 s unarmed is not enough")
+	_run(s, 0.8)
+	eq(s.morale.state, "fleeing", "5 s with no weapon: it breaks again, and runs")
+	eq(s.morale.rolls, 2, "the second roll")
+	var t := _session()
+	_style(t, {"surrender": 0.0, "flee": 0.0, "fight": 1.0})
+	_hurt(t, 0.3)
+	_run(t, 0.1)
+	_set_status(t, _parts(t, "weapon"), "disabled")
+	_run(t, 12.0)
+	eq(t.morale.state, "fighting_on", "a style that can neither yield nor run fights on")
+	eq(t.morale.rolls, 2, "after one more roll, and no third")
+
+
+func test_a_fleeing_enemy_whose_drive_is_held_10_s_surrenders() -> void:
+	var s := _session()
+	_style(s, {"surrender": 0.0, "flee": 1.0, "fight": 0.0})
+	_hurt(s, 0.3)
+	_run(s, 2.0)
+	var engines := _parts(s, "engine")
+	_set_status(s, engines, "disabled")
+	_run(s, 6.0)
+	_set_status(s, engines, "ok")
+	_run(s, 1.0)
+	_set_status(s, engines, "disabled")
+	_run(s, 9.5)
+	eq(s.morale.state, "fleeing", "held 6 s, then 9.5 s in a row: still running (the count starts over when the drive charges)")
+	_run(s, 0.7)
+	eq(s.morale.state, "offering", "held 10 s in a row: cornered, it surrenders")
+	eq(s.morale.pilot_mode(), "hold", "it holds fire and throttle")
+	check(not s.morale.offer.is_empty(), "with an offer: %s" % s.morale.offer_text())
+	eq(Morale.config()["held_surrender_s"], 10.0, "held_surrender_s is in the data")
 
 
 # --- surrender --------------------------------------------------------------------------------------------

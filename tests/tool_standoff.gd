@@ -4,8 +4,8 @@ extends SceneTree
 ## It builds a player-like ship for a stage from data/progression.json's median row (its guns, shield layers and power), with a human mix of
 ## weapons (lasers and the pulse line, what the shops and blueprints offer by then), and fights it through the real arena (as
 ## tests/tool_balance.gd does: both pilots on the AI, the crews in ShipSim, morale ending fights the way the game does, the player takes any
-## surrender) against generated enemies of that stage that carry no shield, enemies that do, Hollow ghosts, and the Lattice wardens (the
-## faction of morale style `hollow`, which never breaks: the control that a morale change must leave as it was), N seeds each.
+## surrender) against generated enemies of that stage that carry no shield, enemies that do, Hollow ghosts, and the Lattice wardens (morale
+## style `warden` since 2026-11; until then `hollow`, which never breaks), N seeds each.
 ##   godot --headless --path . --script res://tests/tool_standoff.gd [-- key=value ...]
 ## Keys: paim (what-if: the player pilot's aim_skill; 0.8+ snipes guns first), stages (default 3,4,5; 1 to 5 have a build), seeds (per stage and kind, default 20), cap (s, default 180), kinds (plain,shield,ghost,warden), jobs (processes, default 2),
 ## out (a JSON of every fight's row), sum (print the table of an out file instead of fighting: sum=<path,path>). Internal: shard (k/n), rows.
