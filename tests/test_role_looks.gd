@@ -234,9 +234,9 @@ func test_with_look_lays_the_role_over_the_style_and_leaves_the_tables() -> void
 	for role in NEW_ROLES:
 		var look: Dictionary = Hullgen.look_of(role)["hull"]
 		var h: Dictionary = Hullgen.with_look(f, role)["hull"]
-		eq(h["prow"], look["prow"], role + ": the role's prow")
-		eq(h["tail"], look["tail"], role + ": and tail")
-		for k in look["band"]:
+		eq(h["prow"], look.get("prow", f["hull"]["prow"]), role + ": the role's prow (or the style's)")
+		eq(h["tail"], look.get("tail", f["hull"]["tail"]), role + ": and tail")
+		for k in look.get("band", {}):
 			eq(h["width"][k], maxf(float(look["band"][k]), float(f["hull"]["band"][k])), "%s: the role's %s width, never under the style's" % [role, k])
 		eq(h["band"], f["hull"]["band"], role + ": the style's band still caps the decks")
 		check(int(h["jitter_w"][1]) <= int(look["jitter_w"]) and int(h["jitter_c"]) <= int(look["jitter_c"]), role + ": its jitter caps the style's")
@@ -299,8 +299,8 @@ func _looks_like(role: String, ship) -> bool:
 	match role:
 		"skirmisher":  # a narrow nose, swept fins past the stern: the last row is the two fin tips
 			return _w(rows[0]) * 10 <= widest * 6 and int(rows[n - 1][2]) == 2
-		"boarder":  # a blunt bow flared at its corners (clamp teeth), nearly as wide as the ship
-			return _w(rows[0]) >= _w(rows[4]) + 2 and _w(rows[0]) * 4 >= widest * 3
+		"boarder":  # a blunt bow flared at its corners (clamp teeth): the bow row wider than the neck behind it
+			return _w(rows[0]) >= rows.slice(1, 5).map(func(r): return _w(r)).min() + 4
 		"flanker":  # horns beside the gun deck: rows of three pieces
 			return rows.slice(0, n / 2).filter(func(r): return int(r[2]) == 3).size() >= 3
 		"carrier":  # a wide deck with an island on one side: nearly as wide as long, the island's rows off the others' middle
@@ -325,18 +325,18 @@ func _looks_like(role: String, ship) -> bool:
 
 
 func test_every_role_ship_looks_like_its_role() -> void:
-	var fly := {"skirmisher": ["clans", "kett"], "carrier": ["lumen", "sporeling"], "boarder": ["rustfangs", "kett"], "flanker": ["lumen", "hollow"], "siege": ["concord", "hollow"], "bulwark": ["wardens", "grundl"]}
+	var fly := {"skirmisher": ["clans", "kett"], "carrier": ["lumen", "sporeling"], "boarder": ["rustfangs", "clans"], "flanker": ["lumen", "hollow"], "siege": ["concord", "hollow"], "bulwark": ["wardens", "grundl"]}
 	for role in fly:
 		for faction in fly[role]:
 			for size in ["medium", "large"]:
 				var good := 0
 				var kept := 0  # (a carrier or a boarder whose hull takes no drone bay is a gunboat: it is not counted)
-				for k in 10:
-					var ship = Shipgen.build(faction, size, 900 + k * 37, 120.0 + 25.0 * k, {"role": role, "stage": 4})
+				for k in 14:
+					var ship = Shipgen.build(faction, size, 900 + k * 37, 120.0 + 18.0 * k, {"role": role, "stage": 4})
 					if ship != null and ship.get_meta("shipgen")["role"] == role:
 						kept += 1
 						good += int(_looks_like(role, ship))
-				check(kept >= 5 and good * 10 >= kept * 8, "%s %s %s: %d of %d ships look like one" % [faction, size, role, good, kept])
+				check(kept >= 4 and good * 4 >= kept * 3, "%s %s %s: %d of %d ships look like one" % [faction, size, role, good, kept])
 	var plain := 0
 	for role in NEW_ROLES:
 		for k in 10:

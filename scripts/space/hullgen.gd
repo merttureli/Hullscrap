@@ -150,8 +150,8 @@ static func make(style: Dictionary, bands: Array, t: int, rows: int, rng: Random
 		room.append(maxi(0, (int(b["x1"]) - int(b["x0"]) + 1 - maxi(int(b.get("need", 0)) + 2, MIN_OVERLAP)) / 2))
 	if level >= 1 and not bool(opts.get("ram", false)):  # (a rammer keeps its ram bow; the plain fallback its bevels)
 		for op in style["hull"].get("role_ops", []):
-			if str(op["op"]) == "wedge" and boost >= 2:
-				continue
+			if (str(op["op"]) == "wedge" and boost >= 2) or (boost >= 3 and str(op["op"]) != "fins") or bands.size() < int(op.get("min_decks", 0)):
+				continue  # a hull still a box at the hardest reshaping keeps only its fins (they make it less of one) and lets the reshaping bevel it
 			var before := {}
 			for v in poly:
 				before[v] = true
@@ -455,7 +455,8 @@ static func _arcs(poly: Array, op: Dictionary, rng: RandomNumberGenerator, arcs:
 
 ## One op of a role's look: wedge and chamfer as the style's (a chamfer of the bow's or the stern's corners no deeper than
 ## `room`), keep (lock the corners `at` selects, so the style's ops leave them), fins, horns, island, racks and steps (below).
-## Every slope they draw is 45 degrees, in every people's grammar. `room`: the floor columns beside the mounts at the bow and
+## Every slope they draw is 45 degrees, in every people's grammar. An op with `min_decks` is left out of a ship of fewer decks
+## (a small hull: the gun deck, the core and the engine room). `room`: the floor columns beside the mounts at the bow and
 ## the stern (make()), which a chamfer or a step there never cuts into.
 static func _role_op(poly: Array, op: Dictionary, rng: RandomNumberGenerator, avoid: Array, locked: Dictionary, room: Array) -> void:
 	match str(op["op"]):
