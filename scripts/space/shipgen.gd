@@ -292,11 +292,14 @@ static func build(faction: String, size: String, seed_value: int, budget: float,
 		roll.seed = _mix(seed_value, faction, size, 99)
 		ram = roll.randf() < float(f["ai"]["rammer"]) and size != "small"
 	var role := str(opts["role"]) if opts.has("role") else pick_role(faction, size, seed_value)
-	if role != "" and not opts.has("ram") and bool(tables()["roles"]["list"][role].get("ram", false)) and float(f["ai"]["rammer"]) > 0.0 and size != "small":
+	var rk: Dictionary = tables()["roles"]["list"].get(role, {})
+	if role != "" and not opts.has("ram") and bool(rk.get("ram", false)) and float(f["ai"]["rammer"]) > 0.0 and size != "small":
 		ram = true  # a brawler of a faction whose pilots ram rams
+	elif not opts.has("ram") and rk.get("ai", {}).has("style"):
+		ram = false  # a fighting role flies its own style: the seed's ram roll is not for it
 	var shields := true
 	var cap := shield_cap(int(opts.get("stage", 0)))
-	if cap < 1.0 and not f.has("budget_mult"):
+	if cap < 1.0 and not f.has("budget_mult") and not bool(rk.get("shielded", false)):  # (a role that is its shield, the bulwark, always may buy one)
 		var sroll := RandomNumberGenerator.new()
 		sroll.seed = _mix(seed_value, faction, size, 98)
 		shields = sroll.randf() < cap
@@ -305,6 +308,9 @@ static func build(faction: String, size: String, seed_value: int, budget: float,
 		var rng := RandomNumberGenerator.new()
 		rng.seed = _mix(seed_value, faction, size, attempt)
 		var r := _attempt(faction, size, rng, budget, ram, attempt, shields, role)
+		if r["ship"] != null and rk.has("bay") and add_role_bay(r["ship"], faction, size, seed_value, rk) == 0:
+			failed.append("no wall takes the role's drone bay")  # a carrier (boarder) without its bay is none: the next roll makes another hull
+			continue
 		if r["ship"] != null:
 			var ship: Ship = r["ship"]
 			ship.get_meta("shipgen")["attempts"] = attempt + 1
@@ -312,10 +318,14 @@ static func build(faction: String, size: String, seed_value: int, budget: float,
 			ship.get_meta("shipgen")["seed"] = seed_value
 			if bool(opts.get("warden", false)) and Morale.fades_style(str(ship.get_meta("ai").get("morale", ""))):
 				ship.get_meta("ai")["morale"] = "hollow"
-			if bool(opts.get("bays", false)):
+			if bool(opts.get("bays", false)) and not rk.has("bay"):  # (a role's own bay stands in for the rolled one)
 				add_enemy_bay(ship, faction, size, seed_value, int(opts.get("stage", 0)))
 			return ship
 		failed.append(r["why"])
+	if rk.has("bay") and failed.has("no wall takes the role's drone bay"):  # no hull of the seed took the bay: it flies as a gunboat
+		var again := opts.duplicate()
+		again["role"] = "gunboat"
+		return build(faction, size, seed_value, budget, again)
 	last_failed = failed
 	return null
 
@@ -382,9 +392,13 @@ static func threat_of(design: String, player: Ship) -> Dictionary:
 
 # --- roles ---------------------------------------------------------------------------------------------------
 
-## The roles a faction flies (data/enemy_tables.json "roles"): the `per_faction` whose favoured category its weights rate highest (ties by the table's order).
+## The roles a faction flies (data/enemy_tables.json "roles"): its `flies` list (a race flies its base faction's), else the
+## `per_faction` whose favoured category its weights rate highest (ties by the table's order).
 static func roles_of(faction: String) -> Array:
 	var cfg: Dictionary = tables()["roles"]
+	var own := flies(faction)
+	if not own.is_empty():
+		return own.keys()
 	var w: Dictionary = tables()["factions"][faction]["weights"]
 	var keyed: Array = []
 	var i := 0
@@ -396,44 +410,68 @@ static func roles_of(faction: String) -> Array:
 	return ids.slice(0, int(cfg["per_faction"]))
 
 
-## The role of the ship of (faction, size, seed), rolled from the seed and weighted by the faction's own weights; "" for a faction with no roles.
+## The roles of `faction`'s `flies` entry (or its base faction's, for a race) and their weights, the unknown ones left out; {} when it has none.
+static func flies(faction: String) -> Dictionary:
+	var cfg: Dictionary = tables()["roles"]
+	var all: Dictionary = cfg.get("flies", {})
+	var f: Dictionary = tables()["factions"].get(faction, {})
+	var own = all.get(faction, all.get(str(f.get("lines_as", "")), {}))
+	var out := {}
+	for id in own:
+		if cfg["list"].has(id):
+			out[id] = float(own[id])
+	return out
+
+
+## The role of the ship of (faction, size, seed), rolled from the seed and weighted by its `flies` weights (else the faction's own weights); "" for a faction with no roles.
 static func pick_role(faction: String, size: String, seed_value: int) -> String:
 	var cfg: Dictionary = tables()["roles"]
 	var w: Dictionary = tables()["factions"][faction]["weights"]
+	var own := flies(faction)
 	var order: Array = ["small", "medium", "large"]
 	var pool: Array = []
+	var weight := {}
 	var total := 0.0
 	for id in roles_of(faction):
 		var r: Dictionary = cfg["list"][id]
 		if order.find(size) < order.find(str(r.get("min_size", "small"))):
 			continue
 		pool.append(id)
-		total += float(w.get(r["favours"], 1))
+		weight[id] = float(own[id]) if not own.is_empty() else float(w.get(r.get("favours", ""), 1))
+		total += float(weight[id])
 	if pool.is_empty():
 		return ""
 	var roll := RandomNumberGenerator.new()
 	roll.seed = _mix(seed_value, faction, size, 97)
 	var x := roll.randf() * total
 	for id in pool:
-		x -= float(w.get(cfg["list"][id]["favours"], 1))
+		x -= float(weight[id])
 		if x < 0.0:
 			return str(id)
 	return str(pool[pool.size() - 1])
 
 
-## `f` with a role laid over it: its weights times the role's, the weight of a long-range gun times the sniper's bias. A copy; the tables stay as they are.
+## `f` with a role laid over it: its weights times the role's, the weight of a long-range gun times the role's `range_bias`, of a gun of a
+## `kind_bias` kind times that, of a tracking gun times `turret_bias`; `role_kit` is the role's entry (what _buy, _finish and build read). A copy; the tables stay as they are.
 static func _with_role(f: Dictionary, role: String) -> Dictionary:
 	if role == "":
 		return f
 	var r: Dictionary = tables()["roles"]["list"][role]
 	var out := f.duplicate(true)
+	out["role_kit"] = r
 	for k in r["weights"]:
 		out["weights"][k] = float(out["weights"].get(k, 1)) * float(r["weights"][k])
-	if r.has("range_from"):
-		_comps()
-		for m in out["parts"]["weapons"]:
-			if _weapons.has(str(m["id"])) and float(_weapons.def(str(m["id"]))["range"]) >= float(r["range_from"]):
-				m["weight"] = float(m.get("weight", 1)) * float(r["range_bias"])
+	_comps()
+	for m in out["parts"]["weapons"]:
+		if not _weapons.has(str(m["id"])):
+			continue
+		var w: Dictionary = _weapons.def(str(m["id"]))
+		if r.has("range_from") and float(w["range"]) >= float(r["range_from"]):
+			m["weight"] = float(m.get("weight", 1)) * float(r["range_bias"])
+		if r.get("kind_bias", {}).has(str(w["kind"])):
+			m["weight"] = float(m.get("weight", 1)) * float(r["kind_bias"][str(w["kind"])])
+		if r.has("turret_bias") and bool(w["turret"]):
+			m["weight"] = float(m.get("weight", 1)) * float(r["turret_bias"])
 	return out
 
 
@@ -528,9 +566,11 @@ static func _buy(f: Dictionary, size: String, budget: float, rng: RandomNumberGe
 	var base: Dictionary = parts["base"]
 	var ai: Dictionary = f["ai"]
 	var engines: Array = _menu(parts["engines"], budget)
+	var rk: Dictionary = f.get("role_kit", {})
 	var lo := {"weapons": [str(base["weapon"])], "engines": [], "shields": [], "systems": [], "reactors": [], "armour": 0,
-		"crew": 2, "skill": float(ai["aim_skill"][0]), "beds": 0, "spent": 0.0, "helm": str(base["helm"]), "o2": str(base["o2"])}
-	for _i in 2:
+		"crew": 2, "skill": float(ai["aim_skill"][0]), "beds": 0, "spent": 0.0, "helm": str(base["helm"]), "o2": str(base["o2"]),
+		"reserve": _bay_draw(rk, size)}  # reserve: the power the role's drone bays will draw (build() mounts them after the hull)
+	for _i in clampi(int(rk.get("base_engines", 2)), 1, maxi(int(mx["engine"]), 1)):
 		lo["engines"].append(str(engines[0]["id"]))
 	var cfg: Dictionary = T["budget"]
 	var ctx := _power_ctx(f, mx, budget)
@@ -542,6 +582,9 @@ static func _buy(f: Dictionary, size: String, budget: float, rng: RandomNumberGe
 		var options: Array = _options(f, size, lo, mx, budget, budget - spent, cfg, ctx)
 		if options.is_empty():
 			break
+		var must: Array = options.filter(func(o): return _wanted(rk, lo, o))
+		if not must.is_empty():  # the role's must-haves come first, while the budget buys them
+			options = must
 		var total := 0.0
 		for o in options:
 			total += float(o["weight"])
@@ -558,6 +601,29 @@ static func _buy(f: Dictionary, size: String, budget: float, rng: RandomNumberGe
 	lo["spent"] = spent
 	lo["beds"] = mini(int(mx["beds"]), (int(lo["crew"]) + 1) / 2)
 	return lo
+
+
+## Is option `o` one the role (`rk`, its roles entry) buys before anything else and `lo` still lacks: a missile launcher while it
+## has fewer than `missiles`, a crew member while it has fewer than 2 + `crew_add`?
+static func _wanted(rk: Dictionary, lo: Dictionary, o: Dictionary) -> bool:
+	match str(o["cat"]):
+		"weapons":
+			return _is_missile(str(o["id"])) and lo["weapons"].filter(func(id): return _is_missile(str(id))).size() < int(rk.get("missiles", 0))
+		"crew":
+			return int(lo["crew"]) < 2 + int(rk.get("crew_add", 0))
+	return false
+
+
+static func _is_missile(id: String) -> bool:
+	return _weapons.has(id) and str(_weapons.def(id)["kind"]) == "missile"
+
+
+## The power the drone bays of role entry `rk` draw on a ship of `size` (0 with no `bay`).
+static func _bay_draw(rk: Dictionary, size: String) -> float:
+	var bay := str(tables().get("drones", {}).get("bay", {}).get(size, ""))
+	if not rk.has("bay") or bay == "" or not _comps().has(bay):
+		return 0.0
+	return -minf(_power(bay), 0.0) * int(rk["bay"].get("count", {}).get(size, 1))
 
 
 ## The menu items of a category for sale at this budget, cheapest first.
@@ -590,7 +656,7 @@ static func _demand(f: Dictionary, lo: Dictionary) -> float:
 	var rad := 0
 	for id in lo["weapons"]:
 		rad += int(_item(f, "weapons", id).get("needs", {}).get("radiator", 0))
-	return d + rad * absf(_power("radiator"))
+	return d + rad * absf(_power("radiator")) + float(lo.get("reserve", 0.0))
 
 
 ## The cheapest reactors (at most `mx.reactor` of them) that cover `lo`'s demand: {ids, cost (above the free base reactor), net}
@@ -1780,6 +1846,50 @@ static func add_enemy_bay(ship: Ship, faction: String, size: String, seed_value:
 	return made
 
 
+## The drone bays a role always flies (its `bay`, data/enemy_tables.json roles: `count` by size, else 1), of the tier the size takes (drones.bay),
+## each loaded with a kit of the role's kit `roles` from the faction's drone kits (else from the role's own `kits`), rolled from the ship's seed,
+## with `parts` drone parts (else the drones' own). A bay that finds no wall is not placed. Returns how many it got.
+static func add_role_bay(ship: Ship, faction: String, size: String, seed_value: int, rk: Dictionary) -> int:
+	var cfg: Dictionary = tables().get("drones", {})
+	var bay_id := str(cfg.get("bay", {}).get(size, ""))
+	if not Content.has("components", bay_id):
+		return 0
+	var rb: Dictionary = rk["bay"]
+	var tier := int(ship.components.def(bay_id)["bay"]["max_tier"])
+	var pool := {}
+	var total := 0.0
+	for src in [cfg.get("kits", {}).get(faction, cfg.get("default", {})), rb.get("kits", {})]:
+		for id in src:
+			var k := Drones.kit(str(id))
+			if not k.is_empty() and str(k["drone"]["role"]) in rb.get("roles", []) and int(k["drone"]["tier"]) <= tier:
+				pool[str(id)] = float(src[id])
+				total += float(src[id])
+		if not pool.is_empty():
+			break
+	if pool.is_empty():
+		return 0
+	var rng := RandomNumberGenerator.new()
+	rng.seed = _mix(seed_value, faction, size, 96)
+	var made := 0
+	for i in int(rb.get("count", {}).get(size, 1)):
+		var x := rng.randf() * total
+		var pick := ""
+		for id in pool:
+			pick = str(id)
+			x -= float(pool[id])
+			if x <= 0.0:
+				break
+		if add_bay(ship, bay_id, pick, [1, 3, 2] if i == 0 else [3, 1, 2]) >= 0:
+			made += 1
+			ship.inventory.add(pick, 1)
+	if made > 0:
+		var parts: Array = rb.get("parts", cfg.get("parts", [4, 9]))
+		ship.inventory.add(Drones.PART, rng.randi_range(int(parts[0]), int(parts[1])))
+		ship.mark_dirty()
+		ship.refresh()
+	return made
+
+
 # --- the finish ----------------------------------------------------------------------------------
 
 ## Take parts off that the power cannot carry (the last gun first) until supply covers the demand.
@@ -1835,6 +1945,7 @@ static func _finish(ship: Ship, f: Dictionary, faction: String, lo: Dictionary, 
 		var lap := i / names.size()  # more crew than names: the second lap is "Vex II"
 		ship.crew_plan.append({"name": base_name if lap == 0 else "%s %s" % [base_name, "I".repeat(lap + 1)], "species": str(crew["species"][rng.randi() % crew["species"].size()])})
 	var ai: Dictionary = {"aim_skill": snappedf(float(lo["skill"]), 0.01), "morale": str(f["ai"].get("morale", "default")), "faction": str(f.get("lines_as", faction))}  # morale: a style of data/morale.json; faction: whose lines (morale.json) it says
+	ai.merge(f.get("role_kit", {}).get("ai", {}).duplicate(), true)  # a fighting role's pilot style (pilot_ai.gd) and its break line (morale.gd)
 	if ram:
 		ai["style"] = "rammer"
 		ai["morale"] = "ram"

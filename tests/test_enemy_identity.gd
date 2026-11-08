@@ -194,7 +194,7 @@ func test_no_two_styles_share_both_a_dominant_colour_and_a_dressing_kind() -> vo
 func test_roles_shift_the_split_not_the_budget_and_name_the_ship() -> void:
 	for id in ["kett", "rustfangs", "concord", "revenant"]:
 		var roles: Array = Shipgen.roles_of(id)
-		check(roles.size() >= 2 and roles.size() <= 4, "%s flies 2 to 4 roles: %s" % [id, str(roles)])
+		check(roles.size() >= 2 and roles.size() <= 6, "%s flies 2 to 6 roles: %s" % [id, str(roles)])  # (2 to 4 before the fighting roles: a faction's `flies` list keeps some old roles and adds two new ones)
 		var seen := {}
 		for sd in 80:
 			var ship = Shipgen.build(id, "medium", sd, 150.0, {"stage": 3})
