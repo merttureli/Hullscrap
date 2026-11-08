@@ -231,9 +231,10 @@ func test_the_carrier_launches_and_keeps_beyond_the_foes_reach() -> void:
 	ship = _roled("lumen", "large", "carrier", 31, 260.0)
 	ship.inventory.add(Drones.PART, -ship.inventory.count(Drones.PART))
 	d = _arena(ship, 2400.0)
+	var gap0: float = d[1].gap_now()
 	_step(d[0], d[1], 12.0)
 	check(not d[1].has_drones(), "with no parts it has no drone to fly")
-	check(d[1].gap_now() < d[1].foe_reach(), "and closes to fight with its guns (gap %d)" % d[1].gap_now())
+	check(d[1].gap_now() < 0.7 * gap0, "and closes to fight with its guns (gap %d from %d)" % [d[1].gap_now(), gap0])
 
 
 func test_the_boarder_throws_its_boarders_and_holds_close() -> void:
@@ -283,10 +284,15 @@ func test_the_flanker_gets_behind_the_foes_beam() -> void:
 
 
 func test_the_siege_boat_fires_its_volley_then_backs_off() -> void:
-	var ship = _roled("concord", "large", "siege", 61, 260.0)
-	var d := _arena(ship, 3600.0, 11, "gen:concord:large:7:30000")  # (a foe of many guns: a siege boat closes on one whose guns are all out)
+	var d := []
+	for k in 12:  # a siege boat whose presented side has two volley guns or more (one gun is no volley: it holds and fires)
+		d = _arena(_roled("concord", "large", "siege", 61 + k, 260.0), 3600.0, 11, "gen:concord:large:7:30000")  # (a foe of many guns: a siege boat closes on one whose guns are all out)
+		_step(d[0], d[1], 1.0)
+		if d[1].volley_size() >= 2:
+			break
 	var a: Arena = d[0]
 	var ai: PilotAI = d[1]
+	check(ai.volley_size() >= 2, "a siege boat with a volley of %d guns" % ai.volley_size())
 	a.ships[0].ai_volley = true  # (the session sets it for every enemy)
 	var at_volley := [-1.0, 0.0]
 	var most := [0.0]
@@ -316,8 +322,9 @@ func test_the_bulwark_closes_slowly_and_faces_its_best_sector() -> void:
 	var co = a.ships[0]
 	eq(co.sectors, 4, "four sectors")
 	var fastest := [0.0]
-	_step(a, ai, 10.0, func(): fastest[0] = maxf(fastest[0], co.flight.vel.dot((a.ships[1].flight.pos - co.flight.pos).normalized())))
+	_step(a, ai, PilotAI.BULWARK_CHASE_S - 0.5, func(): fastest[0] = maxf(fastest[0], co.flight.vel.dot((a.ships[1].flight.pos - co.flight.pos).normalized())))
 	check(fastest[0] < PilotAI.BULWARK_CLOSE * 1.3, "it closes slowly (%d px/s at most)" % fastest[0])
+	_step(a, ai, 0.5)
 	eq(Shields.sector_of_world_dir(co, a.ships[1].flight.pos - co.flight.pos), 0, "with even sectors it shows the foe its bow")
 	co.sector_layers[0] = 0.0  # the bow sector is knocked out
 	co.sector_wait[0] = 30.0
@@ -409,3 +416,18 @@ func test_a_carrier_reads_its_drones_in_the_threat() -> void:
 	check(below * 5 <= n, "and so does most of them one by one (%d of %d read fewer)" % [below, n])
 	var plain = Shipgen.build("lumen", "medium", 3, 120.0, {"role": "escort", "stage": 3})
 	eq(Threat.bay_dps(plain, plain.power_state.get("powered", {})), 0.0, "a ship with no bay adds nothing")
+
+
+func test_a_siege_boat_of_one_volley_gun_holds_and_fires() -> void:
+	var d := []
+	for k in 20:
+		d = _arena(_roled("rustfangs", "small", "siege", 40 + k, 50.0), 2600.0, 11, "gen:concord:large:7:30000")
+		_step(d[0], d[1], 1.0)
+		if d[1].volley_size() == 1:
+			break
+	eq(d[1].volley_size(), 1, "a siege boat with one volley gun")
+	d[0].ships[0].ai_volley = true
+	var backed := [false]
+	_step(d[0], d[1], 30.0, func(): backed[0] = backed[0] or d[1]._reload >= 0.0)
+	check(not backed[0], "it never backs off: one shot is no volley")
+	check(_events(d[0], "shot", 0) >= 3, "and it keeps firing (%d shots)" % _events(d[0], "shot", 0))

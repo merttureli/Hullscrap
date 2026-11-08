@@ -378,8 +378,8 @@
 			"carrier": {"weights": {"weapons": 0.75, "shield": 1.4, "armour": 1.1, "systems": 1.5}, "bay": {"roles": ["combat"], "kits": {"pulse_drone_mk1": 3, "laser_drone_mk2": 2, "flak_drone_mk3": 1}, "count": {"large": 2}, "parts": [8, 14]}, "min_size": "medium", "favours": "systems", "ai": {"style": "carrier", "break_structure": 0.97}},
 			"boarder": {"weights": {"crew": 2.5, "armour": 0.9, "engine": 2.0, "weapons": 0.6, "shield": 0.8}, "base_engines": 3, "crew_add": 2, "bay": {"roles": ["boarder"], "kits": {"boarder_pod_mk1": 4, "boarder_pod_mk2": 2, "boarder_pod_mk3": 1}}, "favours": "crew", "ai": {"style": "boarder"}},
 			"flanker": {"weights": {"engine": 2.0, "weapons": 1.2, "armour": 0.7, "shield": 0.9}, "turret_bias": 2.0, "favours": "engine", "ai": {"style": "flanker"}},
-			"siege": {"weights": {"weapons": 2.0, "skill": 1.0, "armour": 0.6, "engine": 0.8, "shield": 0.7}, "range_from": 1200, "range_bias": 2.5, "kind_bias": {"missile": 3.0}, "missiles": 1, "favours": "skill", "ai": {"style": "siege"}},
-			"bulwark": {"weights": {"armour": 1.4, "shield": 1.2, "engine": 0.3, "weapons": 2.0, "crew": 1.2}, "range_from": 1100, "range_bias": 2.0, "base_engines": 1, "min_stage": 2, "favours": "shield", "ai": {"style": "bulwark", "break_structure": 0.9}}
+			"siege": {"weights": {"weapons": 2.0, "skill": 1.0, "armour": 0.6, "engine": 0.8, "shield": 0.7}, "range_from": 1200, "range_bias": 2.5, "kind_bias": {"missile": 1.5}, "missiles": 1, "favours": "skill", "ai": {"style": "siege"}},
+			"bulwark": {"weights": {"armour": 1.4, "shield": 1.2, "engine": 0.3, "weapons": 2.0, "crew": 1.2}, "range_from": 1100, "range_bias": 2.0, "min_stage": 2, "favours": "shield", "ai": {"style": "bulwark", "break_structure": 0.9}}
 		},
 		"flies": {
 			"rustfangs": {"gunboat": 3, "brawler": 3, "sniper": 1, "boarder": 2, "skirmisher": 2},
