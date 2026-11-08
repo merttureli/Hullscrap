@@ -7,11 +7,16 @@ extends RefCounted
 ## spikes (saw teeth on a flank) and arc (a round2 corner). Every edge it draws is axis aligned, 45 degrees or
 ## 2:1, so scripts/ship/hull_outline.gd turns the outline into the exact shaped cells of data/shapes.json.
 ## The polygon is clockwise on the cell lattice (x right, y down, bow up) and every vertex is a Vector2i.
+## A fighting role's look (data/role_looks.json, with_look()) sets the proportions and adds its own ops (`role_ops`): they shape
+## the staircase first, and the corners they make are locked, so the style's own ops (its finish) then work on the rest.
 
 const Shapes = preload("res://scripts/ship/shapes.gd")
 const HullOutline = preload("res://scripts/ship/hull_outline.gd")
 
+const LOOKS_PATH := "res://data/role_looks.json"
 const MIN_OVERLAP := 6  ## columns two neighbouring decks share
+
+static var _looks := {}
 
 ## The ops of a ram bow (a Rustfang rammer): a V bow of 45 degree slopes and small bevels elsewhere.
 const RAM_OPS: Array = [
@@ -27,12 +32,53 @@ const PLAIN_OPS: Array = [
 ]
 
 
+## data/role_looks.json, read once.
+static func looks() -> Dictionary:
+	if _looks.is_empty():
+		var d = JSON.parse_string(FileAccess.get_file_as_string(LOOKS_PATH))
+		assert(d is Dictionary and d.get("roles") is Dictionary, "bad role looks: " + LOOKS_PATH)
+		_looks = d
+	return _looks
+
+
+## The look of `role` ({hull, dressing}), {} for a role with none (the old roles keep the style's hull as it is).
+static func look_of(role: String) -> Dictionary:
+	return looks()["roles"].get(role, {})
+
+
+## `f` (a faction's table) with the look of `role` laid over its hull: the role's prow and tail replace the style's, its `band`
+## becomes the deck widths (`width`: the style's `band` still caps what a deck holds, so the look drops no room), its jitter
+## caps the style's (a symmetric people stays symmetric) and its ops become `role_ops`. The style keeps its own ops, asym,
+## spine and max_fill. A copy; `f` itself for a role with no look.
+static func with_look(f: Dictionary, role: String) -> Dictionary:
+	var look := look_of(role)
+	if look.is_empty():
+		return f
+	var lh: Dictionary = look["hull"]
+	var hull: Dictionary = f["hull"].duplicate(true)
+	for k in ["prow", "tail"]:
+		if lh.has(k):
+			hull[k] = lh[k].duplicate()
+	if lh.has("band"):
+		var w: Dictionary = hull["band"].duplicate()
+		w.merge(lh["band"], true)
+		hull["width"] = w
+	if lh.has("jitter_w"):
+		hull["jitter_w"] = [mini(int(hull["jitter_w"][0]), int(lh["jitter_w"])), mini(int(hull["jitter_w"][1]), int(lh["jitter_w"]))]
+	if lh.has("jitter_c"):
+		hull["jitter_c"] = mini(int(hull["jitter_c"]), int(lh["jitter_c"]))
+	hull["role_ops"] = lh.get("ops", []).duplicate(true)
+	var out := f.duplicate()
+	out["hull"] = hull
+	return out
+
+
 ## `boost` (0..3) is how hard a hull that came out too boxy is reshaped: its ends narrow and bevel more. Give every deck of `bands` ([{kind, need (the floor width it needs), rooms}]) its floor columns x0..x1 (set in place): the share of
-## `interior_max` its kind gets in the faction's grammar, never less than it needs, plus the faction's jitter. The centre
+## `interior_max` its kind gets in the faction's grammar (a role's `width`, else `band`), never less than it needs, plus the faction's jitter. The centre
 ## line is x = 0; a symmetric faction gets even widths and no slip.
 static func extents(style: Dictionary, bands: Array, interior_max: int, rng: RandomNumberGenerator, boost := 0, t := 1) -> void:
 	var hull: Dictionary = style["hull"]
-	var frac: Dictionary = hull["band"]
+	var frac: Dictionary = hull.get("width", hull["band"])
 	var jw: Array = hull["jitter_w"]
 	var jc := int(hull["jitter_c"])
 	var asym := bool(hull["asym"])
@@ -96,19 +142,31 @@ static func make(style: Dictionary, bands: Array, t: int, rows: int, rng: Random
 			{"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [boost + 2, boost + 2]},
 			{"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": "max"},
 		]
+	var locked := {}  # the corners a role's look made: the style's ops leave them as they are
+	if level >= 1 and not bool(opts.get("ram", false)):  # (a rammer keeps its ram bow; the plain fallback its bevels)
+		for op in style["hull"].get("role_ops", []):
+			if str(op["op"]) == "wedge" and boost >= 2:
+				continue
+			var before := {}
+			for v in poly:
+				before[v] = true
+			_role_op(poly, op, rng, opts.get("avoid", []), locked)
+			for v in poly:
+				if not before.has(v):
+					locked[v] = true
 	var arcs := {}
 	for op in ops:
 		match str(op["op"]):
 			"wedge", "chamfer":
 				if str(op["op"]) == "wedge" and boost >= 2 and not bool(opts.get("ram", false)):
 					continue  # a wedge fills the very step a boxy hull needs
-				_apply(poly, op, rng, opts.get("avoid", []))
+				_apply(poly, op, rng, opts.get("avoid", []), locked)
 			"spikes":
 				if level >= 2:
-					_spikes(poly, op, rng, opts.get("avoid", []))
+					_spikes(poly, op, rng, opts.get("avoid", []), locked)
 	for op in ops:
 		if str(op["op"]) == "arc" and level >= 2:
-			_arcs(poly, op, rng, arcs)
+			_arcs(poly, op, rng, arcs, locked)
 	var out: Array = []
 	for i in poly.size():
 		var v: Vector2i = poly[i]
@@ -198,8 +256,8 @@ static func _bounds(poly: Array) -> Rect2i:
 
 
 ## The vertices an op's `at` (and `side`) selects, as positions: convex corners at the "tip" (the top row), the
-## "stern_end" (the bottom row), the "shoulder" (any other), concave steps in the "bow" or "stern" half.
-static func _targets(poly: Array, at: String, side: String) -> Array:
+## "stern_end" (the bottom row), the "shoulder" (any other), concave steps in the "bow" or "stern" half; never one in `locked`.
+static func _targets(poly: Array, at: String, side: String, locked := {}) -> Array:
 	var box := _bounds(poly)
 	var mid_y := box.position.y + box.size.y / 2.0
 	var mid_x := box.position.x + box.size.x / 2.0
@@ -228,7 +286,7 @@ static func _targets(poly: Array, at: String, side: String) -> Array:
 					ok = true
 		if ok and side != "":
 			ok = (f["v"].x < mid_x) == (side == "left")
-		if ok:
+		if ok and not locked.has(f["v"]):
 			out.append(f["v"])
 	return out
 
@@ -246,7 +304,7 @@ static func _side(op: Dictionary, rng: RandomNumberGenerator) -> String:
 # --- ops ---------------------------------------------------------------------------------------------
 
 ## A wedge or chamfer op: its chance, side, kind and size are rolled once, then it is applied to every vertex it selects.
-static func _apply(poly: Array, op: Dictionary, rng: RandomNumberGenerator, avoid: Array) -> void:
+static func _apply(poly: Array, op: Dictionary, rng: RandomNumberGenerator, avoid: Array, locked := {}) -> void:
 	if rng.randf() >= float(op.get("chance", 1.0)):
 		return
 	var side := _side(op, rng)
@@ -255,7 +313,7 @@ static func _apply(poly: Array, op: Dictionary, rng: RandomNumberGenerator, avoi
 	var n := 1
 	if op.has("n"):
 		n = 99 if str(op["n"]) == "max" else rng.randi_range(int(op["n"][0]), int(op["n"][1]))
-	var targets := _targets(poly, str(op["at"]), side)
+	var targets := _targets(poly, str(op["at"]), side, locked)
 	for v in targets:
 		var i := poly.find(v)
 		if i < 0:
@@ -327,8 +385,9 @@ static func _wedge(poly: Array, i: int, kind: String) -> bool:
 	return true
 
 
-## Saw teeth on the long vertical flanks: 45 degree triangles `depth` deep, outside the shell, away from the rows in `avoid`.
-static func _spikes(poly: Array, op: Dictionary, rng: RandomNumberGenerator, avoid: Array) -> void:
+## Saw teeth on the long vertical flanks: 45 degree triangles `depth` deep, outside the shell, away from the rows in `avoid`
+## and off the edges of a `locked` corner.
+static func _spikes(poly: Array, op: Dictionary, rng: RandomNumberGenerator, avoid: Array, locked := {}) -> void:
 	if rng.randf() >= float(op.get("chance", 1.0)):
 		return
 	var depth := int(op.get("depth", 2))
@@ -339,7 +398,7 @@ static func _spikes(poly: Array, op: Dictionary, rng: RandomNumberGenerator, avo
 		for i in poly.size():
 			var a: Vector2i = poly[i]
 			var b: Vector2i = poly[(i + 1) % poly.size()]
-			if a.x != b.x or absi(b.y - a.y) < span + 2:
+			if a.x != b.x or absi(b.y - a.y) < span + 2 or locked.has(a) or locked.has(b):
 				continue
 			var y_lo := mini(a.y, b.y) + 1
 			var y_hi := maxi(a.y, b.y) - 1 - span
@@ -361,10 +420,10 @@ static func _spikes(poly: Array, op: Dictionary, rng: RandomNumberGenerator, avo
 
 
 ## Mark convex corners to be drawn as round2 arcs (both edges at least 2 long, no arcs side by side on a short edge).
-static func _arcs(poly: Array, op: Dictionary, rng: RandomNumberGenerator, arcs: Dictionary) -> void:
+static func _arcs(poly: Array, op: Dictionary, rng: RandomNumberGenerator, arcs: Dictionary, locked := {}) -> void:
 	var side := _side(op, rng)
 	var count := rng.randi_range(int(op["count"][0]), int(op["count"][1]))
-	var targets := _targets(poly, str(op["at"]), side)
+	var targets := _targets(poly, str(op["at"]), side, locked)
 	var order: Array = []
 	while not targets.is_empty():
 		order.append(targets.pop_at(rng.randi() % targets.size()))
@@ -384,7 +443,236 @@ static func _arcs(poly: Array, op: Dictionary, rng: RandomNumberGenerator, arcs:
 		count -= 1
 
 
-## The round2 arc replacing the convex corner i: radius 2, centred inside the corner.
+# --- the role ops (data/role_looks.json) ---------------------------------------------------------------
+
+## One op of a role's look: wedge and chamfer as the style's, keep (lock the corners `at` selects, so the style's ops leave
+## them), fins, jaw, horns, island, racks and steps (below). Every slope they draw is 45 degrees, in every people's grammar.
+static func _role_op(poly: Array, op: Dictionary, rng: RandomNumberGenerator, avoid: Array, locked: Dictionary) -> void:
+	match str(op["op"]):
+		"wedge", "chamfer":
+			_apply(poly, op, rng, avoid, locked)
+		"keep":
+			for v in _targets(poly, str(op["at"]), _side(op, rng), locked):
+				locked[v] = true
+		"fins", "jaw":
+			_teeth(poly, op, rng, locked)
+		"horns":
+			_horns(poly, op, rng, locked)
+		"island":
+			_island(poly, op, rng, avoid)
+		"racks":
+			_racks(poly, op, rng, avoid)
+		"steps":
+			_steps(poly, op, rng, avoid, locked)
+
+
+## A 45 degree tooth `depth` cells on each end corner: "fins" sweep out of the stern corners along the stern line (the stern
+## grows wider, its rows stay where they are), "jaw" juts forward from the bow corners (a clamp tooth each side of the bow,
+## its tip `w` wide).
+static func _teeth(poly: Array, op: Dictionary, rng: RandomNumberGenerator, locked: Dictionary) -> void:
+	var fins := str(op["op"]) == "fins"
+	var d := rng.randi_range(int(op["depth"][0]), int(op["depth"][1]))
+	var w := int(op.get("w", 0))
+	var targets := _targets(poly, "stern_end" if fins else "tip", "", locked)
+	if targets.size() != 2:
+		return
+	var cuts: Array = []  # [corner, the two points in polygon order], both worked out before either is cut (both or none)
+	for v in targets:
+		var f := _info(poly, poly.find(v))
+		if not f["axis"]:
+			return
+		var h_in: bool = f["din"].y == 0
+		var h_away: Vector2i = -f["din"] if h_in else f["dout"]  # along the end's edge, away from the corner
+		var v_away: Vector2i = f["dout"] if h_in else -f["din"]  # along the flank, away from the corner
+		var lh: int = f["lin"] if h_in else f["lout"]
+		var lv: int = f["lout"] if h_in else f["lin"]
+		if (fins and d >= lv) or (not fins and 3 * (d + w) + 2 > lh):
+			return
+		var pts: Array = [v - h_away * d, v + v_away * d]  # a fin: the point out along the stern line, the one up the flank
+		if not fins:  # a jaw tooth: its tip ahead of the flank, its flat top `w` wide, its slope back to the bow line
+			pts = [v + h_away * (d + w), v - v_away * d + h_away * w, v - v_away * d] if w > 0 else [v + h_away * d, v - v_away * d]
+		if not h_in:
+			pts.reverse()
+		cuts.append([v, pts])
+	for c in cuts:
+		var i := poly.find(c[0])
+		poly[i] = c[1][0]
+		for k in range(1, c[1].size()):
+			poly.insert(i + k, c[1][k])
+
+
+## Two horns, `w` wide, rise from the shoulders where the bow narrows (the step to the gun deck) to `reach` rows past the bow,
+## leaving `gap` columns of the step free beside the gun deck, their outer tips bevelled at 45 degrees: a crescent opening
+## forward. None when either side has no such step.
+static func _horns(poly: Array, op: Dictionary, rng: RandomNumberGenerator, locked: Dictionary) -> void:
+	var box := _bounds(poly)
+	var mid_x := box.position.x + box.size.x / 2.0
+	var mid_y := box.position.y + box.size.y / 2.0
+	var w := rng.randi_range(int(op["w"][0]), int(op["w"][1]))
+	var top := box.position.y - rng.randi_range(int(op["reach"][0]), int(op["reach"][1]))
+	var gap := int(op.get("gap", 2))
+	var right := -1
+	var left := -1
+	for i in poly.size():
+		var f := _info(poly, i)
+		if not f["axis"] or not f["convex"] or locked.has(f["v"]) or f["v"].y >= mid_y or f["v"].y == box.position.y or f["v"].y - top < 4:
+			continue
+		if f["din"] == Vector2i.RIGHT and f["dout"] == Vector2i.DOWN and f["v"].x > mid_x and int(f["lin"]) >= gap + 2 and (right < 0 or f["v"].y < poly[right].y):
+			right = i
+		elif f["din"] == Vector2i.UP and f["dout"] == Vector2i.RIGHT and f["v"].x < mid_x and int(f["lout"]) >= gap + 2 and (left < 0 or f["v"].y < poly[left].y):
+			left = i
+	if right < 0 or left < 0:
+		return
+	w = mini(w, mini(int(_info(poly, right)["lin"]), int(_info(poly, left)["lout"])) - gap)
+	if w < 2:
+		return
+	var c := w - 1
+	var r: Vector2i = poly[right]
+	var l: Vector2i = poly[left]
+	var i := poly.find(r)
+	poly.remove_at(i)
+	for p in [Vector2i(r.x - w, r.y), Vector2i(r.x - w, top), Vector2i(r.x - c, top), Vector2i(r.x, top + c)]:
+		poly.insert(i, p)
+		i += 1
+	i = poly.find(l)
+	poly.remove_at(i)
+	for p in [Vector2i(l.x, top + c), Vector2i(l.x + c, top), Vector2i(l.x + w, top), Vector2i(l.x + w, l.y)]:
+		poly.insert(i, p)
+		i += 1
+
+
+## The island: a block `w` wide and `len` rows long, its outer corners bevelled, on one flank (`side`; "random_one" by the
+## seed), on the straight stretch nearest the middle row that keeps a row clear of the stretch's ends and of `avoid`.
+static func _island(poly: Array, op: Dictionary, rng: RandomNumberGenerator, avoid: Array) -> void:
+	var side := _side(op, rng)
+	var w := maxi(rng.randi_range(int(op["w"][0]), int(op["w"][1])), 2)
+	var ln := maxi(rng.randi_range(int(op["len"][0]), int(op["len"][1])), 3)
+	var box := _bounds(poly)
+	var mid_x := box.position.x + box.size.x / 2.0
+	var mid_y := box.position.y + box.size.y / 2.0
+	var best := []  # [distance from the middle, edge index, first row]
+	for i in poly.size():
+		var a: Vector2i = poly[i]
+		var b: Vector2i = poly[(i + 1) % poly.size()]
+		if a.x != b.x:
+			continue
+		var on_right := b.y > a.y and a.x > mid_x
+		if not (on_right or (b.y < a.y and a.x < mid_x)) or (side != "" and on_right != (side == "right")):
+			continue
+		for y in range(mini(a.y, b.y) + 1, maxi(a.y, b.y) - ln):
+			if avoid.any(func(r): return y <= int(r[1]) + 1 and y + ln >= int(r[0]) - 1):
+				continue
+			var dist := absf(y + ln / 2.0 - mid_y)
+			if best.is_empty() or dist < best[0]:
+				best = [dist, i, y]
+	if best.is_empty():
+		return
+	var i: int = best[1]
+	var y: int = best[2]
+	var x: int = poly[i].x
+	var pts: Array = [Vector2i(x, y), Vector2i(x + w - 1, y), Vector2i(x + w, y + 1), Vector2i(x + w, y + ln - 1), Vector2i(x + w - 1, y + ln), Vector2i(x, y + ln)]
+	if poly[(i + 1) % poly.size()].y < poly[i].y:  # the left flank runs up: the mirror, bottom first
+		pts = [Vector2i(x, y + ln), Vector2i(x - w + 1, y + ln), Vector2i(x - w, y + ln - 1), Vector2i(x - w, y + 1), Vector2i(x - w + 1, y), Vector2i(x, y)]
+	for k in pts.size():
+		poly.insert(i + 1 + k, pts[k])
+
+
+## Racks: square teeth `depth` deep and `h` rows tall, `gap` rows apart, on both flanks at the same rows (a symmetric ship stays
+## symmetric), where both flanks run straight a row past the tooth and away from `avoid`; `count` of them, spread along the ship.
+static func _racks(poly: Array, op: Dictionary, rng: RandomNumberGenerator, avoid: Array) -> void:
+	var count := rng.randi_range(int(op["count"][0]), int(op["count"][1]))
+	var h := int(op.get("h", 2))
+	var gap := int(op.get("gap", 2))
+	var depth := int(op.get("depth", 1))
+	var box := _bounds(poly)
+	var mid_x := box.position.x + box.size.x / 2.0
+	var right := {}  # first row of a tooth -> the x of the flank there
+	var left := {}
+	for i in poly.size():
+		var a: Vector2i = poly[i]
+		var b: Vector2i = poly[(i + 1) % poly.size()]
+		if a.x != b.x:
+			continue
+		for y in range(mini(a.y, b.y) + 1, maxi(a.y, b.y) - h):
+			if b.y > a.y and a.x > mid_x:
+				right[y] = maxi(a.x, int(right.get(y, a.x)))  # (the outer flank)
+			elif b.y < a.y and a.x < mid_x:
+				left[y] = mini(a.x, int(left.get(y, a.x)))
+	var rows: Array = []
+	for y in right:
+		if left.has(y) and not avoid.any(func(r): return y <= int(r[1]) + 1 and y + h >= int(r[0]) - 1):
+			rows.append(y)
+	rows.sort()
+	var spaced: Array = []
+	for y in rows:
+		if spaced.is_empty() or y >= int(spaced[spaced.size() - 1]) + h + gap:
+			spaced.append(y)
+	var picks: Array = []
+	for k in mini(count, spaced.size()):
+		picks.append(spaced[k * spaced.size() / mini(count, spaced.size())])
+	for y in picks:
+		_rack_tooth(poly, right[y], y, h, depth, true)
+		_rack_tooth(poly, left[y], y, h, -depth, false)
+
+
+static func _rack_tooth(poly: Array, x: int, y: int, h: int, depth: int, down: bool) -> void:
+	for i in poly.size():
+		var a: Vector2i = poly[i]
+		var b: Vector2i = poly[(i + 1) % poly.size()]
+		if a.x != x or b.x != x or (b.y > a.y) != down or mini(a.y, b.y) >= y or maxi(a.y, b.y) <= y + h:
+			continue
+		var pts: Array = [Vector2i(x, y), Vector2i(x + depth, y), Vector2i(x + depth, y + h), Vector2i(x, y + h)]
+		if not down:
+			pts.reverse()
+		for k in pts.size():
+			poly.insert(i + 1 + k, pts[k])
+		return
+
+
+## Stepped ends: at both corners of the bow ("tip") or the stern ("stern_end"), `n` square notches `a` rows by `b` columns (a
+## ziggurat of plate layers), as many on each side, the outer corners of every step bevelled by `bevel` at 45 degrees; fewer
+## steps where the edges are too short or reach `avoid`.
+static func _steps(poly: Array, op: Dictionary, rng: RandomNumberGenerator, avoid: Array, locked: Dictionary) -> void:
+	var n := rng.randi_range(int(op["n"][0]), int(op["n"][1]))
+	var a := int(op.get("a", 2))
+	var b := int(op.get("b", 2))
+	var targets := _targets(poly, str(op["at"]), "", locked)
+	if targets.size() != 2:
+		return
+	for v in targets:  # the steps both corners take
+		var f := _info(poly, poly.find(v))
+		if not f["axis"]:
+			return
+		var h_in: bool = f["din"].y == 0
+		var lh: int = f["lin"] if h_in else f["lout"]
+		var lv: int = f["lout"] if h_in else f["lin"]
+		var v_away: Vector2i = f["dout"] if h_in else -f["din"]
+		while n > 0 and (a * n + 1 >= lv or 2 * b * n + 2 > lh or avoid.any(func(r): return mini(v.y, v.y + v_away.y * a * n) < int(r[1]) + 1 and maxi(v.y, v.y + v_away.y * a * n) > int(r[0]))):
+			n -= 1
+	var made := {}
+	for v in targets:
+		var corner: Vector2i = v
+		for k in range(n, 0, -1):  # the first notch is the deepest: each one after it cuts the corner the last one left
+			var i := poly.find(corner)
+			var f := _info(poly, i)
+			var h_in: bool = f["din"].y == 0
+			var h_away: Vector2i = -f["din"] if h_in else f["dout"]
+			var v_away: Vector2i = f["dout"] if h_in else -f["din"]
+			var p_flank := corner + v_away * a * k
+			var p_end := corner + h_away * b
+			var pts: Array = [p_end, p_flank + h_away * b, p_flank] if h_in else [p_flank, p_flank + h_away * b, p_end]
+			poly[i] = pts[0]
+			poly.insert(i + 1, pts[1])
+			poly.insert(i + 2, pts[2])
+			made[p_flank] = true
+			corner = p_end
+		made[corner] = true
+	var bevel := int(op.get("bevel", 0))
+	if bevel > 0:
+		for v in made:
+			var i := poly.find(v)
+			if i >= 0:
+				_chamfer(poly, i, "45", bevel, avoid)
 static func _arc_entry(poly: Array, i: int) -> Array:
 	var f := _info(poly, i)
 	var v: Vector2i = f["v"]
