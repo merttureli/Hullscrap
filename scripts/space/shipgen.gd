@@ -291,7 +291,7 @@ static func build(faction: String, size: String, seed_value: int, budget: float,
 		var roll := RandomNumberGenerator.new()
 		roll.seed = _mix(seed_value, faction, size, 99)
 		ram = roll.randf() < float(f["ai"]["rammer"]) and size != "small"
-	var role := str(opts["role"]) if opts.has("role") else pick_role(faction, size, seed_value)
+	var role := str(opts["role"]) if opts.has("role") else pick_role(faction, size, seed_value, float(tables().get("drones", {}).get("stage_mult", {}).get(str(int(opts.get("stage", 0))), 1.0)) <= 0.0)
 	var rk: Dictionary = tables()["roles"]["list"].get(role, {})
 	if role != "" and not opts.has("ram") and bool(rk.get("ram", false)) and float(f["ai"]["rammer"]) > 0.0 and size != "small":
 		ram = true  # a brawler of a faction whose pilots ram rams
@@ -424,7 +424,8 @@ static func flies(faction: String) -> Dictionary:
 
 
 ## The role of the ship of (faction, size, seed), rolled from the seed and weighted by its `flies` weights (else the faction's own weights); "" for a faction with no roles.
-static func pick_role(faction: String, size: String, seed_value: int) -> String:
+## `no_bay`: a role that flies a drone bay is not picked (a stage whose enemies carry none: drones.stage_mult 0).
+static func pick_role(faction: String, size: String, seed_value: int, no_bay := false) -> String:
 	var cfg: Dictionary = tables()["roles"]
 	var w: Dictionary = tables()["factions"][faction]["weights"]
 	var own := flies(faction)
@@ -434,7 +435,7 @@ static func pick_role(faction: String, size: String, seed_value: int) -> String:
 	var total := 0.0
 	for id in roles_of(faction):
 		var r: Dictionary = cfg["list"][id]
-		if order.find(size) < order.find(str(r.get("min_size", "small"))):
+		if order.find(size) < order.find(str(r.get("min_size", "small"))) or (no_bay and r.has("bay")):
 			continue
 		pool.append(id)
 		weight[id] = float(own[id]) if not own.is_empty() else float(w.get(r.get("favours", ""), 1))
@@ -603,12 +604,12 @@ static func _buy(f: Dictionary, size: String, budget: float, rng: RandomNumberGe
 	return lo
 
 
-## Is option `o` one the role (`rk`, its roles entry) buys before anything else and `lo` still lacks: a missile launcher while it
+## Is option `o` one the role (`rk`, its roles entry) buys before anything else and `lo` still lacks: a bow missile launcher while it
 ## has fewer than `missiles`, a crew member while it has fewer than 2 + `crew_add`?
 static func _wanted(rk: Dictionary, lo: Dictionary, o: Dictionary) -> bool:
 	match str(o["cat"]):
 		"weapons":
-			return _is_missile(str(o["id"])) and lo["weapons"].filter(func(id): return _is_missile(str(id))).size() < int(rk.get("missiles", 0))
+			return _is_missile(str(o["id"])) and slot_of(str(o["id"])) == "bow" and lo["weapons"].filter(func(id): return _is_missile(str(id))).size() < int(rk.get("missiles", 0))
 		"crew":
 			return int(lo["crew"]) < 2 + int(rk.get("crew_add", 0))
 	return false

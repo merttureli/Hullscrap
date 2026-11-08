@@ -42,13 +42,13 @@ extends RefCounted
 ##     closes inside SKIRMISH_RUN of it, it turns and burns away (as it flees) until it is back out at the hold, then comes round again.
 ##   - "carrier" (_carry): it keeps the gap at CARRIER_MARGIN of the foe's longest reach, within its drones' reach (Drones.DRONE_REACH),
 ##     and its bays launch and relaunch (Drones.ai_launch). With no drone left to fly it fights as the others do.
-##   - "boarder" (_board): it closes fast (BOARD_CLOSE_MAX px/s) to throwing range and its bays throw their pods (Drones.LIMPET_REACH);
+##   - "boarder" (_board): it closes fast (BOARD_CLOSE_MAX px/s) to throwing range and its bays throw their pods (BOARD_THROW);
 ##     while its people are aboard the foe (robots, or pods on the hull or in flight) it holds close (BOARD_GAP) and strafes.
 ##   - "flanker" (_flank): it steers for the foe's stern quarter (FLANK_DEG off the foe's stern, by the foe's heading, at its hold) and
 ##     goes round the foe's hull to get there; near that point it fights as the others do and is soon carried on across. Its
 ##     priority() puts the foe's engines and weapons first.
-##   - "siege" (_siege): it holds the gap at SIEGE_HOLD of its longest reach and fires in volleys (the session puts its guns in Volley);
-##     once a volley is out it backs off to SIEGE_BACK of its reach for SIEGE_BACK_S at least and while the guns reload, then returns.
+##   - "siege" (_siege): it holds the gap at SIEGE_HOLD of the reach of its long guns (siege_reach()) and fires in volleys (the session puts its guns in Volley);
+##     once a volley is out it backs off to SIEGE_BACK of its reach for SIEGE_BACK_S at least and while any of those guns reloads, then returns.
 ##   - "bulwark" (_bulwark): it closes slowly (BULWARK_CLOSE px/s at most) and turns its strongest shield sector (the most HP) toward the
 ##     foe, the balance shifted that way (_balance); with one sector or none it shows the foe its bow. It breaks late (its ai's break_structure).
 
@@ -95,14 +95,16 @@ const CARRIER_MARGIN := 1.15  ## a carrier keeps the gap at this many times the 
 const CARRIER_DRONE_SHARE := 0.85  ## and its centre within this share of its drones' reach of the foe's
 const BOARD_CLOSE_MAX := 560.0  ## px/s a boarder closes at, at most
 const BOARD_GAP := 2.0 * HULL_MARGIN  ## px between the hulls a boarder holds while its people are aboard
+const BOARD_THROW := 0.6 * Drones.LIMPET_REACH  ## px between the centres a boarder throws its pods from (a nearer throw than the others': fewer are lost)
 const FLANK_DEG := 45.0  ## a flanker's goal: this far off the foe's stern, to the side it came from
 const FLANK_NEAR := 0.35  ## within this share of its hold of the goal it fights as the others do
 const FLANK_SPEED := 330.0  ## px/s it closes on its goal at, at most (on top of the foe's own drift)
 const FLANK_ALIGNED := 0.5  ## rad: it burns once its nose is this close to the way it wants to go
-const SIEGE_HOLD := 0.9  ## a siege boat holds the gap at this share of its longest reach
+const SIEGE_HOLD := 0.8  ## a siege boat holds the gap at this share of its reach (siege_reach())
+const SIEGE_SHARE := 0.6  ## its reach: the longest range that this share of its volley guns have
 const SIEGE_BACK := 1.3  ## and backs off to this share while it reloads
-const SIEGE_BACK_S := 2.5  ## seconds it backs off after a volley, at least
-const SIEGE_COOLING := 0.5  ## a volley is out when this share of its guns (not rapid, not point defence) cool for more than SIEGE_RELOAD_S
+const SIEGE_BACK_S := 3.0  ## seconds it backs off after a volley, at least
+const SIEGE_COOLING := 0.5  ## a volley is out when more than this share of its volley guns (cooling_share()) cool for more than SIEGE_RELOAD_S
 const SIEGE_RELOAD_S := 0.5
 const BULWARK_CLOSE := 140.0  ## px/s a bulwark closes at, at most
 const BULWARK_SWAP := 1.25  ## it turns another sector to the foe once that holds this many times the HP of the one facing it
@@ -192,7 +194,7 @@ func think(dt: float) -> void:
 		_fly(dt)
 	_balance(dt)
 	_shoot(dt)
-	Drones.ai_launch(arena, me, foe)  # its bays launch when they can (drones.gd)
+	Drones.ai_launch(arena, me, foe, BOARD_THROW if style == "boarder" else Drones.LIMPET_REACH)  # its bays launch when they can (drones.gd)
 
 
 # --- flying ------------------------------------------------------------------------------------
@@ -520,9 +522,9 @@ func boarders_out() -> bool:
 ## Boarder: closes fast, throws, then holds close while its people are aboard (see the top).
 func _board(dt: float) -> void:
 	if boarders_out():
-		_fly(dt, centres_at(BOARD_GAP), BOARD_CLOSE_MAX)
+		_fly(dt, minf(centres_at(BOARD_GAP), _hold_d) if _hold_d > 0.0 else centres_at(BOARD_GAP), BOARD_CLOSE_MAX)
 	else:
-		_fly(dt, minf(_hold_d, Drones.LIMPET_REACH) if _hold_d > 0.0 else -1.0, BOARD_CLOSE_MAX)
+		_fly(dt, minf(_hold_d, BOARD_THROW) if _hold_d > 0.0 else -1.0, BOARD_CLOSE_MAX)
 
 
 ## The flanker's goal (world px): FLANK_DEG off the foe's stern on its side, at the distance it holds.
@@ -564,31 +566,54 @@ func _flank(dt: float) -> void:
 	arena.set_input(me, 1.0 if aligned and err.length() > 20.0 else 0.0, turn)
 
 
-## Is a volley out: SIEGE_COOLING of its armed guns that join volleys (not rapid, not point defence) cool for more than SIEGE_RELOAD_S?
-func volley_out() -> bool:
+## Its guns that join a volley from the side it presents (not rapid, not point defence, not shot out; a fixed gun facing that side,
+## or a tracking one): uid -> range.
+func volley_guns() -> Dictionary:
 	var armed := _intact()
-	var n := 0
-	var cooling := 0
+	var out := {}
 	for uid in armed:
 		var w: Dictionary = arena.weapons.def(armed[uid]["id"])
 		if bool(w.get("rapid", false)) or (w.get("effects") is Dictionary and w["effects"].has("intercept")):
 			continue
-		n += 1
-		cooling += int(arena.cooldown_left(me, uid) > SIEGE_RELOAD_S)
-	return n > 0 and float(cooling) >= SIEGE_COOLING * n
+		if w["turret"] or facing_of(armed[uid]["dir"]) == facing:
+			out[uid] = float(w["range"])
+	return out
 
 
-## Siege boat: a volley from range, back off while it reloads, come back (see the top).
+## A siege boat's reach: the longest range that guns of SIEGE_SHARE of its volley guns have (reach() with none).
+func siege_reach() -> float:
+	var ranges: Array = volley_guns().values()
+	if ranges.is_empty():
+		return reach()
+	ranges.sort()
+	ranges.reverse()
+	return float(ranges[mini(ceili(SIEGE_SHARE * ranges.size()) - 1, ranges.size() - 1)])
+
+
+## The share of the volley guns that reach from its hold (siege_reach()) cooling for more than SIEGE_RELOAD_S (0 with none).
+func cooling_share() -> float:
+	var r := siege_reach()
+	var guns := volley_guns()
+	var n := 0
+	var cooling := 0
+	for uid in guns:
+		if float(guns[uid]) >= r - 1e-3:
+			n += 1
+			cooling += int(arena.cooldown_left(me, uid) > SIEGE_RELOAD_S)
+	return float(cooling) / float(n) if n > 0 else 0.0
+
+
+## Siege boat: a volley from range (more than SIEGE_COOLING of its guns there cooling), back off while any of them reloads and for
+## SIEGE_BACK_S at least, come back (see the top).
 func _siege(dt: float) -> void:
-	var out := volley_out()
-	if _reload < 0.0 and out:
+	var share := cooling_share()
+	if _reload < 0.0 and share > SIEGE_COOLING:
 		_reload = SIEGE_BACK_S
 	elif _reload >= 0.0:
 		_reload -= dt
-		if _reload < 0.0 and out:
+		if _reload < 0.0 and share > 0.0:
 			_reload = 0.0  # still reloading: it stays back
-	var r := reach()
-	_fly(dt, centres_at((SIEGE_BACK if _reload >= 0.0 else SIEGE_HOLD) * r))
+	_fly(dt, centres_at((SIEGE_BACK if _reload >= 0.0 else SIEGE_HOLD) * siege_reach()))
 
 
 ## The world direction sector `s` of ship `co`'s bubble faces (sector 0 the bow, clockwise).
