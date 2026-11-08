@@ -5,6 +5,9 @@ extends SceneTree
 ##     frame than any generated class), applies its hand edits and writes the design file. The designs are committed; this is how they were drawn.
 ##   godot --headless --path . --script res://tests/tool_flagships.gd -- bench [races=kett] [seeds=12] [cap=180] [stage=3] [jobs=2]
 ##     fights each flagship against the player-like ship of its stage (tests/tool_standoff.gd BUILDS) and prints win rate, mean time, stalemates.
+##     Every fight carries the probe of tests/fight_probe.gd and a capped one its class. designs=<dir>: the flagship_<race>.json files of that folder
+##     instead of the pack's; late=0: no time-based yield (the design's break_after_s is dropped); jsonl=<path>: each fight a line appended as it ends,
+##     and a run started again skips what the file holds (run the shards yourself: shard=k/n, one jsonl each); sum=<path,path>: the tables of jsonl files.
 
 const Ship = preload("res://scripts/ship/ship.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
@@ -16,6 +19,7 @@ const Jobs = preload("res://scripts/crew/jobs.gd")
 const Structure = preload("res://scripts/ship/structure.gd")
 const Standoff = preload("res://tests/tool_standoff.gd")
 const Specs = preload("res://tests/flagship_specs.gd")
+const Probe = preload("res://tests/fight_probe.gd")
 
 const STEP := 1.0 / 60.0
 const SIM_EVERY := 12
@@ -49,6 +53,12 @@ func _run() -> void:
 	if args.has("make"):
 		for r in _races():
 			make(str(r))
+	elif args.has("sum"):
+		var rows: Array = []
+		for path in str(args["sum"]).split(","):
+			rows.append_array(Standoff.read_rows(path))
+		print(summary(rows))
+		print(class_table(rows))
 	elif args.has("bench"):
 		bench()
 	elif args.has("power"):
@@ -84,7 +94,7 @@ func make(race: String) -> void:
 	var names: Array = sp["names"]
 	for i in names.size():
 		d["crew_plan"].append({"name": names[i], "species": species[i % species.size()]})
-	d["ai"] = {"aim_skill": float(sp["aim"]), "morale": str(sp["morale"]), "faction": "flagship_" + race, "captain": str(sp["captain"]), "break_after_s": float(sp.get("after_s", 120)), "break_structure": snappedf(1.0 - float(sp.get("yield_hp", 70)) / maxf(Structure.totals(ship).y, 1.0), 0.001)}  # it yields after losing yield_hp of its blocks
+	d["ai"] = {"aim_skill": float(sp["aim"]), "morale": str(sp["morale"]), "faction": "flagship_" + race, "captain": str(sp["captain"]), "break_after_s": float(sp.get("after_s", 120)), "break_structure": snappedf(1.0 - (float(sp["yield_hp"]) / maxf(Structure.totals(ship).y, 1.0) if sp.has("yield_hp") else float(sp.get("yield_frac", 0.1))), 0.001)}  # it yields after losing yield_frac of its blocks (or yield_hp of them)
 	if bool(sp.get("ram", false)):
 		d["ai"]["style"] = "rammer"
 	d["flagship"] = {"race": race, "role": str(sp.get("role", "flagship"))}
@@ -168,7 +178,7 @@ func build(race: String, sp: Dictionary, seed_value: int) -> Ship:
 						diff.append("%s %d/%d" % [id, int(got.get(id, 0)), int(want[id])])
 				print("  seed %d attempt %d: dropped %s; power %s" % [seed_value, attempt, str(diff), str(net.map(func(n): return "%s/%s" % [str(n["supply"]), str(n["demand"])]))])
 			continue  # a mount that found no clean wall is dropped silently by Shipgen: a flagship keeps every part it was drawn with
-		var why :=Shipgen.validate(ship, float(f["hull"].get("max_fill", Shipgen.MAX_FILL)) + 0.01)
+		var why :=Shipgen.validate(ship, minf(float(f["hull"].get("max_fill", Shipgen.MAX_FILL)) + 0.01, 0.9))  # (tests/test_flagships.gd checks 0.9)
 		if not why.is_empty():
 			if args.has("v"):
 				print("  seed %d attempt %d: invalid %s" % [seed_value, attempt, str(why[0])])
@@ -224,7 +234,7 @@ func bench() -> void:
 		var files := []
 		var pids := []
 		var pass_on := []
-		for key in ["races", "seeds", "cap", "stage", "first", "v", "pstage", "lag"]:
+		for key in ["races", "seeds", "cap", "stage", "first", "v", "pstage", "lag", "designs", "late"]:
 			if args.has(key):
 				pass_on.append("%s=%s" % [key, args[key]])
 		for k in jobs:
@@ -243,15 +253,35 @@ func bench() -> void:
 	else:
 		var shard := Array(str(args.get("shard", "0/1")).split("/")).map(func(x): return int(x))
 		var k := 0
+		var done := {}
+		var fa: FileAccess = null
+		if args.has("jsonl"):
+			if FileAccess.file_exists(str(args["jsonl"])):
+				for r in Standoff.read_rows(str(args["jsonl"])):
+					done[r["key"]] = true
+					rows.append(r)
+			fa = FileAccess.open(str(args["jsonl"]), FileAccess.READ_WRITE if FileAccess.file_exists(str(args["jsonl"])) else FileAccess.WRITE)
+			fa.seek_end()
 		for race in _races():
 			var stage := int(args.get("stage", meta[race]["stage"] if meta.has(race) else 3))
 			for s in range(int(args.get("first", 0)), int(args.get("first", 0)) + seeds):
 				k += 1
 				if (k - 1) % shard[1] != shard[0]:
 					continue
+				var key := "%s|%s|%d" % [race, str(args.get("pstage", stage)), s]
+				if done.has(key):
+					continue
 				var row := fight(str(race), stage, s, cap)
-				row.merge({"race": race, "stage": stage, "seed": s})
+				row.merge({"race": race, "stage": stage, "seed": s, "key": key, "pstage": int(args.get("pstage", stage))})
+				if row["state"] == "fighting":
+					row["class"] = Probe.classify(row)
 				rows.append(row)
+				if fa != null:
+					fa.store_line(JSON.stringify(row))
+					fa.flush()
+					print("%s seed %d (player %s): %s in %.0f s%s" % [race, s, str(row["pstage"]), row["state"], row["t"], " (%s)" % row["class"] if row.has("class") else ""])
+		if fa != null:
+			fa.close()
 		if args.has("rows"):
 			var f := FileAccess.open(str(args["rows"]), FileAccess.WRITE)
 			f.store_string(JSON.stringify(rows))
@@ -262,6 +292,33 @@ func bench() -> void:
 		for row in rows:
 			print("  %s seed %d: %s in %.0f s (foe hull %.2f, mine %.2f) shots p/e %d/%d, shields stopped p/e %d/%d, dealt hull p/e %.0f/%.0f, parts %.0f/%.0f" % [row["race"], row["seed"], row["state"], row["t"], row["foe_hull"], row["hull"], row["p_shots"], row["e_shots"], row["p_shield"], row["e_shield"], row["p_hull"], row["e_hull"], row["p_part"], row["e_part"]])
 	print(summary(rows))
+	print(class_table(rows))
+
+
+## Per (race, player build): the fights, the wins (won, captured, spared), the losses, the cap share and the classes of the capped ones (FightProbe.classify),
+## the mean time, and the hp each side landed a second on the other's blocks (p: the player).
+static func class_table(rows: Array) -> String:
+	var L: Array[String] = ["| race | player | n | win % | lost % | cap % | " + " | ".join(Probe.CLASSES) + " | mean s | p hp/s | e hp/s |", "|---|---|---|---|---|---|" + "---|".repeat(Probe.CLASSES.size() + 3)]
+	var by := {}
+	for r in rows:
+		var k := "%s|%s" % [r["race"], str(r.get("pstage", r["stage"]))]
+		if not by.has(k):
+			by[k] = []
+		by[k].append(r)
+	var ks := by.keys()
+	ks.sort()
+	for k in ks:
+		var sel: Array = by[k]
+		var n := float(sel.size())
+		var capped := sel.filter(func(r): return str(r["state"]) == "fighting")
+		var bits: Array[String] = []
+		for c in Probe.CLASSES:
+			bits.append(str(roundi(100.0 * capped.filter(func(r): return Probe.classify(r) == c).size() / n)))
+		var mean := func(f: Callable) -> float: return sel.reduce(func(acc, r): return acc + float(f.call(r)), 0.0) / n
+		L.append("| %s | %s | %d | %d | %d | %d | %s | %.0f | %.2f | %.2f |" % [k.get_slice("|", 0), k.get_slice("|", 1), sel.size(), roundi(100.0 * sel.filter(func(r): return r["state"] in ["won", "captured", "spared"]).size() / n),
+			roundi(100.0 * sel.filter(func(r): return r["state"] == "lost").size() / n), roundi(100.0 * capped.size() / n), " | ".join(bits), mean.call(func(r): return r["t"]),
+			mean.call(func(r): return (float(r.get("p_hull", 0.0)) + float(r.get("p_part", 0.0))) / maxf(float(r["t"]), 1.0)), mean.call(func(r): return (float(r.get("e_hull", 0.0)) + float(r.get("e_part", 0.0))) / maxf(float(r["t"]), 1.0))])
+	return "\n".join(L)
 
 
 static func summary(rows: Array) -> String:
@@ -310,7 +367,7 @@ func _scan(a, cursor: int, d: Dictionary) -> int:
 
 func fight(race: String, stage: int, s: int, cap: float) -> Dictionary:
 	var player: Ship = Standoff.build_player(int(args["pstage"]) if args.has("pstage") else maxi(stage - int(args.get("lag", 0)), 1))  # pstage=<n>, or lag=<k> (the stage k below the flagship's): a lighter player-like ship, "a starter and a few upgrades"
-	var enemy: Ship = Session.load_ship(OUT % race)
+	var enemy: Ship = Session.load_ship(str(args["designs"]).path_join("flagship_%s.json" % race) if args.has("designs") else OUT % race)
 	var row := {"state": "error", "t": 0.0, "foe_hull": 1.0, "hull": 1.0}
 	if player == null or enemy == null:
 		return row
@@ -321,11 +378,14 @@ func fight(race: String, stage: int, s: int, cap: float) -> Dictionary:
 	sess.start(player, enemy, 1 + s * 7919)
 	var pilot := PilotAI.new(sess.arena, Session.PLAYER, Session.ENEMY, {"aim_skill": float(Threat.config()["player_aim"])})
 	pilot.foe_morale = sess.morale
+	if str(args.get("late", "")) == "0":
+		sess.morale.break_after = 0.0  # no time-based yield: it yields on damage only
 	var a = sess.arena
 	var n := 0
 	var ticks := int(cap * 60.0)
 	var d := {"p_shots": 0, "e_shots": 0, "p_hull": 0.0, "e_hull": 0.0, "p_part": 0.0, "e_part": 0.0, "p_shield": 0, "e_shield": 0}
 	var cursor := 0
+	var probe := Probe.new(a, pilot)
 	while sess.state() == "fighting" and n < ticks:
 		if n % PLAYER_EVERY == 0:
 			pilot.think(STEP * PLAYER_EVERY)
@@ -334,12 +394,16 @@ func fight(race: String, stage: int, s: int, cap: float) -> Dictionary:
 		sess.ai.think(STEP)
 		a.step(STEP)
 		sess.morale.tick(STEP)
+		probe.step()
 		n += 1
 		if n % SIM_EVERY == 0:
 			sim.step(SIM_EVERY * STEP)
 			cursor = _scan(a, cursor, d)
 	cursor = _scan(a, cursor, d)
 	row.merge(d)
+	row.merge(probe.result())
+	row["break_at"] = sess.morale.break_at
+	row["morale"] = sess.morale.state
 	row["state"] = sess.state()
 	row["t"] = n * STEP
 	row["foe_hull"] = Structure.structure_fraction(a.ships[Session.ENEMY])
