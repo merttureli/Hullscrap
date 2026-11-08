@@ -295,6 +295,7 @@ func test_the_siege_boat_fires_its_volley_then_backs_off() -> void:
 	check(ai.volley_size() >= 2, "a siege boat with a volley of %d guns" % ai.volley_size())
 	a.ships[0].ai_volley = true  # (the session sets it for every enemy)
 	var at_volley := [-1.0, 0.0]
+	var least := [INF]  # the nearest it came after the volley (its way still carried it in), then the farthest it backed off to
 	var most := [0.0]
 	_step(a, ai, 40.0, func():
 		var dist: float = a.ships[0].flight.pos.distance_to(a.ships[1].flight.pos)
@@ -302,10 +303,11 @@ func test_the_siege_boat_fires_its_volley_then_backs_off() -> void:
 			at_volley[0] = a.time()
 			at_volley[1] = dist
 		elif at_volley[0] >= 0.0 and a.time() < at_volley[0] + PilotAI.SIEGE_BACK_S + 5.0:
-			most[0] = maxf(most[0], dist))
+			least[0] = minf(least[0], dist)
+			most[0] = maxf(most[0], dist) if dist > least[0] else most[0])
 	check(at_volley[0] >= 0.0, "it fired a volley (%d shots)" % _events(a, "shot", 0))
 	check(at_volley[1] > ai.centres_at(0.6 * ai.siege_reach()), "from far off (%d between the centres)" % at_volley[1])
-	check(most[0] > at_volley[1] + 60.0, "then the range grew (%d to %d)" % [at_volley[1], most[0]])
+	check(most[0] > least[0] + 60.0, "then the range grew (from %d at the volley it came in to %d and backed off to %d)" % [at_volley[1], least[0], most[0]])
 	check(_events(a, "shot", 0) >= 6, "and it came back for more volleys (%d shots)" % _events(a, "shot", 0))
 
 
