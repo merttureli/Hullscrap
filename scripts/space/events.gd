@@ -86,7 +86,7 @@ const SUITS_NEEDED := "Everyone sent needs a sealed suit."
 const TRAIT_LABELS := {"no_breath": "Doesn't breathe", "heat_resistant": "Heat-proof", "fast_repair": "Quick hands", "suit": "Suited"}
 const SHIPS_DIR := "res://data/ships/"
 const DEFAULT_WEIGHT := 10.0
-const FADE_FLOOR := 0.5  ## least weight a faded event keeps
+const FADE_FLOOR := 0.01  ## least weight a faded event keeps (a lone event is still pickable)
 const STORY_WEIGHT := 100.0  ## a `once` event this heavy fades when shown and not used up
 
 static var _shared = null

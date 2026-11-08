@@ -30,7 +30,7 @@ const NODE := {"id": "n1", "type": "wreck_field", "place": ""}
 
 func test_an_event_shown_once_is_picked_less_often_after() -> void:
 	var c := _camp([_ev("a", "wreck_field"), _ev("b", "wreck_field")], 7)
-	eq(float(c.cfg["events"]["repeat_fade"]), 0.25, "the factor is in drift.json")
+	eq(float(c.cfg["events"]["repeat_fade"]), 0.02, "the factor is in drift.json")
 	var fresh := 0
 	for i in 600:
 		c.story_views = {}
@@ -42,7 +42,7 @@ func test_an_event_shown_once_is_picked_less_often_after() -> void:
 		if c.events.pick(c, NODE)["id"] == "a":
 			seen += 1
 	check(fresh > 240 and fresh < 360, "unseen: about half (%d of 600)" % fresh)
-	check(seen > 60 and seen < 140, "seen once: about a fifth (%d of 600)" % seen)  # 2.5 against 10
+	check(seen < 40, "seen once: about a fiftieth (%d of 600)" % seen)  # 0.2 against 10
 	c.story_views = {}
 	c.events.pick(c, NODE)
 	eq(c.story_views.values().reduce(func(x, y): return x + y, 0), 1, "every pick is counted, for any event")
@@ -52,7 +52,7 @@ func test_a_lone_event_is_still_picked_however_often_it_was_shown() -> void:
 	var c := _camp([_ev("only", "wreck_field")])
 	c.story_views = {"only": 40}
 	eq(Events.fade_weight(c.events.get_event("only"), 10.0, c), Events.FADE_FLOOR, "the weight stops at the floor")
-	eq(Events.fade_weight(c.events.get_event("only"), 0.2, c), 0.2, "and never rises above its own weight")
+	eq(Events.fade_weight(c.events.get_event("only"), 0.005, c), 0.005, "and never rises above its own weight")
 	for i in 50:
 		eq(c.events.pick(c, NODE)["id"], "only", "a pool of one still picks it")
 	eq(c.story_views["only"], 90, "(and counts it)")
