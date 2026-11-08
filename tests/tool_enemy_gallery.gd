@@ -351,11 +351,15 @@ func role_sheet(faction: String, path: String, k: float) -> void:
 				var size: String = SIZES[si]
 				var sd := 300 + n * 7919
 				var ship = Shipgen.build(faction, size, sd, 160.0, {"role": roles[i], "stage": 4}) if fits(roles[i], size) else null
-				cells.append([i, si * 3 + n, ship, "%s %s %d" % [roles[i], size.substr(0, 1).to_upper(), sd] if ship != null else roles[i] + " -"])
+				var label: String = "%s %s %d" % [roles[i], size.substr(0, 1).to_upper(), sd] if ship != null else roles[i] + " -"
+				if ship != null and str(ship.get_meta("shipgen")["role"]) != roles[i]:  # (a hull that takes no drone bay: the seed's ship is a gunboat)
+					label += " (%s)" % ship.get_meta("shipgen")["role"]
+				cells.append([i, si * 3 + n, ship, label])
 	await draw_grid(cells, path, k, "%s: the roles it flies (small, medium, large; three seeds each)" % faction)
 
 
-## The six fighting roles side by side in each race's palette, medium and large, after the race's own gunboat.
+## The six fighting roles side by side in each race's palette, medium and large, after the race's own gunboat (the first seed from 41
+## that keeps the role: a carrier or boarder whose hull takes no drone bay is a gunboat).
 func race_sheet(races: Array, path: String, k: float) -> void:
 	var cells: Array = []
 	var row := 0
@@ -364,7 +368,11 @@ func race_sheet(races: Array, path: String, k: float) -> void:
 			var cols: Array = ["gunboat"] + NEW_ROLES
 			for c in cols.size():
 				var ship = Shipgen.build(race, size, 41, 200.0, {"role": cols[c], "stage": 4})
-				cells.append([row, c, ship, "%s %s %s" % [race, cols[c], size.substr(0, 1).to_upper()]])
+				for sd in range(42, 50):
+					if str(ship.get_meta("shipgen")["role"]) == cols[c]:
+						break
+					ship = Shipgen.build(race, size, sd, 200.0, {"role": cols[c], "stage": 4})
+				cells.append([row, c, ship, "%s %s %s" % [race, ship.get_meta("shipgen")["role"], size.substr(0, 1).to_upper()]])
 			row += 1
 	await draw_grid(cells, path, k, "the six fighting roles in two race palettes (the race's own gunboat first)")
 
