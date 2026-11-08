@@ -54,7 +54,7 @@ const Launch = preload("res://scripts/space/launch.gd")
 ## 9 adds `crew_offers` (the events that add crew fired in this region, events.gd); older saves start with none.
 ## 10 drops `hull_loss` (there is no hull pool: the blocks are the health, structure.gd); an older save's is ignored.
 ## 11 adds `boarded` to each saved sector (what the soldier opened and unlocked aboard a POI, boarding.gd); older saves have none.
-## 12 adds `story_views` (how often each heavy `once` event was shown, events.gd fade_weight); older saves start with none.
+## 12 adds `story_views` (how often each event was shown this run, events.gd fade_weight); older saves start with none.
 ## 13 adds `wreck_ships` to each saved sector (the enemy Ship as the fight left it, kept with its wreck so the wreck is boarded as that ship, boarding.gd); an older save's wreck has none and is boarded as a generated site.
 const VERSION := 13
 const MIN_VERSION := 1
@@ -119,7 +119,7 @@ var region_id := ""  ## the region the ship is in (data/regions/<id>.json)
 var region_data := {}  ## that region's data (Regions.get_region), not saved
 var route: Array = []  ## the regions of the run in order, this one last
 var region_seed := 0  ## the seed of this region's map and sectors
-var story_views := {}  ## heavy once-events: id -> times shown in this run (their weight halves with each); saved
+var story_views := {}  ## every event: id -> times shown in this run (its weight fades with each, events.gd); saved
 var expedition := {}  ## the away team now out (expedition.gd): {poi, kind, team (names), page}; {} when none. Saved as the optional "expedition"
 var captives := {}  ## crew an expedition left captured: name -> species, for a later `rescue` (expedition.gd). Saved as the optional "captives"
 var crew_offers := 0  ## events that add crew fired in this region (events.gd counts them in pick): data/drift.json `crew.offers_per_region` is the limit; saved

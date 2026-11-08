@@ -5,6 +5,7 @@
 		"lane_min": 2, "lane_max": 4, "lane_third": 0.55, "lane_fourth": 0.15, "lane_length": 420, "clearance": 26,
 		"attempts": 400, "clan_trader": 0.4
 	},
+	"events": {"_doc": "Event memory (events.gd fade_weight): every time an event is shown in a run (campaign.story_views counts every id; a pick through Events.pick: map nodes, docks, people, sites, expeditions) its weight is multiplied by repeat_fade, never under 0.5 so a lone event stays pickable. A heavy once story event keeps its own halving.", "repeat_fade": 0.25},
 	"node_weights": {"pirate": 22, "wreck_field": 18, "distress": 16, "trader": 10, "anomaly": 8, "patrol": 8, "asteroid_field": 14, "empty": 4},
 	"types": {
 		"station": {"label": "Station", "color": "#e1a136", "glyph": "S"},

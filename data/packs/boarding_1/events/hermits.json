@@ -85,7 +85,7 @@
 			"once": false,
 			"requires": {
 				"role": "hermit",
-				"site": "derelict"
+				"site": ["station", "derelict"]
 			},
 			"text": "Every light on this deck has been put out but one. Under it, at a folding table, a person is reading a book with the care of someone defusing it. {name} does not look up. 'You can come in,' {name} says, softly. 'Not with that.' It takes you a moment to understand that {name} means the torch. At the edge of the single pool of light, in the dark beyond it, something shifts and settles, like a coat sliding off a chair.",
 			"choices": [
@@ -308,7 +308,7 @@
 			"once": false,
 			"requires": {
 				"role": "hermit",
-				"site": "derelict"
+				"site": ["station", "derelict"]
 			},
 			"text": "A desk in a mail room, a lamp, and a dozen grey sacks slumped against the wall. {name} is reading a letter with a pencil in one hand. A stack of replies stands at the elbow, each in a fresh envelope. 'They never got delivered,' {name} says, not looking up. 'That seemed a poor reason not to answer.'",
 			"choices": [
