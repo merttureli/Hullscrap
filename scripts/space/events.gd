@@ -86,6 +86,7 @@ const SUITS_NEEDED := "Everyone sent needs a sealed suit."
 const TRAIT_LABELS := {"no_breath": "Doesn't breathe", "heat_resistant": "Heat-proof", "fast_repair": "Quick hands", "suit": "Suited"}
 const SHIPS_DIR := "res://data/ships/"
 const DEFAULT_WEIGHT := 10.0
+const FADE_FLOOR := 0.01  ## least weight a faded event keeps (a lone event is still pickable)
 const STORY_WEIGHT := 100.0  ## a `once` event this heavy fades when shown and not used up
 
 static var _shared = null
@@ -253,7 +254,7 @@ func _index_recruiters() -> void:
 ## alone in its pool (a region's station greeting) is rarer too.
 func crew_factor(id: String, c) -> float:
 	var kind: String = _recruiters.get(id, "")
-	if kind == "" or kind == "ada":
+	if kind == "" or kind == "ada" or is_recruiter_talk(events.get(id, {})):
 		return 1.0
 	var key := "unique_event" if kind == "unique" else ("station_event" if str(events[id].get("type", "")) == "station" else "species_event")
 	return float(_dict(c.cfg.get("crew")).get(key, 1.0))
@@ -263,10 +264,16 @@ func crew_factor(id: String, c) -> float:
 ## not the events of the packs data/drift.json `crew.offers_exempt_packs` names (the story's).
 func offers_crew(id: String, c) -> bool:
 	var kind: String = _recruiters.get(id, "")
-	if kind == "" or kind == "ada":
+	if kind == "" or kind == "ada" or is_recruiter_talk(events.get(id, {})):
 		return false
 	var path := str(files.get(id, ""))
 	return not _list(_dict(c.cfg.get("crew")).get("offers_exempt_packs")).any(func(p): return path.contains("/packs/%s/" % p))
+
+
+## A recruiter's talk (`requires.role` recruiter): never gated or capped in the pick, so the capital's recruiter always has something to say.
+## Over the region's crew-offer limit it just offers no recruit (choice_view hides the npc_join choices); signing one on counts as the offer (apply).
+static func is_recruiter_talk(ev: Dictionary) -> bool:
+	return str(_dict(ev.get("requires")).get("role", "")) == "recruiter" and str(ev.get("type", "")) == "boarding_npc"
 
 
 ## How many crew-adding events may fire in a region (`crew.offers_per_region`); no limit when the key is missing.
@@ -324,9 +331,8 @@ func pick(c, node: Dictionary, ship = null, filter := Callable()) -> Dictionary:
 			break
 	if offers_crew(str(chosen.get("id", "")), c):
 		c.crew_offers += 1
-	if is_story(chosen):  # shown and perhaps declined: it comes back less often
-		var sid := str(chosen.get("id", ""))
-		c.story_views[sid] = int(c.story_views.get(sid, 0)) + 1
+	var sid := str(chosen.get("id", ""))  # shown: it comes back less often (`fade_weight`)
+	c.story_views[sid] = int(c.story_views.get(sid, 0)) + 1
 	return chosen
 
 
@@ -335,12 +341,17 @@ static func is_story(ev: Dictionary) -> bool:
 	return bool(ev.get("once", false)) and _weight(ev.get("weight", DEFAULT_WEIGHT)) >= STORY_WEIGHT
 
 
-## `w` halved for each view of a story event in this run (campaign.story_views), never under 1.
+## `w` faded for each time event `ev` was shown in this run (campaign.story_views): a story event halves, any other is multiplied
+## by data/drift.json events.repeat_fade. Never under `FADE_FLOOR` (or `w` itself when that is lower), so a lone event is still pickable.
+## A `fallback` event is rolled only when the pool is empty, so fading never lets one crowd out a real event.
 static func fade_weight(ev: Dictionary, w: float, c) -> float:
-	if not is_story(ev):
-		return w
 	var views := int(c.story_views.get(str(ev.get("id", "")), 0))
-	return maxf(1.0, w / pow(2.0, views)) if views > 0 else w
+	if views <= 0:
+		return w
+	if is_story(ev):
+		return maxf(1.0, w / pow(2.0, views))
+	var f := float(_dict(c.cfg.get("events")).get("repeat_fade", 1.0))
+	return maxf(minf(w, FADE_FLOOR), w * pow(f, views))
 
 
 ## May `ev` happen at `node` now (not used up, its requires hold)?
@@ -475,11 +486,14 @@ func choice_view(ev: Dictionary, c, ship, node: Dictionary = {}) -> Array:
 	var out := []
 	var team = Expedition.members(c, ship) if Expedition.active(c) else null
 	var choices: Array = ev.get("choices", []) if ev.get("choices") is Array else []
+	var recruiter_full := is_recruiter_talk(ev) and offers_used(c) >= offers_cap(c)
 	for i in choices.size():
 		var ch: Dictionary = _dict(choices[i])
 		var req := _dict(ch.get("requires"))
 		if not _world_ok(req, c, node, ship) or not _crew_ok(req, ship, team):
 			continue
+		if recruiter_full and _list(ch.get("outcomes")).any(func(o): return _dict(_dict(o).get("effects")).has("npc_join")):
+			continue  # (the region's crew offer is made: the recruiter has no one to sign on)
 		var short: Dictionary = ship.inventory.missing(needs(ch))
 		var blue := is_blue(ch)
 		var text := str(ch.get("text", ""))
@@ -711,6 +725,8 @@ func apply(effects: Dictionary, c, ship, node: Dictionary = {}, actor = null) ->
 		var kin := str(npc.get("species", "human"))
 		var mate: String = c.add_crew(ship, str(npc.get("name", "")), kin)
 		if mate != "":
+			if str(npc.get("role", "")) == "recruiter":
+				c.crew_offers += 1  # a signed-on recruit is the region's offer (is_recruiter_talk)
 			lines.append("%s (%s) joins the crew" % [mate, kin.capitalize()])
 			told.append(Backstory.intro(mate, kin, ""))
 		else:

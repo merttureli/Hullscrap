@@ -40,6 +40,7 @@ func test_a_region_weight_makes_the_homeland_louder() -> void:
 		c.cfg["region_weight"] = w
 		var n := 0
 		for i in 400:
+			c.story_views = {}  # (the weights, not the event memory, are measured)
 			if c.events.pick(c, {"id": "n1", "type": "wreck_field", "place": ""})["id"] == "homeland":
 				n += 1
 		share[w] = n
@@ -60,11 +61,11 @@ func test_a_skipped_story_event_comes_back_less_often() -> void:
 	c.story_views["story"] = 30
 	eq(Events.fade_weight(ev, 200.0, c), 1.0, "never under 1")
 	var light: Dictionary = c.events.get_event("plain")
-	c.story_views["plain"] = 5
-	eq(Events.fade_weight(light, 10.0, c), 10.0, "an ordinary event does not fade")
+	c.story_views["plain"] = 1
+	eq(Events.fade_weight(light, 10.0, c), 0.2, "an ordinary event fades too (event memory): a fiftieth after one view")
 	var twice := _ev("heavy_repeatable", "wreck_field", {}, 300, false)
 	c.story_views["heavy_repeatable"] = 2
-	eq(Events.fade_weight(twice, 300.0, c), 300.0, "nor does one that is not `once`")
+	check(absf(Events.fade_weight(twice, 300.0, c) - 0.12) < 0.0001, "so does one that is not `once` (repeat_fade, not the story halving)")
 
 
 func test_the_views_are_saved_and_an_old_save_has_none() -> void:

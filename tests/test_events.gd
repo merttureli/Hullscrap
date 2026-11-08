@@ -253,6 +253,7 @@ func test_picks_are_weighted_and_follow_the_seed() -> void:
 		var c := _camp(list, 42)
 		var seq := []
 		for i in 100:
+			c.story_views = {}  # (the weights, not the event memory, are measured)
 			seq.append(c.events.pick(c, _node("pirate"), ship)["id"])
 		runs.append(seq)
 	eq(runs[0], runs[1], "same seed, same events")
