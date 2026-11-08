@@ -312,3 +312,19 @@ func test_the_bulwark_closes_slowly_and_faces_its_best_sector() -> void:
 		stats.erase("sectors")
 	else:
 		stats["sectors"] = had
+
+
+func test_the_same_seed_flies_the_same_fight_in_every_style() -> void:
+	for role in NEW_ROLES:
+		var runs: Array = []
+		for k in 2:
+			var ship = Shipgen.build("lumen", "medium", 81, 120.0, {"role": role, "stage": 3})
+			var d := _arena(ship, 2000.0, 13)
+			d[0].autofire[1] = true
+			var foe := PilotAI.new(d[0], 1, 0)
+			for i in int(6.0 / DT):
+				d[1].think(DT)
+				foe.think(DT)
+				d[0].step(DT)
+			runs.append([d[0].ships[0].flight.pos, d[0].ships[1].flight.pos, d[0].events.size()])
+		eq(runs[0], runs[1], role + ": the same fight twice")
