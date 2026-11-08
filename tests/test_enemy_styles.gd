@@ -86,12 +86,13 @@ func test_a_stage_with_no_bays_never_rolls_a_carrier_or_a_boarder() -> void:
 	check(ship != null and not Drones.bays_of(ship).is_empty(), "a pinned carrier still flies its bay (the tools measure it)")
 
 
-## Every faction builds each of its roles at every size, at 20 seeds (build() validates every ship it returns).
+## Every faction builds each of the new roles it flies at every size, at 20 seeds (build() validates every ship it returns; the old
+## roles are built by tests/test_enemy_identity.gd and the fights' own tests).
 func test_every_faction_size_and_role_builds() -> void:
 	var listed: Dictionary = Shipgen.tables()["roles"]["flies"]
 	var budget := {"small": 40.0, "medium": 110.0, "large": 260.0}
 	for faction in listed:
-		for role in Shipgen.roles_of(faction):
+		for role in Shipgen.roles_of(faction).filter(func(r): return NEW_ROLES.has(r)):
 			for size in ["small", "medium", "large"]:
 				var bad := 0
 				for sd in 20:
