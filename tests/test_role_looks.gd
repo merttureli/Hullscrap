@@ -252,3 +252,115 @@ func test_old_roles_build_the_same_ships_as_before() -> void:
 			continue
 		eq(JSON.stringify([ship.to_dict(), ship.name, ship.crew_plan, ship.get_meta("ai"), ship.get_meta("shipgen")]).sha256_text().substr(0, 16), OLD_SHIPS[spec], spec + ": the same ship")
 	eq(OLD_SHIPS.size(), 60, "60 old-role ships")
+
+
+# --- the ships -------------------------------------------------------------------------------------
+
+## The hull rows of `ship` (its tiles, shaped ones too), top to bottom: [[first x, last x, runs], ...] and the middle x.
+func _rows(ship) -> Dictionary:
+	var by_y := {}
+	var lo := Vector2i(1 << 20, 1 << 20)
+	var hi := -lo
+	for c in ship.grid.tiles:
+		if not by_y.has(c.y):
+			by_y[c.y] = []
+		by_y[c.y].append(c.x)
+		lo = lo.min(c)
+		hi = hi.max(c)
+	var rows: Array = []
+	for y in range(lo.y, hi.y + 1):
+		var xs: Array = by_y.get(y, [])
+		xs.sort()
+		var runs := 0
+		for i in xs.size():
+			runs += int(i == 0 or xs[i] != xs[i - 1] + 1)
+		rows.append([xs[0], xs[xs.size() - 1], runs] if not xs.is_empty() else [0, -1, 0])
+	return {"rows": rows, "mid": (lo.x + hi.x) / 2.0, "w": hi.x - lo.x + 1}
+
+
+func _w(r: Array) -> int:
+	return int(r[1]) - int(r[0]) + 1
+
+
+## Does `ship` show the mark of `role`'s silhouette?
+func _looks_like(role: String, ship) -> bool:
+	var d := _rows(ship)
+	var rows: Array = d["rows"]
+	var n := rows.size()
+	var widest := 0
+	for r in rows:
+		widest = maxi(widest, _w(r))
+	match role:
+		"skirmisher":  # a narrow nose, swept fins past the stern: the last row is the two fin tips
+			return _w(rows[0]) * 2 <= widest and int(rows[n - 1][2]) == 2
+		"boarder":  # two clamp teeth ahead of a blunt bow as wide as the ship
+			return int(rows[0][2]) == 2 and rows.slice(0, 6).any(func(r): return int(r[2]) == 1 and _w(r) * 10 >= widest * 6)
+		"flanker":  # horns beside the gun deck: rows of three pieces
+			return rows.slice(0, n / 2).filter(func(r): return int(r[2]) == 3).size() >= 3
+		"carrier":  # a wide deck with an island on one side: wider than long, lopsided
+			return float(d["w"]) >= 0.85 * n and rows.any(func(r): return absf(float(r[0]) + float(r[1]) - 2.0 * float(d["mid"])) >= 3.0)
+		"siege":  # a long narrow neck lined with racks: rows wider than both neighbours
+			var teeth := 0
+			for i in range(1, n - 1):
+				teeth += int(_w(rows[i]) > _w(rows[i - 1]) and _w(rows[i]) > _w(rows[i + 1]))
+			var neck := widest
+			for i in n / 4:
+				neck = mini(neck, _w(rows[i]))
+			return teeth >= 2 and neck * 10 <= widest * 7
+		"bulwark":  # stepped ends: square steps down the bow and the stern
+			var steps := 0
+			for i in range(1, mini(8, n)):
+				steps += int(_w(rows[i]) >= _w(rows[i - 1]) + 4)
+			return steps >= 2
+	return false
+
+
+func test_every_role_ship_looks_like_its_role() -> void:
+	var fly := {"skirmisher": ["clans", "kett"], "carrier": ["lumen", "sporeling"], "boarder": ["rustfangs", "kett"], "flanker": ["lumen", "hollow"], "siege": ["concord", "hollow"], "bulwark": ["wardens", "grundl"]}
+	for role in fly:
+		for faction in fly[role]:
+			for size in ["medium", "large"]:
+				var good := 0
+				for k in 10:
+					var ship = Shipgen.build(faction, size, 900 + k * 37, 120.0 + 25.0 * k, {"role": role, "stage": 4})
+					good += int(ship != null and _looks_like(role, ship))
+				check(good >= 8, "%s %s %s: %d of 10 ships look like one" % [faction, size, role, good])
+	var plain := 0
+	for role in NEW_ROLES:
+		for k in 10:
+			plain += int(_looks_like(role, Shipgen.build("concord", "medium", 900 + k * 37, 150.0, {"role": "escort", "stage": 4})))
+	check(plain <= 6, "an old role's ship rarely looks like a new one (%d of 60)" % plain)
+
+
+func test_a_role_ship_is_the_same_for_the_same_seed() -> void:
+	for role in NEW_ROLES:
+		var a = Shipgen.from_spec("gen:wardens:large:77:20000:s4:role:" + role)
+		var b = Shipgen.from_spec("gen:wardens:large:77:20000:s4:role:" + role)
+		check(a != null and b != null, role + " builds")
+		if a != null and b != null:
+			eq(JSON.stringify(a.to_dict()), JSON.stringify(b.to_dict()), role + ": the same ship")
+
+
+func test_a_role_ship_wears_its_role_s_dressing() -> void:
+	var kinds := {}
+	for role in NEW_ROLES:
+		for e in Hullgen.look_of(role)["dressing"]:
+			kinds[str(e["kind"])] = role
+	eq(kinds.size(), 6, "a dressing kind of its own for each role")
+	for kind in kinds:
+		var role: String = kinds[kind]
+		for faction in ["wardens", "kett"]:
+			var ship = Shipgen.build(faction, "large", 51, 200.0, {"role": role, "stage": 4})
+			var plan: Array = Dressing.plan(ship, ship.get_meta("style")["dressing"])
+			var mine: Array = plan.filter(func(p): return p["kind"] == kind)
+			check(mine.size() >= 2, "%s %s wears %s (%d)" % [faction, role, kind, mine.size()])
+			if Dressing.PAIRED.has(kind):
+				var mid := float(_rows(ship)["mid"]) + 0.5
+				eq(mine.size(), 2, "%s: one %s each side" % [role, kind])
+				check(mine.size() == 2 and (mine[0]["at"].x < mid) != (mine[1]["at"].x < mid), "%s: on both sides" % kind)
+			eq(Dressing.plan(ship, ship.get_meta("style")["dressing"]), plan, role + ": the same pieces every time")
+	var old = Shipgen.build("kett", "large", 51, 200.0, {"role": "gunboat", "stage": 4})
+	var plan_old: Array = Dressing.plan(old, old.get_meta("style")["dressing"])
+	check(plan_old.all(func(p): return not kinds.has(p["kind"])), "an old role wears only its livery's dressing")
+	old.remove_meta("shipgen")  # a ship from a design file has no role: it plans as before
+	eq(Dressing.plan(old, old.get_meta("style")["dressing"]), plan_old, "a ship with no role plans its livery as before")

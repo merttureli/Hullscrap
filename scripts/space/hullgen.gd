@@ -549,7 +549,8 @@ static func _horns(poly: Array, op: Dictionary, rng: RandomNumberGenerator, lock
 
 
 ## The island: a block `w` wide and `len` rows long, its outer corners bevelled, on one flank (`side`; "random_one" by the
-## seed), on the straight stretch nearest the middle row that keeps a row clear of the stretch's ends and of `avoid`.
+## seed; the other flank when that one has no room), on the straight stretch nearest the middle row that keeps a row clear
+## of the stretch's ends and of `avoid`.
 static func _island(poly: Array, op: Dictionary, rng: RandomNumberGenerator, avoid: Array) -> void:
 	var side := _side(op, rng)
 	var w := maxi(rng.randi_range(int(op["w"][0]), int(op["w"][1])), 2)
@@ -558,20 +559,23 @@ static func _island(poly: Array, op: Dictionary, rng: RandomNumberGenerator, avo
 	var mid_x := box.position.x + box.size.x / 2.0
 	var mid_y := box.position.y + box.size.y / 2.0
 	var best := []  # [distance from the middle, edge index, first row]
-	for i in poly.size():
-		var a: Vector2i = poly[i]
-		var b: Vector2i = poly[(i + 1) % poly.size()]
-		if a.x != b.x:
-			continue
-		var on_right := b.y > a.y and a.x > mid_x
-		if not (on_right or (b.y < a.y and a.x < mid_x)) or (side != "" and on_right != (side == "right")):
-			continue
-		for y in range(mini(a.y, b.y) + 1, maxi(a.y, b.y) - ln):
-			if avoid.any(func(r): return y <= int(r[1]) + 1 and y + ln >= int(r[0]) - 1):
+	for pass_no in 2:  # the side asked for, then (no stretch there) the other
+		for i in poly.size():
+			var a: Vector2i = poly[i]
+			var b: Vector2i = poly[(i + 1) % poly.size()]
+			if a.x != b.x:
 				continue
-			var dist := absf(y + ln / 2.0 - mid_y)
-			if best.is_empty() or dist < best[0]:
-				best = [dist, i, y]
+			var on_right := b.y > a.y and a.x > mid_x
+			if not (on_right or (b.y < a.y and a.x < mid_x)) or (side != "" and (on_right != (side == "right")) == (pass_no == 0)):
+				continue
+			for y in range(mini(a.y, b.y) + 1, maxi(a.y, b.y) - ln):
+				if avoid.any(func(r): return y <= int(r[1]) + 1 and y + ln >= int(r[0]) - 1):
+					continue
+				var dist := absf(y + ln / 2.0 - mid_y)
+				if best.is_empty() or dist < best[0]:
+					best = [dist, i, y]
+		if not best.is_empty() or side == "":
+			break
 	if best.is_empty():
 		return
 	var i: int = best[1]
