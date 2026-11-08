@@ -39,7 +39,7 @@ extends RefCounted
 ## - The fighting styles of the enemy roles (data/enemy_tables.json roles, the role's `ai.style`), each its own small function; the guns
 ##   fire as above in all of them:
 ##   - "skirmisher" (_skirmish): hit and run. It holds the gap between the hulls at SKIRMISH_HOLD of its longest reach; when the foe
-##     closes inside SKIRMISH_RUN of it, it turns and burns away (as it flees) until it is back out at the hold, then comes round again.
+##     closes inside SKIRMISH_RUN of it, it turns and burns away (as it flees) until it is out at SKIRMISH_TURN, then comes round again.
 ##   - "carrier" (_carry): it keeps the gap at CARRIER_MARGIN of the foe's longest reach, within its drones' reach (Drones.DRONE_REACH),
 ##     and its bays launch and relaunch (Drones.ai_launch). With no drone left to fly it fights as the others do.
 ##   - "boarder" (_board): it closes fast (BOARD_CLOSE_MAX px/s) to throwing range and its bays throw their pods (BOARD_THROW);
@@ -89,7 +89,8 @@ const RAM_MAX_LEAD_S := 4.0
 const RAM_ALIGNED := 0.45  ## rad: full throttle when the heading is this close to the steering direction
 const FLEE_ALIGNED := 0.6  ## rad: a fleeing ship burns once its nose is this close to straight away from the foe
 const SKIRMISH_HOLD := 0.9  ## a skirmisher holds the gap between the hulls at this share of its longest reach
-const SKIRMISH_RUN := 0.6  ## inside this share it turns and burns away, until it is back out at SKIRMISH_HOLD
+const SKIRMISH_RUN := 0.6  ## inside this share it turns and burns away, until it is back out at SKIRMISH_TURN
+const SKIRMISH_TURN := 0.75  ## the share at which a run ends: it turns back, and its way carries it out to the hold
 const SKIRMISH_RUN_MAX_S := 6.0  ## a run that has not opened the gap in this long ends: it turns and fights
 const CARRIER_MARGIN := 1.15  ## a carrier keeps the gap at this many times the foe's longest reach
 const CARRIER_DRONE_SHARE := 0.85  ## and its centre within this share of its drones' reach of the foe's
@@ -491,7 +492,7 @@ func _due(dt: float) -> bool:
 	return true
 
 
-## Skirmisher: hit and run (see the top). The run is a flight (_flee) that ends back out at the hold, or after SKIRMISH_RUN_MAX_S.
+## Skirmisher: hit and run (see the top). The run is a flight (_flee) that ends at SKIRMISH_TURN of its reach, or after SKIRMISH_RUN_MAX_S.
 func _skirmish(dt: float) -> void:
 	if _due(dt):
 		_sd = {"r": reach(), "gap": gap_now(), "hold": centres_at(SKIRMISH_HOLD * reach())}
@@ -499,7 +500,7 @@ func _skirmish(dt: float) -> void:
 	var gap: float = _sd["gap"]
 	if _running >= 0.0:
 		_running += dt
-		if gap >= SKIRMISH_HOLD * r or _running > SKIRMISH_RUN_MAX_S:
+		if gap >= SKIRMISH_TURN * r or _running > SKIRMISH_RUN_MAX_S:
 			_running = -1.0
 	elif gap < SKIRMISH_RUN * r:
 		_running = 0.0
