@@ -76,10 +76,11 @@ const OLD_SHIPS := {
 
 # --- the role ops on a plain stack of decks -------------------------------------------------------------
 
-## A gun deck (8 wide), a bridge (16), a core (20) and an engine room (12), centred on x = -0.5, in a shell 1 cell thick.
-func _bands() -> Array:
+## A gun deck (8 wide, or 2 x `gun_half`) needing 2 columns for its gun, a bridge (16), a core (20) and an engine room (12),
+## centred on x = -0.5, in a shell 1 cell thick.
+func _bands(gun_half := 4) -> Array:
 	return [
-		{"kind": "gun", "x0": -4, "x1": 3, "y0": 1, "y1": 4},
+		{"kind": "gun", "x0": -gun_half, "x1": gun_half - 1, "y0": 1, "y1": 4, "need": 2},
 		{"kind": "bridge", "x0": -8, "x1": 7, "y0": 6, "y1": 11},
 		{"kind": "core", "x0": -10, "x1": 9, "y0": 13, "y1": 18},
 		{"kind": "engine", "x0": -6, "x1": 5, "y0": 20, "y1": 22},
@@ -87,10 +88,10 @@ func _bands() -> Array:
 
 
 ## make() of the decks with `role_ops` and the style's `ops`: {poly, cells, errors}.
-func _make(role_ops: Array, ops := [], opts := {}, seed_value := 7) -> Dictionary:
+func _make(role_ops: Array, ops := [], opts := {}, seed_value := 7, gun_half := 4) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value
-	var h := Hullgen.make({"hull": {"ops": ops, "role_ops": role_ops}}, _bands(), 1, 24, rng, opts)
+	var h := Hullgen.make({"hull": {"ops": ops, "role_ops": role_ops}}, _bands(gun_half), 1, 24, rng, opts)
 	var r := Hullgen.raster(h["outline"])
 	return {"poly": h["poly"], "cells": r["cells"], "errors": r["errors"]}
 
@@ -145,12 +146,13 @@ func test_fins_sweep_out_of_the_stern_corners() -> void:
 
 
 func test_a_jaw_juts_a_clamp_tooth_forward_of_each_bow_corner() -> void:
-	var m := _make([{"op": "jaw", "depth": [2, 2], "w": 1}])
+	var m := _make([{"op": "jaw", "depth": [2, 2], "w": 1}], [], {}, 7, 7)
 	_clean(m, "jaw")
 	eq(_top(m["cells"]), -2, "the teeth reach two rows past the bow")
 	eq(_runs(m["cells"], -1), 2, "two teeth, apart")
-	check(m["cells"].has(Vector2i(-5, -2)) and m["cells"].has(Vector2i(4, -2)), "each on its corner")
+	check(m["cells"].has(Vector2i(-8, -2)) and m["cells"].has(Vector2i(7, -2)), "each on its corner")
 	check(not m["cells"].has(Vector2i(0, -1)), "the middle of the bow stays back for the guns")
+	eq(_make([{"op": "jaw", "depth": [2, 2], "w": 1}])["cells"].size(), _make([])["cells"].size(), "no jaw over the columns a narrow gun deck's gun and door need")
 
 
 func test_horns_rise_from_the_shoulders_beside_the_gun_deck() -> void:
@@ -186,22 +188,23 @@ func test_racks_line_both_flanks_at_the_same_rows() -> void:
 
 
 func test_steps_make_a_ziggurat_of_the_bow() -> void:
-	var m := _make([{"op": "steps", "at": "tip", "n": [2, 2], "a": 1, "b": 2, "bevel": 1}])
+	var m := _make([{"op": "steps", "at": "tip", "n": [2, 2], "a": 1, "b": 2, "bevel": 1}], [], {}, 7, 7)
 	_clean(m, "steps")
 	var w := func(y): return int(_row(m["cells"], y)[1]) - int(_row(m["cells"], y)[0]) + 1
 	check(w.call(0) < w.call(1) and w.call(1) < w.call(2), "each step down the bow is wider (%d, %d, %d)" % [w.call(0), w.call(1), w.call(2)])
-	eq([w.call(0), w.call(1), w.call(4)], [2, 6, 10], "two steps two columns each side, the gun deck below them as wide as before")
-	var deep := _make([{"op": "steps", "at": "tip", "n": [3, 3], "a": 2, "b": 2, "bevel": 0}])
-	eq(_row(deep["cells"], 2), _row(_make([])["cells"], 2), "a step that would reach the deck behind is left out (the gun deck's flank is 5 rows)")
+	eq([w.call(0), w.call(1), w.call(4)], [8, 12, 16], "two steps two columns each side, the gun deck below them as wide as before")
+	var deep := _make([{"op": "steps", "at": "tip", "n": [3, 3], "a": 2, "b": 2, "bevel": 0}], [], {}, 7, 7)
+	eq(_row(deep["cells"], 2), _row(_make([], [], {}, 7, 7)["cells"], 2), "a step that would reach the deck behind is left out (the gun deck's flank is 5 rows)")
+	eq(_make([{"op": "steps", "at": "tip", "n": [2, 2], "a": 1, "b": 2, "bevel": 0}])["cells"].size(), _make([])["cells"].size(), "no step into the floor a narrow gun deck's gun and door need")
 	check(m["cells"].values().any(func(s): return not s.is_empty()), "the steps are bevelled")
 
 
 func test_the_style_ops_leave_the_corners_a_role_made() -> void:
 	var bevel := [{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [3, 3]}, {"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}]
-	var style_only := _make([], bevel)
-	check(not style_only["cells"].has(Vector2i(-5, 1)), "the style alone bevels the bow corner")
-	var m := _make([{"op": "jaw", "depth": [2, 2], "w": 1}], bevel)
-	check(m["cells"].has(Vector2i(-5, -2)) and m["cells"].has(Vector2i(4, -2)), "after a jaw the style's tip bevel finds no corner of it")
+	var style_only := _make([], bevel, {}, 7, 7)
+	check(not style_only["cells"].has(Vector2i(-8, 1)), "the style alone bevels the bow corner")
+	var m := _make([{"op": "jaw", "depth": [2, 2], "w": 1}], bevel, {}, 7, 7)
+	check(m["cells"].has(Vector2i(-8, -2)) and m["cells"].has(Vector2i(7, -2)), "after a jaw the style's tip bevel finds no corner of it")
 	var wedge := [{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}]
 	eq(_row(_make([{"op": "keep", "at": "bow"}], wedge)["cells"], 4), _row(_make([])["cells"], 4), "a kept step is not filled by the style's wedge")
 	check(_row(_make([], wedge)["cells"], 4) != _row(_make([])["cells"], 4), "(which it fills without the keep)")

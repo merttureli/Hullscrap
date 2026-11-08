@@ -39,7 +39,8 @@
 		"siege": {
 			"hull": {"prow": [7, 9], "tail": [2, 4], "band": {"gun": 0.3}, "jitter_w": 2, "jitter_c": 2,
 				"ops": [
-					{"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [1, 2]},
+					{"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [2, 2]},
+					{"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 1]},
 					{"op": "keep", "at": "bow"},
 					{"op": "wedge", "at": "stern", "slope": ["45"]},
 					{"op": "racks", "count": [5, 9], "h": 1, "gap": 1, "depth": 2}
