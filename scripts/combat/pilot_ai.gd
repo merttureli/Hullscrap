@@ -39,8 +39,8 @@ extends RefCounted
 ## - The fighting styles of the enemy roles (data/enemy_tables.json roles, the role's `ai.style`), each its own small function; the guns
 ##   fire as above in all of them:
 ##   - "skirmisher" (_skirmish): hit and run. It holds the gap between the hulls at SKIRMISH_HOLD of its longest reach; when the foe
-##     closes inside SKIRMISH_RUN of it, it turns and burns away (as it flees) until it is out at SKIRMISH_TURN, then comes round again
-##     and fights for SKIRMISH_FIGHT_S before it runs again.
+##     closes inside SKIRMISH_RUN of it (SKIRMISH_LOOK_S early from a foe that charges), it turns and burns away (as it flees) until it is
+##     out at SKIRMISH_TURN, then comes round again and fights for SKIRMISH_FIGHT_S before it runs again (unless the foe is on top of it).
 ##   - "carrier" (_carry): it keeps the gap at CARRIER_MARGIN of the foe's longest reach, within its drones' reach (Drones.DRONE_REACH),
 ##     and its bays launch and relaunch (Drones.ai_launch). With no drone left to fly it fights as the others do.
 ##   - The skirmisher, the carrier and the siege boat keep away from the foe's guns: once those are all out they close and fight as the others do.
@@ -95,6 +95,8 @@ const SKIRMISH_RUN := 0.5  ## inside this share it turns and burns away, until i
 const SKIRMISH_TURN := 0.7  ## the share at which a run ends: it turns back, and its way carries it out to the hold
 const SKIRMISH_RUN_MAX_S := 6.0  ## a run that has not opened the gap in this long ends: it turns and fights
 const SKIRMISH_FIGHT_S := 8.0  ## after a run it fights this long before it runs again (the hit of hit and run)
+const SKIRMISH_LOOK_S := 2.0  ## it runs this many seconds early from a foe that closes on it (the gap its closing speed eats while it turns)
+const SKIRMISH_CLEAR := 3.0 * HULL_MARGIN  ## px between the hulls: closer than this it breaks off even while it fights (it never rams)
 const CARRIER_MARGIN := 1.05  ## a carrier keeps the gap at this many times the foe's longest reach (1.15 kept it where nothing but its drones reached: fights ran to the cap)
 const CARRIER_DRONE_SHARE := 0.85  ## and its centre within this share of its drones' reach of the foe's
 const BOARD_CLOSE_MAX := 560.0  ## px/s a boarder closes at, at most
@@ -499,7 +501,9 @@ func _due(dt: float) -> bool:
 ## Skirmisher: hit and run (see the top). The run is a flight (_flee) that ends at SKIRMISH_TURN of its reach, or after SKIRMISH_RUN_MAX_S.
 func _skirmish(dt: float) -> void:
 	if _due(dt):
-		_sd = {"r": reach(), "gap": gap_now(), "hold": centres_at(SKIRMISH_HOLD * reach()), "armed": foe_reach() > 0.0}
+		var u: Vector2 = (arena.ships[foe].flight.pos - arena.ships[me].flight.pos).normalized()
+		_sd = {"r": reach(), "gap": gap_now(), "hold": centres_at(SKIRMISH_HOLD * reach()), "armed": foe_reach() > 0.0,
+			"closing": maxf(0.0, (arena.ships[me].flight.vel - arena.ships[foe].flight.vel).dot(u))}
 	if not _sd["armed"]:  # the foe's guns are out: nothing to run from
 		_running = -1.0
 		_fly(dt)
@@ -509,10 +513,10 @@ func _skirmish(dt: float) -> void:
 	_fight_for -= dt
 	if _running >= 0.0:
 		_running += dt
-		if gap >= SKIRMISH_TURN * r or _running > SKIRMISH_RUN_MAX_S:
+		if gap - float(_sd["closing"]) * SKIRMISH_LOOK_S >= SKIRMISH_TURN * r or _running > SKIRMISH_RUN_MAX_S:
 			_running = -1.0
 			_fight_for = SKIRMISH_FIGHT_S
-	elif gap < SKIRMISH_RUN * r and _fight_for <= 0.0:
+	elif (gap - float(_sd["closing"]) * SKIRMISH_LOOK_S < SKIRMISH_RUN * r and _fight_for <= 0.0) or gap < SKIRMISH_CLEAR:
 		_running = 0.0
 	if _running >= 0.0:
 		_flee()

@@ -354,3 +354,15 @@ func test_the_styles_that_keep_away_close_in_once_the_foes_guns_are_out() -> voi
 		var u: Vector2 = (foe.flight.pos - a.ships[0].flight.pos).normalized()
 		var plain := ai.hold_distance(u, ai._intact()) - ai.extent(0, u) - ai.extent(1, -u)
 		check(ai.gap_now() < kept - 100.0 and ai.gap_now() < plain + 150.0, "%s: it closed from a gap of %d to %d (a plain pilot holds %d)" % [role, kept, ai.gap_now(), plain])
+
+
+## A skirmisher never rams: against a foe that sits still it closes to its hold and never touches it.
+func test_the_skirmisher_never_touches_a_still_foe() -> void:
+	for spec in ["gen:rustfangs:medium:21:8000:s3:role:skirmisher", "gen:clans:medium:304:8000:s3:role:skirmisher", "gen:concord:large:305:20000:s3:role:skirmisher"]:
+		var sess := Session.new()
+		sess.start(Session.load_ship(RUSTBUCKET), Session.load_ship(spec), 7)
+		for n in int(20.0 / DT):
+			sess.input = {"throttle": 0.0, "turn": 0.0, "strafe": 0.0}
+			sess.tick(DT)
+		eq(_events(sess.arena, "ram"), 0, spec + ": no contact in 20 s")
+		check(sess.ai.gap_now() > PilotAI.HULL_MARGIN, "%s: a gap of %d px at the end" % [spec, sess.ai.gap_now()])
