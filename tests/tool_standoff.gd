@@ -42,6 +42,7 @@ const PLAYER_EVERY := 3
 const JUMPS_A_STAGE := 12.5  ## the progression bot's stages (docs/audit/progression.md): about this many jumps each
 const FACTIONS := ["rustfangs", "concord", "lumen", "clans"]  ## the pirates a stage 3-6 region sends (the Hollow's ghosts are their own kind)
 const MAX_TRIES := 600  ## seeds looked at to fill the plain / shield quotas of a stage
+const FULL_TRIES := 100  ## hulls a build with `min_guns` tries
 const STARTERS := {"courier": "res://data/ships/starter_courier.json", "rustbucket": "res://data/ships/starter_rustbucket.json", "prism": "res://data/ships/starter_prism.json"}
 const DENTAL := "res://data/ships/dental_plan.json"  ## the authored stage-1 pirate QA met (threat 3, one shield layer)
 const CELL_FACTIONS := ["rustfangs", "concord", "lumen", "wardens", "clans", "hollow"]  ## the six base factions of data/enemy_tables.json (cells=1)
@@ -56,7 +57,7 @@ const BUILDS := {
 	4: {"size": "large", "weapons": ["laser_mk2", "laser_mk1", "pulse_mk1", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2"], "armour": 1},
 	5: {"size": "large", "weapons": ["laser_mk2", "laser_mk2", "pulse_mk2", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2", "shield_mk1"], "armour": 2},
 	6: {"size": "large", "weapons": ["laser_mk2", "laser_mk2", "pulse_mk2", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2", "shield_mk1"], "armour": 2},
-	7: {"size": "large", "weapons": ["laser_mk2", "laser_mk2", "laser_mk2", "pulse_mk2", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2", "shield_mk2", "shield_mk1"], "armour": 3},  # a well-prepared ship (the flagship bench pstage=7): more guns, a third layer and a plate more than the stage 6 median
+	7: {"size": "large", "weapons": ["laser_mk2", "laser_mk2", "laser_mk2", "pulse_mk2", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2", "shield_mk2", "shield_mk1"], "armour": 3, "min_guns": 6},  # a well-prepared ship (the flagship bench pstage=7): more guns, a third layer and a plate more than the stage 6 median; min_guns: only a hull that mounts that many of them (6 is the most: the pulse and a turret never fit)
 }
 
 var args := {}
@@ -188,14 +189,15 @@ func _fan_out(jobs: int) -> void:
 # --- the ships -------------------------------------------------------------------------------------
 
 ## The player-like ship of `stage`: Shipgen's own pipeline (the hull grammar of the Concord, the real mount rules, cables, validation)
-## with the loadout of BUILDS instead of a bought one. Null when it cannot be built.
+## with the loadout of BUILDS instead of a bought one. Null when it cannot be built. Shipgen drops a gun that finds no wall to mount through:
+## the stage builds 3 to 6 fly without their pulse gun (and 4 to 6 a turret less); a build with `min_guns` tries hulls (up to FULL_TRIES) until one mounts that many.
 static func build_player(stage: int) -> Ship:
 	var b: Dictionary = BUILDS[stage]
 	var f: Dictionary = Shipgen.tables()["factions"]["concord"]
 	var sz: Dictionary = Shipgen.tables()["sizes"][b["size"]]
 	Shipgen._comps()
 	var weapons: Array = b["weapons"]
-	for attempt in 40:
+	for attempt in (FULL_TRIES if b.has("min_guns") else 40):
 		var rng := RandomNumberGenerator.new()
 		rng.seed = 7000 + stage * 100 + attempt
 		var lo := {"weapons": weapons.duplicate(), "engines": ["engine_mk1", "engine_mk1", "engine_mk1"], "shields": b["shields"].duplicate(), "systems": [], "reactors": [],
@@ -231,9 +233,19 @@ static func build_player(stage: int) -> Ship:
 		var ship: Ship = made["ship"]
 		if not Shipgen.validate(ship).is_empty():
 			continue
+		if b.has("min_guns") and _guns_of(ship) < int(b["min_guns"]):
+			continue
 		ship.name = "Bench %d" % stage
 		return ship
 	return null
+
+
+## The guns (weapon parts) `ship` carries.
+static func _guns_of(ship: Ship) -> int:
+	var n := 0
+	for uid in ship.components.instances:
+		n += int(str(ship.components.def(ship.components.instances[uid]["id"]).get("family", "")) == "weapon")
+	return n
 
 
 ## The campaign's danger of the first region whose pirates are `faction` (tool_balance.gd danger_for).
