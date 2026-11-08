@@ -66,6 +66,7 @@ Beta 4.1 is a fights, balance and content update on top of Beta 4, from a conten
 - **A spared ship hands over one part**: taking a surrender opens a short salvage page with one pick and the Scan row, and no strip row. The surrender offer itself no longer includes a part.
 - **Fewer enemies run**: Concord ships now surrender as often as they flee, and other pirates surrender more often.
 - **The skulls** no longer overrate ships armed with light kinetic guns.
+- **Fights end**: an enemy with no working gun surrenders or runs instead of fighting on, one whose jump drive you hold for 10 s surrenders, the Lattice wardens stand aside or withdraw to the gate when beaten, and an enemy volley no longer waits on a gun that cannot bear.
 
 ### Crew and repairs
 - **Crew keep their breath**: they take a job in an airless room only if they can finish it and walk out with air to spare. Send someone in yourself (middle click) and they go, with a warning.
