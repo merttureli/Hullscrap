@@ -470,8 +470,8 @@ static func _role_op(poly: Array, op: Dictionary, rng: RandomNumberGenerator, av
 
 
 ## A 45 degree tooth `depth` cells on each end corner: "fins" sweep out of the stern corners along the stern line (the stern
-## grows wider, its rows stay where they are), "jaw" juts forward from the bow corners (a clamp tooth each side of the bow,
-## its tip `w` wide).
+## grows wider; `swept`: and as far back past it, a swept wing), "jaw" juts forward from the bow corners (a clamp tooth each
+## side of the bow, its tip `w` wide).
 static func _teeth(poly: Array, op: Dictionary, rng: RandomNumberGenerator, locked: Dictionary) -> void:
 	var fins := str(op["op"]) == "fins"
 	var d := rng.randi_range(int(op["depth"][0]), int(op["depth"][1]))
@@ -489,10 +489,12 @@ static func _teeth(poly: Array, op: Dictionary, rng: RandomNumberGenerator, lock
 		var v_away: Vector2i = f["dout"] if h_in else -f["din"]  # along the flank, away from the corner
 		var lh: int = f["lin"] if h_in else f["lout"]
 		var lv: int = f["lout"] if h_in else f["lin"]
-		if (fins and d >= lv) or (not fins and 3 * (d + w) + 2 > lh):
+		if (fins and d >= lv) or (not fins and 2 * (d + w) + 2 > lh):  # (a jaw leaves the bow between its teeth)
 			return
 		var pts: Array = [v - h_away * d, v + v_away * d]  # a fin: the point out along the stern line, the one up the flank
-		if not fins:  # a jaw tooth: its tip ahead of the flank, its flat top `w` wide, its slope back to the bow line
+		if fins and bool(op.get("swept", false)):  # swept back past the stern too: its trailing edge comes back to the corner
+			pts = [v, v - h_away * d - v_away * d, v - h_away * d, v + v_away * d]
+		elif not fins:  # a jaw tooth: its tip ahead of the flank, its flat top `w` wide, its slope back to the bow line
 			pts = [v + h_away * (d + w), v - v_away * d + h_away * w, v - v_away * d] if w > 0 else [v + h_away * d, v - v_away * d]
 		if not h_in:
 			pts.reverse()
