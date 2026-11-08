@@ -9,6 +9,9 @@ const Dressing = preload("res://scripts/view/dressing.gd")
 const Gallery = preload("res://tests/tool_enemy_gallery.gd")
 
 const NEW_ROLES := ["skirmisher", "carrier", "boarder", "flanker", "siege", "bulwark"]
+const RATE_FACTIONS := ["rustfangs", "concord", "lumen", "wardens", "clans", "hollow", "kett", "sporeling"]  ## the build-rate sample
+const RATE_SIZES := ["medium", "large"]
+const RATE_SEEDS := 5
 ## Ships of the old roles (pinned by `:role:`) before the role looks: the sha256 (first 16 hex) of their dict, name, crew, pilot and meta.
 const OLD_SHIPS := {
 	"gen:rustfangs:small:40:6000:s3:role:gunboat": "e6c12806740770ab",
@@ -344,31 +347,31 @@ func test_every_role_ship_looks_like_its_role() -> void:
 	check(plain <= 6, "an old role's ship rarely looks like a new one (%d of 60)" % plain)
 
 
-## Every faction (and race) builds each new role it flies at every size class it fits, 20 seeds each, as well as its old roles
-## at the same seeds (tool_enemy_gallery.gd rates()): a ship every time the old roles give one, on the first roll no less
-## often over all the factions of a size, and per faction and size never more than 15 points less often (20 seeds a role is
-## noisy). The table: tool_enemy_gallery.gd rates=1.
+## A sample (the six base factions and two races, medium and large, 5 seeds a role) builds each new role it flies as well as
+## its old roles at the same seeds (tool_enemy_gallery.gd rates()): a ship every time the old roles give one, on the first roll
+## no less often over the sample of a size (to the ship: at least the old roles' share of the new ones, rounded down), and per
+## faction and size never more than 15 points less often (a few seeds are noisy). The full sweep, every faction x size x 20
+## seeds, is tool_enemy_gallery.gd -- rates=1 (about 10 minutes).
 func test_the_new_roles_build_as_well_as_the_old_ones() -> void:
 	var pooled := {}
-	for size in Gallery.SIZES:
+	for size in RATE_SIZES:
 		pooled[size] = {"new": {"n": 0, "first": 0, "made": 0}, "old": {"n": 0, "first": 0, "made": 0}}
-	for faction in Shipgen.factions():
-		var sp := Gallery.split_roles(faction)  # (a faction with no new role, a rare one, has nothing to compare)
-		for size in Gallery.SIZES:
-			var a := Gallery.rates(faction, size, sp[0], 20)
-			var b := Gallery.rates(faction, size, sp[1], 20)
+	for faction in RATE_FACTIONS:
+		var sp := Gallery.split_roles(faction)
+		check(not sp[0].is_empty(), faction + " flies new roles")
+		for size in RATE_SIZES:
+			var a := Gallery.rates(faction, size, sp[0], RATE_SEEDS)
+			var b := Gallery.rates(faction, size, sp[1], RATE_SEEDS)
 			for k in ["n", "first", "made"]:
 				pooled[size]["new"][k] += a[k]
 				pooled[size]["old"][k] += b[k]
-			if a["n"] == 0 or b["n"] == 0:
-				continue
 			check(Gallery._pct(a, "made") >= Gallery._pct(b, "made"), "%s %s: the new roles are built %.0f%% of the time, the old %.0f%%" % [faction, size, Gallery._pct(a, "made"), Gallery._pct(b, "made")])
 			check(Gallery._pct(a, "first") >= Gallery._pct(b, "first") - 15.0, "%s %s: the new roles on the first roll %.0f%%, the old %.0f%%" % [faction, size, Gallery._pct(a, "first"), Gallery._pct(b, "first")])
-	for size in Gallery.SIZES:
+	for size in RATE_SIZES:
 		var a: Dictionary = pooled[size]["new"]
 		var b: Dictionary = pooled[size]["old"]
-		check(Gallery._pct(a, "first") >= Gallery._pct(b, "first"), "%s, every faction: the new roles on the first roll %.1f%% of %d, the old %.1f%% of %d" % [size, Gallery._pct(a, "first"), a["n"], Gallery._pct(b, "first"), b["n"]])
-		check(Gallery._pct(a, "made") >= Gallery._pct(b, "made"), "%s, every faction: the new roles built %.1f%%, the old %.1f%%" % [size, Gallery._pct(a, "made"), Gallery._pct(b, "made")])
+		for k in ["first", "made"]:
+			check(int(a[k]) >= floori(float(b[k]) / float(b["n"]) * float(a["n"]) + 1e-9), "%s, the sample: the new roles %s %d of %d, the old %d of %d" % [size, "on the first roll" if k == "first" else "built", a[k], a["n"], b[k], b["n"]])
 
 
 ## A carrier or a boarder whose hull takes no drone bay flies as a gunboat (shipgen build()): its look's hull loses that no more
