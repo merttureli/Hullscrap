@@ -404,7 +404,7 @@
 		"ion_factor": 0.4,
 		"kinetic_floor": 4.0,
 		"drone_uptime": 0.6,
-		"pod_share": 0.2
+		"pod_share": 0.1
 	},
 	"drones": {
 		"_doc": "The enemy's drone bays (docs/DRONES.md section 7; Shipgen.add_enemy_bay). A generated enemy (a spec: Shipgen.from_spec) has a bay with the chance of its size (chance: a bay that finds no flank or stern wall to mount through is not placed, so about 3 in 5 of these are, and about 1 enemy in 4 flies one), scaled by its stage (stage_mult: the stages with a `:s<n>` in the spec; 0 = a later stage, which a spec does not name; stage 1 has none), on its flank or stern, of the tier its size takes (bay). The kit is rolled from the faction's weights (limpets and pods too: Sporeling poison, Emberkin fire, Basalt heat, Gauntling boarders; the AI throws them with a lead and a skilled wide angle, Limpets.ai_aim) (kits; a kit the bay is too small for is left out; `default` for a faction with no entry), and the ship carries it with parts (parts: [least, most]). The hollow and the wardens never have one (of these rolled bays: a carrier's or a boarder's own bay is its role's, roles.list `bay`, Shipgen.add_role_bay, and stands in for this roll). Kett large ships carry a second bay (second_bay: faction -> chance).",
