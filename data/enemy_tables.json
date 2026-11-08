@@ -374,7 +374,7 @@
 			"escort": {"weights": {"shield": 2.5, "weapons": 0.8, "armour": 0.9}, "favours": "shield"},
 			"sniper": {"weights": {"skill": 2.0, "armour": 0.8}, "range_from": 800, "range_bias": 2.5, "favours": "skill"},
 			"hauler": {"weights": {"weapons": 0.6, "armour": 0.8, "crew": 2.0, "systems": 2.0, "engine": 0.8}, "min_size": "medium", "favours": "crew"},
-			"skirmisher": {"weights": {"engine": 2.5, "weapons": 1.1, "armour": 0.4, "shield": 0.8, "crew": 0.8}, "range_from": 1200, "range_bias": 1.5, "base_engines": 3, "favours": "engine", "ai": {"style": "skirmisher"}},
+			"skirmisher": {"weights": {"engine": 2.5, "weapons": 0.9, "armour": 0.4, "shield": 0.8, "crew": 0.8, "skill": 0.5}, "range_from": 1200, "range_bias": 1.5, "base_engines": 3, "favours": "engine", "ai": {"style": "skirmisher"}},
 			"carrier": {"weights": {"weapons": 0.5, "shield": 1.4, "armour": 1.1, "systems": 1.5}, "bay": {"roles": ["combat"], "kits": {"pulse_drone_mk1": 3, "laser_drone_mk2": 2, "flak_drone_mk3": 1}, "count": {"large": 2}}, "min_size": "medium", "favours": "systems", "ai": {"style": "carrier"}},
 			"boarder": {"weights": {"crew": 2.5, "armour": 0.9, "engine": 2.0, "weapons": 0.6, "shield": 0.8}, "base_engines": 3, "crew_add": 2, "bay": {"roles": ["boarder"], "kits": {"boarder_pod_mk1": 4, "boarder_pod_mk2": 2, "boarder_pod_mk3": 1}}, "favours": "crew", "ai": {"style": "boarder"}},
 			"flanker": {"weights": {"engine": 2.0, "weapons": 1.2, "armour": 0.7, "shield": 0.9}, "turret_bias": 2.0, "favours": "engine", "ai": {"style": "flanker"}},
