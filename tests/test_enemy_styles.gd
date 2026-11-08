@@ -26,12 +26,12 @@ func _roled(faction: String, size: String, role: String, seed_value: int, budget
 	return null
 
 
-## An arena with `ship` (index 0, at the origin, nose up) against the pirate raider (index 1) sitting `dist` px ahead, nose toward it.
-## The pirate holds fire. Returns [arena, the pilot of ship 0].
-func _arena(ship, dist: float, seed_value := 11) -> Array:
+## An arena with `ship` (index 0, at the origin, nose up) against the pirate raider (or the design `foe_path`; index 1) sitting `dist` px
+## ahead, nose toward it. The foe holds fire. Returns [arena, the pilot of ship 0].
+func _arena(ship, dist: float, seed_value := 11, foe_path := PIRATE) -> Array:
 	var a := Arena.new(seed_value)
 	a.add_ship(ship, Vector2.ZERO, 0.0)
-	a.add_ship(Session.load_ship(PIRATE), Vector2(0.0, -dist), PI)
+	a.add_ship(Session.load_ship(foe_path), Vector2(0.0, -dist), PI)
 	a.autofire[1] = false
 	return [a, PilotAI.new(a, 0, 1, ship.get_meta("ai", {}))]
 
@@ -172,7 +172,7 @@ func test_the_same_seed_gives_the_same_roled_ship() -> void:
 
 func test_the_skirmisher_runs_when_the_foe_closes_and_opens_the_range_again() -> void:
 	var ship = _roled("concord", "medium", "skirmisher", 21, 120.0)
-	var d := _arena(ship, 2600.0)
+	var d := _arena(ship, 2800.0, 11, "gen:concord:large:7:30000")  # (a foe of many guns, some of which last: with its guns out a skirmisher has nothing to run from)
 	var a: Arena = d[0]
 	var ai: PilotAI = d[1]
 	var r := ai.reach()
@@ -336,3 +336,21 @@ func test_the_same_seed_flies_the_same_fight_in_every_style() -> void:
 				d[0].step(DT)
 			runs.append([d[0].ships[0].flight.pos, d[0].ships[1].flight.pos, d[0].events.size()])
 		eq(runs[0], runs[1], role + ": the same fight twice")
+
+
+func test_the_styles_that_keep_away_close_in_once_the_foes_guns_are_out() -> void:
+	for role in ["skirmisher", "carrier", "siege"]:
+		var ship = _roled("lumen", "large", role, 91, 260.0)
+		var d := _arena(ship, 2600.0)
+		var a: Arena = d[0]
+		var ai: PilotAI = d[1]
+		_step(a, ai, 10.0)
+		var kept := ai.gap_now()
+		var foe = a.ships[1]
+		for uid in foe.mounts:
+			foe.ship.components.instances[uid]["status"] = "disabled"
+		eq(ai.foe_reach(), 0.0, role + ": the foe has no gun left")
+		_step(a, ai, 15.0)
+		var u: Vector2 = (foe.flight.pos - a.ships[0].flight.pos).normalized()
+		var plain := ai.hold_distance(u, ai._intact()) - ai.extent(0, u) - ai.extent(1, -u)
+		check(ai.gap_now() < kept - 100.0 and ai.gap_now() < plain * 1.3, "%s: it closed from a gap of %d to %d (a plain pilot holds %d)" % [role, kept, ai.gap_now(), plain])
