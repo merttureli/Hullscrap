@@ -1,12 +1,12 @@
 {
-	"_doc": "How the fighting roles look (scripts/space/hullgen.gd with_look(), scripts/view/dressing.gd). Per role id of data/enemy_tables.json roles: `hull` is laid over the hull style of the ship's faction or race: `prow` and `tail` replace the style's, `band` sets the deck widths (shares of the widest floor by deck kind; the style's own band still caps what a deck holds, so no room is dropped for the look), `jitter_w` and `jitter_c` cap the style's jitter (a symmetric people stays symmetric), and `ops` shape the staircase before the style's own ops. The corners a role op makes are locked: the style's ops (its finish: bevels, spikes, arcs) work on the rest, so a Sporeling carrier is a Sporeling ship shaped like a carrier. A rammer keeps the style's hull (its ram bow) and the plain fallback hull its bevels. Role ops: wedge and chamfer (as the style's), keep {at} (lock those corners), fins {depth, swept} (45 degree fins out of the stern corners, swept: back past the stern too), jaw {depth, w} (a clamp tooth forward of each bow corner, its tip w wide), horns {w, reach, gap} (two horns from the shoulders where the bow narrows, `reach` rows past the bow), island {w, len, side} (a block on one flank), racks {count, h, gap, depth} (square teeth on both flanks at the same rows), steps {at: tip or stern_end, n, a, b, bevel} (stepped ends). Every slope is 45 degrees. `dressing` is added to the livery's (style.dressing entries, the same shape). Roles not listed (gunboat, brawler, escort, sniper, hauler) keep the style's hull as it is.",
+	"_doc": "How the fighting roles look (scripts/space/hullgen.gd with_look(), scripts/view/dressing.gd). Per role id of data/enemy_tables.json roles: `hull` is laid over the hull style of the ship's faction or race: `prow` and `tail` replace the style's, `band` sets the deck widths (shares of the widest floor by deck kind; the style's own band still caps what a deck holds, so no room is dropped for the look), `jitter_w` and `jitter_c` cap the style's jitter (a symmetric people stays symmetric), and `ops` shape the staircase before the style's own ops. The corners a role op makes are locked: the style's ops (its finish: bevels, spikes, arcs) work on the rest, so a Sporeling carrier is a Sporeling ship shaped like a carrier. A rammer keeps the style's hull (its ram bow) and the plain fallback hull its bevels. Role ops: wedge and chamfer (as the style's), keep {at} (lock those corners), fins {depth, swept} (45 degree fins out of the stern corners, swept: back past the stern too), jaw {depth, w} (a clamp tooth forward of each bow corner, its tip w wide), horns {w, reach, gap} (two horns from the shoulders where the bow narrows, `reach` rows past the bow), island {w, len, side} (a block on one flank), racks {count, h, gap, depth} (square teeth on both flanks at the same rows), steps {at: tip or stern_end, n, a, b, bevel} (stepped ends). A jaw or a step never cuts into the columns the bow's or the stern's mounts need. Every slope is 45 degrees. `dressing` is added to the livery's (style.dressing entries, the same shape). Roles not listed (gunboat, brawler, escort, sniper, hauler) keep the style's hull as it is.",
 	"roles": {
 		"skirmisher": {
-			"hull": {"prow": [5, 7], "tail": [1, 2], "band": {"gun": 0.3, "engine": 1.15}, "jitter_w": 0, "jitter_c": 0,
+			"hull": {"prow": [3, 4], "tail": [0, 1], "band": {"gun": 0.3, "engine": 1.0}, "jitter_w": 0, "jitter_c": 0,
 				"ops": [
 					{"op": "wedge", "at": "bow", "slope": ["45"]},
 					{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [1, 1]},
-					{"op": "fins", "depth": [3, 4], "swept": true}
+					{"op": "fins", "depth": [2, 2], "swept": true}
 				]},
 			"dressing": [{"kind": "fin_trim", "len": 2.6}]
 		},
@@ -19,7 +19,7 @@
 			"dressing": [{"kind": "bay_doors", "count": [2, 3], "where": "flank", "sym": true, "len": 2.4}]
 		},
 		"boarder": {
-			"hull": {"prow": [1, 2], "tail": [0, 1], "band": {"gun": 0.9, "bridge": 1.0, "core": 0.95, "aux": 0.95, "engine": 0.55}, "jitter_w": 2, "jitter_c": 2,
+			"hull": {"prow": [1, 2], "tail": [0, 1], "band": {"gun": 0.9, "bridge": 1.0, "core": 0.95, "aux": 0.95}, "jitter_w": 2, "jitter_c": 2,
 				"ops": [
 					{"op": "jaw", "depth": [3, 3], "w": 2},
 					{"op": "wedge", "at": "stern", "slope": ["45"]},
@@ -37,8 +37,9 @@
 			"dressing": [{"kind": "horn_lamps", "len": 1.0}]
 		},
 		"siege": {
-			"hull": {"prow": [7, 9], "tail": [2, 4], "band": {"gun": 0.3, "engine": 0.45}, "jitter_w": 2, "jitter_c": 2,
+			"hull": {"prow": [7, 9], "tail": [2, 4], "band": {"gun": 0.3}, "jitter_w": 2, "jitter_c": 2,
 				"ops": [
+					{"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": [1, 2]},
 					{"op": "keep", "at": "bow"},
 					{"op": "wedge", "at": "stern", "slope": ["45"]},
 					{"op": "racks", "count": [5, 9], "h": 1, "gap": 1, "depth": 2}
@@ -46,10 +47,10 @@
 			"dressing": [{"kind": "racks", "count": [4, 7], "where": "flank", "sym": true, "len": 1.6}]
 		},
 		"bulwark": {
-			"hull": {"prow": [2, 3], "tail": [2, 2], "band": {"gun": 0.6, "bridge": 0.9, "core": 1.1, "aux": 1.1, "engine": 0.7}, "jitter_w": 1, "jitter_c": 0,
+			"hull": {"prow": [2, 3], "tail": [2, 2], "band": {"gun": 1.0, "bridge": 1.0, "core": 1.1, "aux": 1.1, "engine": 0.9}, "jitter_w": 1, "jitter_c": 0,
 				"ops": [
-					{"op": "steps", "at": "tip", "n": [2, 3], "a": 2, "b": 3, "bevel": 1},
-					{"op": "steps", "at": "stern_end", "n": [2, 2], "a": 2, "b": 3, "bevel": 1},
+					{"op": "steps", "at": "tip", "n": [2, 3], "a": 2, "b": 2, "bevel": 1},
+					{"op": "steps", "at": "stern_end", "n": [2, 2], "a": 2, "b": 2, "bevel": 1},
 					{"op": "keep", "at": "bow"},
 					{"op": "keep", "at": "stern"}
 				]},

@@ -143,6 +143,9 @@ static func make(style: Dictionary, bands: Array, t: int, rows: int, rng: Random
 			{"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": "max"},
 		]
 	var locked := {}  # the corners a role's look made: the style's ops leave them as they are
+	var room: Array = []  # the floor columns at each end (bow, stern) beside what its mounts need (and a door, a mount's outside half a column past its breech)
+	for b in [bands[0], bands[bands.size() - 1]]:
+		room.append(maxi(0, (int(b["x1"]) - int(b["x0"]) + 1 - maxi(int(b.get("need", 0)) + 2, MIN_OVERLAP)) / 2))
 	if level >= 1 and not bool(opts.get("ram", false)):  # (a rammer keeps its ram bow; the plain fallback its bevels)
 		for op in style["hull"].get("role_ops", []):
 			if str(op["op"]) == "wedge" and boost >= 2:
@@ -150,7 +153,7 @@ static func make(style: Dictionary, bands: Array, t: int, rows: int, rng: Random
 			var before := {}
 			for v in poly:
 				before[v] = true
-			_role_op(poly, op, rng, opts.get("avoid", []), locked)
+			_role_op(poly, op, rng, opts.get("avoid", []), locked, room, t)
 			for v in poly:
 				if not before.has(v):
 					locked[v] = true
@@ -450,7 +453,8 @@ static func _arcs(poly: Array, op: Dictionary, rng: RandomNumberGenerator, arcs:
 
 ## One op of a role's look: wedge and chamfer as the style's, keep (lock the corners `at` selects, so the style's ops leave
 ## them), fins, jaw, horns, island, racks and steps (below). Every slope they draw is 45 degrees, in every people's grammar.
-static func _role_op(poly: Array, op: Dictionary, rng: RandomNumberGenerator, avoid: Array, locked: Dictionary) -> void:
+## `room`: the floor columns beside the mounts at the bow and the stern (make()): a step cuts no further in, a jaw's tooth stands no further in than them and the shell `t`.
+static func _role_op(poly: Array, op: Dictionary, rng: RandomNumberGenerator, avoid: Array, locked: Dictionary, room: Array, t: int) -> void:
 	match str(op["op"]):
 		"wedge", "chamfer":
 			_apply(poly, op, rng, avoid, locked)
@@ -458,7 +462,7 @@ static func _role_op(poly: Array, op: Dictionary, rng: RandomNumberGenerator, av
 			for v in _targets(poly, str(op["at"]), _side(op, rng), locked):
 				locked[v] = true
 		"fins", "jaw":
-			_teeth(poly, op, rng, locked)
+			_teeth(poly, op, rng, locked, int(room[0]) + t)
 		"horns":
 			_horns(poly, op, rng, locked)
 		"island":
@@ -466,13 +470,13 @@ static func _role_op(poly: Array, op: Dictionary, rng: RandomNumberGenerator, av
 		"racks":
 			_racks(poly, op, rng, avoid)
 		"steps":
-			_steps(poly, op, rng, avoid, locked)
+			_steps(poly, op, rng, avoid, locked, int(room[0 if str(op["at"]) == "tip" else 1]))
 
 
 ## A 45 degree tooth `depth` cells on each end corner: "fins" sweep out of the stern corners along the stern line (the stern
 ## grows wider; `swept`: and as far back past it, a swept wing), "jaw" juts forward from the bow corners (a clamp tooth each
 ## side of the bow, its tip `w` wide).
-static func _teeth(poly: Array, op: Dictionary, rng: RandomNumberGenerator, locked: Dictionary) -> void:
+static func _teeth(poly: Array, op: Dictionary, rng: RandomNumberGenerator, locked: Dictionary, room: int) -> void:
 	var fins := str(op["op"]) == "fins"
 	var d := rng.randi_range(int(op["depth"][0]), int(op["depth"][1]))
 	var w := int(op.get("w", 0))
@@ -489,7 +493,7 @@ static func _teeth(poly: Array, op: Dictionary, rng: RandomNumberGenerator, lock
 		var v_away: Vector2i = f["dout"] if h_in else -f["din"]  # along the flank, away from the corner
 		var lh: int = f["lin"] if h_in else f["lout"]
 		var lv: int = f["lout"] if h_in else f["lin"]
-		if (fins and d >= lv) or (not fins and 2 * (d + w) + 2 > lh):  # (a jaw leaves the bow between its teeth)
+		if (fins and d >= lv) or (not fins and (2 * (d + w) + 2 > lh or d + w > room)):  # (a jaw leaves the bow between its teeth)
 			return
 		var pts: Array = [v - h_away * d, v + v_away * d]  # a fin: the point out along the stern line, the one up the flank
 		if fins and bool(op.get("swept", false)):  # swept back past the stern too: its trailing edge comes back to the corner
@@ -643,10 +647,10 @@ static func _rack_tooth(poly: Array, x: int, y: int, h: int, depth: int, down: b
 ## Stepped ends: at both corners of the bow ("tip") or the stern ("stern_end"), `n` square notches `a` rows by `b` columns (a
 ## ziggurat of plate layers), as many on each side, the outer corners of every step bevelled by `bevel` at 45 degrees; fewer
 ## steps where the edges are too short or reach `avoid`.
-static func _steps(poly: Array, op: Dictionary, rng: RandomNumberGenerator, avoid: Array, locked: Dictionary) -> void:
-	var n := rng.randi_range(int(op["n"][0]), int(op["n"][1]))
+static func _steps(poly: Array, op: Dictionary, rng: RandomNumberGenerator, avoid: Array, locked: Dictionary, room: int) -> void:
 	var a := int(op.get("a", 2))
 	var b := int(op.get("b", 2))
+	var n := mini(rng.randi_range(int(op["n"][0]), int(op["n"][1])), room / b)
 	var targets := _targets(poly, str(op["at"]), "", locked)
 	if targets.size() != 2:
 		return

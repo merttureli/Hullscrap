@@ -336,6 +336,33 @@ func test_every_role_ship_looks_like_its_role() -> void:
 	check(plain <= 6, "an old role's ship rarely looks like a new one (%d of 60)" % plain)
 
 
+## Every faction (and race) builds each new role it flies at every size class it fits, 20 seeds each, as well as its old roles
+## at the same seeds (tool_enemy_gallery.gd rates()): a ship of the role every time the old roles give one, on the first roll
+## no less often over all the factions of a size, and per faction and size never more than 15 points less often (20 seeds
+## a role is noisy). The table: tool_enemy_gallery.gd rates=1.
+func test_the_new_roles_build_as_well_as_the_old_ones() -> void:
+	var pooled := {}
+	for size in Gallery.SIZES:
+		pooled[size] = {"new": {"n": 0, "first": 0, "made": 0}, "old": {"n": 0, "first": 0, "made": 0}}
+	for faction in Shipgen.factions():
+		var sp := Gallery.split_roles(faction)  # (a faction with no new role, a rare one, has nothing to compare)
+		for size in Gallery.SIZES:
+			var a := Gallery.rates(faction, size, sp[0], 20)
+			var b := Gallery.rates(faction, size, sp[1], 20)
+			for k in ["n", "first", "made"]:
+				pooled[size]["new"][k] += a[k]
+				pooled[size]["old"][k] += b[k]
+			if a["n"] == 0 or b["n"] == 0:
+				continue
+			check(Gallery._pct(a, "made") >= Gallery._pct(b, "made"), "%s %s: the new roles are built %.0f%% of the time, the old %.0f%%" % [faction, size, Gallery._pct(a, "made"), Gallery._pct(b, "made")])
+			check(Gallery._pct(a, "first") >= Gallery._pct(b, "first") - 15.0, "%s %s: the new roles on the first roll %.0f%%, the old %.0f%%" % [faction, size, Gallery._pct(a, "first"), Gallery._pct(b, "first")])
+	for size in Gallery.SIZES:
+		var a: Dictionary = pooled[size]["new"]
+		var b: Dictionary = pooled[size]["old"]
+		check(Gallery._pct(a, "first") >= Gallery._pct(b, "first"), "%s, every faction: the new roles on the first roll %.1f%% of %d, the old %.1f%% of %d" % [size, Gallery._pct(a, "first"), a["n"], Gallery._pct(b, "first"), b["n"]])
+		check(Gallery._pct(a, "made") >= Gallery._pct(b, "made"), "%s, every faction: the new roles built %.1f%%, the old %.1f%%" % [size, Gallery._pct(a, "made"), Gallery._pct(b, "made")])
+
+
 func test_a_role_ship_is_the_same_for_the_same_seed() -> void:
 	for role in NEW_ROLES:
 		var a = Shipgen.from_spec("gen:wardens:large:77:20000:s4:role:" + role)
