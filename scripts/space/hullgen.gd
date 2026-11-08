@@ -49,10 +49,10 @@ static func look_of(role: String) -> Dictionary:
 ## `f` (a faction's table) with the look of `role` laid over its hull: the role's prow and tail replace the style's, its `band`
 ## becomes the deck widths (`width`: the style's `band` still caps what a deck holds, so the look drops no room), its jitter
 ## caps the style's (a symmetric people stays symmetric) and its ops become `role_ops`. The style keeps its own ops, asym,
-## spine and max_fill. A copy; `f` itself for a role with no look.
-static func with_look(f: Dictionary, role: String) -> Dictionary:
+## spine and max_fill. A copy; `f` itself for a role with no look, and for a rammer (`ram`: it keeps the style's ram bow).
+static func with_look(f: Dictionary, role: String, ram := false) -> Dictionary:
 	var look := look_of(role)
-	if look.is_empty():
+	if look.is_empty() or ram:
 		return f
 	var lh: Dictionary = look["hull"]
 	var hull: Dictionary = f["hull"].duplicate(true)

@@ -227,6 +227,7 @@ func test_with_look_lays_the_role_over_the_style_and_leaves_the_tables() -> void
 	var before := JSON.stringify(f)
 	check(is_same(Hullgen.with_look(f, "gunboat"), f), "an old role keeps the style's hull: the same table")
 	check(is_same(Hullgen.with_look(f, ""), f), "and so does no role")
+	check(is_same(Hullgen.with_look(f, "boarder", true), f), "and a rammer: its ram bow is the style's")
 	for role in NEW_ROLES:
 		var look: Dictionary = Hullgen.look_of(role)["hull"]
 		var h: Dictionary = Hullgen.with_look(f, role)["hull"]
@@ -242,6 +243,8 @@ func test_with_look_lays_the_role_over_the_style_and_leaves_the_tables() -> void
 	eq(JSON.stringify(f), before, "the tables stay as they were")
 	var concord: Dictionary = Hullgen.with_look(Shipgen.tables()["factions"]["concord"], "skirmisher")["hull"]
 	eq([concord["jitter_w"], concord["jitter_c"], concord["asym"]], [[0, 0], 0, false], "a symmetric people stays symmetric")
+	var hollow: Dictionary = Hullgen.with_look(Shipgen.tables()["factions"]["hollow"], "flanker")["hull"]
+	eq([hollow["jitter_w"], hollow["jitter_c"], hollow["asym"]], [[1, 2], 1, true], "a lopsided one stays lopsided as far as the role allows")
 
 
 func test_old_roles_build_the_same_ships_as_before() -> void:
@@ -297,8 +300,9 @@ func _looks_like(role: String, ship) -> bool:
 			return int(rows[0][2]) == 2 and rows.slice(0, 6).any(func(r): return int(r[2]) == 1 and _w(r) * 10 >= widest * 6)
 		"flanker":  # horns beside the gun deck: rows of three pieces
 			return rows.slice(0, n / 2).filter(func(r): return int(r[2]) == 3).size() >= 3
-		"carrier":  # a wide deck with an island on one side: wider than long, lopsided
-			return float(d["w"]) >= 0.85 * n and rows.any(func(r): return absf(float(r[0]) + float(r[1]) - 2.0 * float(d["mid"])) >= 3.0)
+		"carrier":  # a wide deck with an island on one side: nearly as wide as long, the island's rows off the others' middle
+			var centres: Array = rows.map(func(r): return float(r[0]) + float(r[1]))
+			return float(d["w"]) >= 0.85 * n and centres.max() - centres.min() >= 3.0
 		"siege":  # a long narrow neck lined with racks: rows wider than both neighbours
 			var teeth := 0
 			for i in range(1, n - 1):

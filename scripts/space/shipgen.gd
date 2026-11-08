@@ -485,7 +485,7 @@ static func _mix(seed_value: int, faction: String, size: String, attempt: int) -
 ## One try at a ship: {ship (null when it failed), why}.
 static func _attempt(faction: String, size: String, rng: RandomNumberGenerator, budget: float, ram: bool, attempt: int, shields := true, role := "") -> Dictionary:
 	var f: Dictionary = _with_role(tables()["factions"][faction], role)
-	f = Hullgen.with_look(f, role)  # a fighting role's silhouette (data/role_looks.json) over the style's hull
+	f = Hullgen.with_look(f, role, ram)  # a fighting role's silhouette (data/role_looks.json) over the style's hull
 	var sz: Dictionary = tables()["sizes"][size]
 	var level := 2 if attempt < 4 else (1 if attempt < 7 else 0)
 	var lo := _buy(f, size, budget, rng, ram, shields)
