@@ -6,6 +6,15 @@ Beta 4.1 is a fights, balance and content update on top of Beta 4, from a conten
 ### Enemies you can read
 - **Race ships and gang liveries.** In a race's home region you meet that race's own ships (about 60% of pirate fights), crewed by that race with its signature parts; the eight factions keep their own livery. Every ship carries an emblem on its hull, a colour for its plating, floor and engines, and dressing outside the hull (mandibles, crystal shards, cargo pods, welded scrap, tarps, fins, lattice spars).
 - **Roles.** Gunboats, brawlers, escorts, snipers and haulers: the name line says which ("Kett gunboat"). A poor ship looks patched; a rich one looks fine.
+- **Six new ways enemies fight**, each with its own pilot, gear and hull shape. Every faction keeps some of its old roles and flies two of the new ones.
+  - **Skirmisher:** a fast, slim dart with swept fins. It hits from the edge of its reach, turns and runs when you close, then comes round again.
+  - **Carrier** (from stage 2): a wide deck with a tower to one side. It stays just out of your guns' reach and launches combat drones.
+  - **Boarder** (from stage 2): a blunt bow with clamps. It closes fast, throws boarder pods and holds close while its robots are aboard.
+  - **Flanker:** a crescent with horns. It goes for your stern quarter and aims at your engines and guns first.
+  - **Siege boat:** a long spine lined with racks. It fires long guns and missiles in volleys, then pulls back to reload.
+  - **Bulwark** (from stage 2): a slow, stepped fortress with heavy guns. It turns its strongest shield toward you and breaks late.
+  - The fight panel's skulls now count a ship's drones and boarder pods.
+- **Fewer repeat events.** Once an event has shown this run, it comes up far less often. Three survivor and hermit encounters can now happen on stations too, and a capital's recruiter always has something to say (once you've taken on crew in that region, without offering one).
 - **No more skulls before a fight.** Event fight choices, radar markers and exit wardens show the enemy ship itself next to yours, her emblem and her name line; the Ledger warns in words only. The fight panel keeps its skull dots.
 
 ### Volley, piercing rounds and shield HP
