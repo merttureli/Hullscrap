@@ -452,7 +452,7 @@ static func pick_role(faction: String, size: String, seed_value: int, no_bay := 
 
 
 ## `f` with a role laid over it: its weights times the role's, the weight of a long-range gun times the role's `range_bias`, of a gun of a
-## `kind_bias` kind times that, of a tracking gun times `turret_bias`; `role_kit` is the role's entry (what _buy, _finish and build read). A copy; the tables stay as they are.
+## `kind_bias` kind times that, of a tracking gun times `turret_bias`, of a gun that hits for `heavy_from` or more a shot times `heavy_bias`; `role_kit` is the role's entry (what _buy, _finish and build read). A copy; the tables stay as they are.
 static func _with_role(f: Dictionary, role: String) -> Dictionary:
 	if role == "":
 		return f
@@ -472,6 +472,8 @@ static func _with_role(f: Dictionary, role: String) -> Dictionary:
 			m["weight"] = float(m.get("weight", 1)) * float(r["kind_bias"][str(w["kind"])])
 		if r.has("turret_bias") and bool(w["turret"]):
 			m["weight"] = float(m.get("weight", 1)) * float(r["turret_bias"])
+		if r.has("heavy_from") and float(_weapons.def(str(m["id"]))["damage"]) >= float(r["heavy_from"]):
+			m["weight"] = float(m.get("weight", 1)) * float(r["heavy_bias"])
 	return out
 
 
