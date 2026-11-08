@@ -2,18 +2,29 @@ extends RefCounted
 ## The exterior dressing of an enemy's livery (`style.dressing` of data/ship_styles.json and data/enemy_tables.json): decoration drawn OUTSIDE the
 ## hull, so a ship reads as its people's at a glance. It is a drawn layer only: no cells, no hp, no collision, nothing the threat rating
 ## counts. plan() places the pieces along the hull's outline by the ship's seed (the same ship always wears the same dressing); draw() paints
-## them in the ship's frame. Kinds: spikes, fins, ribs, pods, shards, spars, lanterns, tarps, scrap, mandibles, slabs.
+## them in the ship's frame. Kinds: spikes, fins, ribs, pods, shards, spars, lanterns, tarps, scrap, mandibles, slabs, and the fighting
+## roles' own (data/role_looks.json, added to the livery's by plan()): bay_doors (carrier), clamps (boarder), racks (siege), fin_trim
+## (skirmisher), horn_lamps (flanker), plate_seams (bulwark).
 ## A dressing entry: {kind, count: [min, max], where: "any" | "flank" | "bow" | "stern" | "front" (bow and the shoulders), sym: true to mirror
-## each piece about the hull's middle, ln: its length in cells (default by kind)}.
+## each piece about the hull's middle, ln: its length in cells (default by kind)}. mandibles, clamps, fin_trim and horn_lamps place
+## themselves (one each side: at the prow, the bow's outer flanks, the stern's outer corners, the tips of the horns) and take no count.
 
-const LENGTH := {"spikes": 1.8, "fins": 3.5, "ribs": 1.0, "pods": 1.5, "shards": 2.6, "spars": 3.5, "lanterns": 1.3, "tarps": 1.0, "scrap": 1.2, "slabs": 0.7, "mandibles": 3.4}
+const Hullgen = preload("res://scripts/space/hullgen.gd")
+
+const LENGTH := {"spikes": 1.8, "fins": 3.5, "ribs": 1.0, "pods": 1.5, "shards": 2.6, "spars": 3.5, "lanterns": 1.3, "tarps": 1.0, "scrap": 1.2, "slabs": 0.7, "mandibles": 3.4,
+	"bay_doors": 2.4, "clamps": 3.0, "racks": 1.6, "fin_trim": 2.6, "horn_lamps": 1.0, "plate_seams": 2.4}
 const DIRS: Array[Vector2i] = [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]
+const PAIRED := ["clamps", "fin_trim", "horn_lamps"]  ## the role kinds that place one piece each side by themselves
 
 
 ## The pieces for `ship` ({kind, at (cell coordinates of the outline face), n (the outward normal), ln, seed}), [] when it has no dressing.
+## The dressing of the ship's fighting role (its `shipgen` meta) comes after `entries`.
 static func plan(ship, entries: Array) -> Array:
 	var out: Array = []
-	if entries.is_empty() or ship == null:
+	if ship == null:
+		return out
+	entries = entries + Hullgen.look_of(str(ship.get_meta("shipgen", {}).get("role", ""))).get("dressing", [])
+	if entries.is_empty():
 		return out
 	var grid = ship.grid
 	var blocked := {}  # the cells of the mounts' outside halves: nothing grows there
@@ -54,6 +65,10 @@ static func plan(ship, entries: Array) -> Array:
 			out.append({"kind": kind, "at": Vector2(l[0]) + Vector2(0.5, 0.0), "n": Vector2(-0.45, -1.0).normalized(), "len": float(e.get("len", LENGTH["mandibles"])), "seed": rng.randi()})
 			out.append({"kind": kind, "at": Vector2(r[0]) + Vector2(0.5, 0.0), "n": Vector2(0.45, -1.0).normalized(), "len": float(e.get("len", LENGTH["mandibles"])), "seed": rng.randi()})
 			continue
+		if PAIRED.has(kind):
+			for p in _pair(kind, faces, mid_x):
+				out.append({"kind": kind, "at": p[0], "n": p[1], "len": float(e.get("len", LENGTH[kind])), "seed": rng.randi()})
+			continue
 		if kind == "trim":  # a fine ship: an accent line along every face of the outline
 			for f in pool:
 				out.append({"kind": kind, "at": Vector2(f[0]) + Vector2(0.5, 0.5) + Vector2(f[1]) * 0.5, "n": Vector2(f[1]), "len": 0.0, "seed": 0})
@@ -81,6 +96,48 @@ static func plan(ship, entries: Array) -> Array:
 				var ln := float(e.get("len", LENGTH.get(kind, 1.5))) * rng.randf_range(0.8, 1.25)
 				out.append({"kind": kind, "at": Vector2(p[0]) + Vector2(0.5, 0.5) + Vector2(p[1]) * 0.5, "n": Vector2(p[1]), "len": ln, "seed": rng.randi()})
 			n -= 1
+	return out
+
+
+## The two spots ([at, n]) of a paired kind, left then right, or [] when a side has none: clamps on the outer flank face of
+## the bow's first row (they reach forward), fin_trim under the outermost cells of the stern row (swept back and out), horn_lamps
+## on the foremost bow faces of each side (the tips of a flanker's horns).
+static func _pair(kind: String, faces: Array, mid_x: float) -> Array:
+	var best := [[], []]  # per side: [score, face]
+	for f in faces:
+		var c: Vector2i = f[0]
+		var d: Vector2i = f[1]
+		var s := 0 if float(c.x) + 0.5 < mid_x else 1
+		var score := 0.0
+		match kind:
+			"clamps":
+				if d.x != (-1 if s == 0 else 1):
+					continue
+				score = c.y * 100.0 - absf(c.x - mid_x)
+			"fin_trim":
+				if d != Vector2i.DOWN:
+					continue
+				score = -c.y * 100.0 - absf(c.x - mid_x)
+			"horn_lamps":
+				if d != Vector2i.UP:
+					continue
+				score = c.y * 100.0 - absf(c.x - mid_x)
+		if best[s].is_empty() or score < float(best[s][0]):
+			best[s] = [score, f]
+	if best[0].is_empty() or best[1].is_empty():
+		return []
+	var out: Array = []
+	for s in 2:
+		var f: Array = best[s][1]
+		var side := -1.0 if s == 0 else 1.0
+		var at := Vector2(f[0]) + Vector2(0.5, 0.5) + Vector2(f[1]) * 0.5
+		match kind:
+			"clamps":
+				out.append([at, Vector2(side * 0.35, -1.0).normalized()])
+			"fin_trim":
+				out.append([at + Vector2(side * 0.5, 0.0), Vector2(side * 0.75, 1.0).normalized()])
+			_:
+				out.append([at, Vector2.UP])
 	return out
 
 
@@ -154,6 +211,54 @@ static func draw(cv: CanvasItem, pieces: Array, origin: Vector2, k: float, pal: 
 				var inward := Vector2(-n.x, 0.0).normalized()
 				var pts := PackedVector2Array([base + tg * 0.6 * k, base + n * ln * 0.55 + tg * 0.5 * k, base + n * ln + inward * 1.3 * k, base + n * ln * 0.6 - tg * 0.2 * k, base - tg * 0.6 * k])
 				_poly(cv, pts, body.lightened(0.2), edge)
+			"bay_doors":  # a launch bay's lip: a dark mouth behind two door leaves, hazard marks on the sill
+				var a: Vector2 = base - tg * ln * 0.5
+				var b: Vector2 = base + tg * ln * 0.5
+				_poly(cv, [a, a + n * 0.75 * k, b + n * 0.75 * k, b], body, edge)
+				_poly(cv, [a + tg * 0.2 * k, a + tg * 0.2 * k + n * 0.5 * k, b - tg * 0.2 * k + n * 0.5 * k, b - tg * 0.2 * k], edge.darkened(0.4), edge)
+				cv.draw_line(base, base + n * 0.5 * k, body.lightened(0.3), maxf(1.0, k / 10.0))
+				for i in 4:
+					var q: Vector2 = a + tg * ln * (0.15 + 0.233 * i) + n * 0.68 * k
+					cv.draw_line(q, q + tg * 0.25 * k, Color(pal["accent"]), maxf(1.0, k / 9.0))
+			"clamps":  # a boarding arm: a jointed strut reaching forward, a claw at its end bent in over the foe
+				var side := signf(n.x)
+				var elbow: Vector2 = base + n * ln * 0.55
+				var hand: Vector2 = elbow + Vector2(-side * 0.35, -1.0).normalized() * ln * 0.45
+				cv.draw_line(base, elbow, edge, 0.6 * k)
+				cv.draw_line(elbow, hand, edge, 0.5 * k)
+				cv.draw_line(base, elbow, body.lightened(0.25), 0.36 * k)
+				cv.draw_line(elbow, hand, body.lightened(0.25), 0.28 * k)
+				cv.draw_circle(elbow, 0.32 * k, lit)
+				_poly(cv, [hand + Vector2(side * 0.4, 0.2) * k, hand + Vector2(-side * 0.7, -0.6) * k, hand + Vector2(-side * 0.2, 0.1) * k], body.lightened(0.1), edge)
+				_poly(cv, [hand + Vector2(-side * 0.4, 0.3) * k, hand + Vector2(-side * 1.1, 0.0) * k, hand + Vector2(-side * 0.3, 0.6) * k], body.lightened(0.1), edge)
+			"racks":  # a missile rack: a frame along the hull holding three tube heads
+				var a: Vector2 = base - tg * ln * 0.5
+				var b: Vector2 = base + tg * ln * 0.5
+				_poly(cv, [a, a + n * 0.6 * k, b + n * 0.6 * k, b], edge, edge)
+				for i in 3:
+					var q: Vector2 = a + tg * ln * (0.2 + 0.3 * i) + n * 0.35 * k
+					cv.draw_circle(q, 0.24 * k, body.lightened(0.3))
+					cv.draw_circle(q, 0.11 * k, Color(pal["accent"]))
+			"fin_trim":  # a swept fin blade off the stern corner, an accent stripe along its leading edge
+				var tip: Vector2 = base + n * ln
+				_poly(cv, [base - tg * 0.45 * k, tip, base + n * ln * 0.45 + tg * 0.5 * k, base + tg * 0.2 * k], body.lightened(0.2), edge)
+				cv.draw_line(base - tg * 0.3 * k + n * 0.2 * k, tip - n * 0.25 * k, Color(pal["accent"]), maxf(1.5, k / 6.0))
+			"horn_lamps":  # a lamp on a horn's tip, its beam cast forward
+				var s2: Vector2 = base + n * ln * 0.6
+				var glow := Color(pal["lamp"], 0.22 + 0.08 * sin(t * 2.5 + float(p["seed"] % 5)))
+				cv.draw_colored_polygon(PackedVector2Array([s2, s2 + n * 3.2 * k + tg * 1.0 * k, s2 + n * 3.2 * k - tg * 1.0 * k]), glow)
+				cv.draw_line(base, s2, edge, maxf(1.0, k / 8.0))
+				cv.draw_circle(s2, 0.42 * k, edge)
+				cv.draw_circle(s2, 0.3 * k, Color(pal["lamp"]))
+			"plate_seams":  # stepped armour plates over the edge: a wide lower layer, a narrower upper one, seams and rivets
+				var a: Vector2 = base - tg * ln * 0.5
+				var b: Vector2 = base + tg * ln * 0.5
+				_poly(cv, [a, a + n * 0.8 * k, b + n * 0.8 * k, b], body, edge)
+				_poly(cv, [a + tg * 0.35 * k, a + tg * 0.35 * k + n * 0.45 * k, b - tg * 0.35 * k + n * 0.45 * k, b - tg * 0.35 * k], body.lightened(0.22), edge)
+				for i in 2:
+					var q: Vector2 = a + tg * ln * (0.33 + 0.34 * i)
+					cv.draw_line(q, q + n * 0.8 * k, edge, maxf(1.0, k / 10.0))
+					cv.draw_circle(q + tg * 0.3 * k + n * 0.62 * k, maxf(0.8, 0.09 * k), lit)
 
 
 static func _poly(cv: CanvasItem, pts: Array, fill: Color, line: Color) -> void:
