@@ -431,3 +431,18 @@ func test_a_siege_boat_of_one_volley_gun_holds_and_fires() -> void:
 	_step(d[0], d[1], 30.0, func(): backed[0] = backed[0] or d[1]._reload >= 0.0)
 	check(not backed[0], "it never backs off: one shot is no volley")
 	check(_events(d[0], "shot", 0) >= 3, "and it keeps firing (%d shots)" % _events(d[0], "shot", 0))
+
+
+## With no boarders out a boarder holds inside its throw range (held on the edge of it, it never threw).
+func test_a_boarder_waits_inside_its_throw_range() -> void:
+	var ship = _roled("rustfangs", "medium", "boarder", 41, 120.0)
+	ship.inventory.add(Drones.PART, -ship.inventory.count(Drones.PART))  # nothing to throw: it only holds
+	var a := Arena.new(11)
+	a.add_ship(ship, Vector2.ZERO, 0.0)
+	a.add_ship(Session.load_ship(RUSTBUCKET), Vector2(0.0, -3200.0), PI)
+	a.autofire[1] = false
+	var ai := PilotAI.new(a, 0, 1, ship.get_meta("ai", {}))
+	_step(a, ai, 25.0)
+	check(not ai.boarders_out(), "no boarders out")
+	var d: float = a.ships[0].flight.pos.distance_to(a.ships[1].flight.pos)
+	check(d < 0.95 * PilotAI.BOARD_THROW, "it waits inside its throw range (%d px between the centres, it throws from %d)" % [d, PilotAI.BOARD_THROW])

@@ -105,6 +105,7 @@ const CARRIER_DRONE_SHARE := 0.85  ## and its centre within this share of its dr
 const BOARD_CLOSE_MAX := 560.0  ## px/s a boarder closes at, at most
 const BOARD_GAP := 2.0 * HULL_MARGIN  ## px between the hulls a boarder holds while its people are aboard
 const BOARD_THROW := 0.6 * Drones.LIMPET_REACH  ## px between the centres a boarder throws its pods from (a nearer throw than the others': fewer are lost)
+const BOARD_HOLD := 0.8  ## with no boarders out it holds at this share of BOARD_THROW at most (held at the throw range itself it hovered on the edge and never threw)
 const FLANK_DEG := 45.0  ## a flanker's goal: this far off the foe's stern, to the side it came from
 const FLANK_NEAR := 0.35  ## within this share of its hold of the goal it fights as the others do
 const FLANK_SPEED := 330.0  ## px/s it closes on its goal at, at most (on top of the foe's own drift)
@@ -573,7 +574,7 @@ func _board(dt: float) -> void:
 	if _sd["out"]:
 		_fly(dt, minf(_sd["close"], _hold_d) if _hold_d > 0.0 else _sd["close"], BOARD_CLOSE_MAX)
 	else:
-		_fly(dt, minf(_hold_d, BOARD_THROW) if _hold_d > 0.0 else -1.0, BOARD_CLOSE_MAX)
+		_fly(dt, minf(_hold_d, BOARD_HOLD * BOARD_THROW) if _hold_d > 0.0 else BOARD_HOLD * BOARD_THROW, BOARD_CLOSE_MAX)
 
 
 ## The flanker's goal (world px): FLANK_DEG off the foe's stern on its side, at the distance it holds.
