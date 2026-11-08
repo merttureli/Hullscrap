@@ -340,9 +340,9 @@ func test_every_role_ship_looks_like_its_role() -> void:
 
 
 ## Every faction (and race) builds each new role it flies at every size class it fits, 20 seeds each, as well as its old roles
-## at the same seeds (tool_enemy_gallery.gd rates()): a ship of the role every time the old roles give one, on the first roll
-## no less often over all the factions of a size, and per faction and size never more than 15 points less often (20 seeds
-## a role is noisy). The table: tool_enemy_gallery.gd rates=1.
+## at the same seeds (tool_enemy_gallery.gd rates()): a ship every time the old roles give one, on the first roll no less
+## often over all the factions of a size, and per faction and size never more than 15 points less often (20 seeds a role is
+## noisy). The table: tool_enemy_gallery.gd rates=1.
 func test_the_new_roles_build_as_well_as_the_old_ones() -> void:
 	var pooled := {}
 	for size in Gallery.SIZES:
@@ -364,6 +364,26 @@ func test_the_new_roles_build_as_well_as_the_old_ones() -> void:
 		var b: Dictionary = pooled[size]["old"]
 		check(Gallery._pct(a, "first") >= Gallery._pct(b, "first"), "%s, every faction: the new roles on the first roll %.1f%% of %d, the old %.1f%% of %d" % [size, Gallery._pct(a, "first"), a["n"], Gallery._pct(b, "first"), b["n"]])
 		check(Gallery._pct(a, "made") >= Gallery._pct(b, "made"), "%s, every faction: the new roles built %.1f%%, the old %.1f%%" % [size, Gallery._pct(a, "made"), Gallery._pct(b, "made")])
+
+
+## A carrier or a boarder whose hull takes no drone bay flies as a gunboat (shipgen build()): its look's hull loses that no more
+## often than the style's own hull (the look switched off) does, 20 seeds of each faction that flies it and size.
+func test_a_role_look_costs_no_drone_bay() -> void:
+	var kept := {"look": 0, "plain": 0}
+	var n := 0
+	for pair in [["carrier", "lumen"], ["carrier", "wardens"], ["boarder", "rustfangs"], ["boarder", "clans"]]:
+		for size in Gallery.SIZES:
+			if not Gallery.fits(pair[0], size):
+				continue
+			var look := Gallery.rates(pair[1], size, [pair[0]], 20)
+			var saved: Dictionary = Hullgen.looks()
+			Hullgen._looks = {"roles": {}}
+			var plain := Gallery.rates(pair[1], size, [pair[0]], 20)
+			Hullgen._looks = saved
+			kept["look"] += look["kept"]
+			kept["plain"] += plain["kept"]
+			n += look["n"]
+	check(kept["look"] >= kept["plain"], "the role's look keeps its bay %d of %d times, the style's hull %d" % [kept["look"], n, kept["plain"]])
 
 
 func test_a_role_ship_is_the_same_for_the_same_seed() -> void:

@@ -297,19 +297,20 @@ static func fits(role: String, size: String) -> bool:
 
 
 ## The build rates of `faction`'s `size` ships of `roles` over `seeds` seeds (stage 4, the budgets of RATE_BUDGETS in turn):
-## {n, first, made}. made: a ship came out, of the role asked (not the gunboat a role with no wall for its bay falls back to);
-## first: and on the first roll.
+## {n, first, made, kept}. made: a ship came out (Shipgen.last_failed when none did); first: on the first roll; kept: of the role
+## asked (not the gunboat a role whose hull takes no drone bay becomes).
 static func rates(faction: String, size: String, roles: Array, seeds: int) -> Dictionary:
-	var out := {"n": 0, "first": 0, "made": 0}
+	var out := {"n": 0, "first": 0, "made": 0, "kept": 0}
 	for role in roles:
 		if not fits(role, size):
 			continue
 		for k in seeds:
 			var ship = Shipgen.build(faction, size, 7000 + k * 101, RATE_BUDGETS[k % RATE_BUDGETS.size()], {"role": role, "stage": 4})
 			out["n"] += 1
-			if ship != null and str(ship.get_meta("shipgen")["role"]) == role:
+			if ship != null:
 				out["made"] += 1
 				out["first"] += int(ship.get_meta("shipgen")["attempts"] == 1)
+				out["kept"] += int(str(ship.get_meta("shipgen")["role"]) == role)
 	return out
 
 
@@ -320,19 +321,19 @@ static func split_roles(faction: String) -> Array:
 
 
 static func rate_report(facs: Array, seeds: int) -> String:
-	var lines := PackedStringArray(["faction    size    new roles: first / made      old roles: first / made"])
-	var tot := {"new": {"n": 0, "first": 0, "made": 0}, "old": {"n": 0, "first": 0, "made": 0}}
+	var lines := PackedStringArray(["faction    size    new roles: first / made / kept      old roles: first / made"])
+	var tot := {"new": {"n": 0, "first": 0, "made": 0, "kept": 0}, "old": {"n": 0, "first": 0, "made": 0, "kept": 0}}
 	for faction in facs:
 		var sp := split_roles(faction)
 		for size in SIZES:
 			var a := rates(faction, size, sp[0], seeds)
 			var b := rates(faction, size, sp[1], seeds)
-			for k in ["n", "first", "made"]:
+			for k in ["n", "first", "made", "kept"]:
 				tot["new"][k] += a[k]
 				tot["old"][k] += b[k]
-			lines.append("%-10s %-7s %3d: %5.1f%% / %5.1f%%      %3d: %5.1f%% / %5.1f%%%s" % [faction, size, a["n"], _pct(a, "first"), _pct(a, "made"), b["n"], _pct(b, "first"), _pct(b, "made"),
+			lines.append("%-10s %-7s %3d: %5.1f%% / %5.1f%% / %5.1f%%     %3d: %5.1f%% / %5.1f%%%s" % [faction, size, a["n"], _pct(a, "first"), _pct(a, "made"), _pct(a, "kept"), b["n"], _pct(b, "first"), _pct(b, "made"),
 				"   <" if _pct(a, "first") < _pct(b, "first") or _pct(a, "made") < _pct(b, "made") else ""])
-	lines.append("all: new %d ships %.1f%% first, %.1f%% made; old %d ships %.1f%% first, %.1f%% made" % [tot["new"]["n"], _pct(tot["new"], "first"), _pct(tot["new"], "made"), tot["old"]["n"], _pct(tot["old"], "first"), _pct(tot["old"], "made")])
+	lines.append("all: new %d ships %.1f%% first, %.1f%% made, %.1f%% of their role; old %d ships %.1f%% first, %.1f%% made" % [tot["new"]["n"], _pct(tot["new"], "first"), _pct(tot["new"], "made"), _pct(tot["new"], "kept"), tot["old"]["n"], _pct(tot["old"], "first"), _pct(tot["old"], "made")])
 	return "\n".join(lines)
 
 
