@@ -7,6 +7,9 @@ extends RefCounted
 ##   - effective hp: the block hp it takes to wreck the ship (the share of its blocks' hp above the defeat line, structure.gd)
 ##     plus the shield layers that are powered;
 ##   - speed: acceleration over a reference, to a small power, kept between 0.7 and 1.4.
+##   - drone bays (bay_dps()) add to the damage per second: a combat drone its gun's (as a turret lands, times `drone_uptime`: it is
+##     shot down and re-armed), a boarder pod the sabotage of the robots it drops (`pod_share` of it: pods are lost, robots are fought).
+##     Limpets and defence drones add nothing here (fire, poison and heat work on the crew; a defence drone shields).
 ## A kinetic gun's hit counts over `kinetic_floor` (data/enemy_tables.json) when it is smaller: the plating eats a light round (the
 ## Rattle Burst's 1.2 damage a shot landed 0.09 hp/s on the Beta 4 weapon bench against the 0.7 its listed dps promised), and without
 ## this the pirates' Rattle Bursts made a jump-5 raider read 3 skulls against the Courier once the gun was given damage 2.
@@ -17,6 +20,8 @@ const Flight = preload("res://scripts/sim/flight.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Stats = preload("res://scripts/sim/stats.gd")
 const Weapons = preload("res://scripts/combat/weapons.gd")
+const Drones = preload("res://scripts/combat/drones.gd")
+const CrewMember = preload("res://scripts/crew/crew_member.gd")
 
 const TABLES_PATH := "res://data/enemy_tables.json"
 
@@ -54,6 +59,7 @@ static func power(ship, skill: float) -> Dictionary:
 			dmg *= float(cfg["ion_factor"])
 		var hit: float = clampf(float(w["accuracy"]) - float(cfg["turret_miss"]), 0.0, 1.0) if bool(w["turret"]) else float(cfg["fixed_hit"]) * (0.55 + 0.45 * skill)
 		dps += dmg * hit / maxf(float(w["cooldown"]), 0.1)
+	dps += bay_dps(ship, powered)
 	var ehp := (1.0 - Structure.defeat_below()) * Structure.totals(ship).y + Shields.layers_of_ship(ship, powered) * float(Shields.params_of_ship(ship, powered)["layer_hp"]) * float(cfg["shield_hp_value"])
 	var f := Flight.new()
 	var mass := f.mass_of(ship.grid, ship.components, ship.cables, Stats.mass_mults(ship.components, ship.lines))
@@ -61,6 +67,30 @@ static func power(ship, skill: float) -> Dictionary:
 	var accel := thrust * f.thrust_to_accel / mass
 	var speed := clampf(pow(maxf(accel, 0.0) / float(cfg["speed_ref"]), float(cfg["speed_power"])), 0.7, 1.4)
 	return {"dps": dps, "ehp": ehp, "accel": accel, "speed": speed, "power": sqrt(dps * ehp) * speed}
+
+
+## What the powered drone bays of `ship` add to its damage per second (see the top): a bay counts once its kit is in the hold and there are
+## parts to launch it.
+static func bay_dps(ship, powered: Dictionary) -> float:
+	var cfg := config()
+	var out := 0.0
+	var bays: Dictionary = Drones.bays_of(ship)
+	for uid in bays:
+		var k := Drones.kit(str(bays[uid]["kit"]))
+		if k.is_empty() or not powered.get(uid, false) or ship.inventory.count(str(bays[uid]["kit"])) <= 0 or ship.inventory.count(Drones.PART) < int(k["drone"]["tier"]):
+			continue
+		var d: Dictionary = k["drone"]
+		match str(d["role"]):
+			"combat":
+				var g: Dictionary = d["gun"]
+				var dmg := float(g.get("damage", 0.0)) * float(g.get("shots", 1)) * float(cfg["kind_factor"].get(str(g.get("kind", "laser")), 1.0))
+				if str(g.get("damage_type", "")) == "ion":
+					dmg *= float(cfg["ion_factor"])
+				out += dmg * clampf(float(g.get("accuracy", 0.75)) - float(cfg["turret_miss"]), 0.0, 1.0) / maxf(float(g.get("cooldown", 1.0)), 0.1) * float(cfg["drone_uptime"])
+			"boarder":
+				for sp in d.get("robots", []):
+					out += float(CrewMember.species_def(str(sp)).get("intruder", {}).get("sabotage_dps", 0.0)) * float(cfg["pod_share"])
+	return out
 
 
 ## Skulls (1-5) of `enemy` against `player`: {skulls, ratio, enemy (power()), player (power())}. The enemy's pilot skill is

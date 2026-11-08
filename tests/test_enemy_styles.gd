@@ -12,6 +12,7 @@ const Threat = preload("res://scripts/space/threat.gd")
 
 const PIRATE := "res://data/ships/pirate_raider.json"
 const RUSTBUCKET := "res://data/ships/starter_rustbucket.json"
+const COURIER := "res://data/ships/starter_courier.json"
 const NEW_ROLES: Array[String] = ["skirmisher", "carrier", "boarder", "flanker", "siege", "bulwark"]
 const DT := 1.0 / 60.0
 
@@ -380,3 +381,31 @@ func test_the_skirmisher_never_touches_a_still_foe() -> void:
 			sess.tick(DT)
 		eq(_events(sess.arena, "ram"), 0, spec + ": no contact in 20 s")
 		check(sess.ai.gap_now() > PilotAI.HULL_MARGIN, "%s: a gap of %d px at the end" % [spec, sess.ai.gap_now()])
+
+
+## A drone bay counts in the threat (Threat.bay_dps): a carrier reads at least the skulls of the same seed built as a gunboat (most seeds, and on the mean).
+func test_a_carrier_reads_its_drones_in_the_threat() -> void:
+	var courier := Session.load_ship(COURIER)
+	var n := 0
+	var below := 0
+	var sums := [0, 0]
+	for sd in 24:
+		var faction: String = ["lumen", "wardens", "concord"][sd % 3]
+		var size: String = ["medium", "large"][sd % 2]
+		var budget: float = [120.0, 260.0][sd % 2]
+		var c = Shipgen.build(faction, size, 700 + sd, budget, {"role": "carrier", "stage": 3})
+		if c.get_meta("shipgen")["role"] != "carrier":
+			continue
+		var g = Shipgen.build(faction, size, 700 + sd, budget, {"role": "gunboat", "stage": 3})
+		check(Threat.bay_dps(c, c.power_state.get("powered", {})) > 0.0, "seed %d: its bay adds to its damage" % (700 + sd))
+		var a: int = Threat.rate(c, courier)["skulls"]
+		var b: int = Threat.rate(g, courier)["skulls"]
+		n += 1
+		sums[0] += a
+		sums[1] += b
+		below += int(a < b)
+	check(n >= 16, "most seeds build a carrier (%d of 24)" % n)
+	check(sums[0] >= sums[1], "carriers read at least the skulls of the gunboats of their seeds (%d vs %d over %d)" % [sums[0], sums[1], n])
+	check(below * 5 <= n, "and so does most of them one by one (%d of %d read fewer)" % [below, n])
+	var plain = Shipgen.build("lumen", "medium", 3, 120.0, {"role": "escort", "stage": 3})
+	eq(Threat.bay_dps(plain, plain.power_state.get("powered", {})), 0.0, "a ship with no bay adds nothing")
