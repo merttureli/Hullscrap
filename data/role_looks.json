@@ -2,7 +2,7 @@
 	"_doc": "How the fighting roles look (scripts/space/hullgen.gd with_look(), scripts/view/dressing.gd). Per role id of data/enemy_tables.json roles: `hull` is laid over the hull style of the ship's faction or race: `prow` and `tail` replace the style's, `band` sets the deck widths (shares of the widest floor by deck kind; the style's own band still caps what a deck holds, so no room is dropped for the look), `jitter_w` and `jitter_c` cap the style's jitter (a symmetric people stays symmetric), and `ops` shape the staircase before the style's own ops. The corners a role op makes are locked: the style's ops (its finish: bevels, spikes, arcs) work on the rest, so a Sporeling carrier is a Sporeling ship shaped like a carrier. A rammer keeps its ram bow and the plain fallback hull its bevels. Role ops: wedge and chamfer (as the style's), keep {at} (lock those corners), fins {depth} (45 degree fins out of the stern corners), jaw {depth, w} (a clamp tooth forward of each bow corner, its tip w wide), horns {w, reach, gap} (two horns from the shoulders where the bow narrows, `reach` rows past the bow), island {w, len, side} (a block on one flank), racks {count, h, gap, depth} (square teeth on both flanks at the same rows), steps {at: tip or stern_end, n, a, b, bevel} (stepped ends). Every slope is 45 degrees. `dressing` is added to the livery's (style.dressing entries, the same shape). Roles not listed (gunboat, brawler, escort, sniper, hauler) keep the style's hull as it is.",
 	"roles": {
 		"skirmisher": {
-			"hull": {"prow": [4, 6], "tail": [1, 2], "band": {"gun": 0.22, "bridge": 0.4, "core": 0.5, "aux": 0.5, "engine": 0.9}, "jitter_w": 0, "jitter_c": 0,
+			"hull": {"prow": [4, 6], "tail": [1, 2], "band": {"gun": 0.22, "engine": 0.9}, "jitter_w": 0, "jitter_c": 0,
 				"ops": [
 					{"op": "wedge", "at": "bow", "slope": ["45"]},
 					{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [1, 1]},
@@ -12,15 +12,15 @@
 			"dressing": [{"kind": "fin_trim", "len": 2.6}]
 		},
 		"carrier": {
-			"hull": {"prow": [0, 1], "tail": [0, 1], "band": {"gun": 0.75, "bridge": 1.0, "core": 1.0, "aux": 1.0, "engine": 0.6}, "jitter_w": 1, "jitter_c": 0,
+			"hull": {"prow": [1, 2], "tail": [1, 2], "band": {"gun": 0.75, "bridge": 1.0, "core": 1.0, "aux": 1.0, "engine": 0.8}, "jitter_w": 1, "jitter_c": 0,
 				"ops": [
 					{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [3, 4]},
-					{"op": "island", "w": [3, 3], "len": [4, 5], "side": "random_one"}
+					{"op": "island", "w": [3, 3], "len": [4, 5], "side": "left"}
 				]},
 			"dressing": [{"kind": "bay_doors", "count": [2, 3], "where": "flank", "sym": true, "len": 2.4}]
 		},
 		"boarder": {
-			"hull": {"prow": [1, 2], "tail": [0, 1], "band": {"gun": 0.9, "bridge": 0.85, "core": 0.85, "aux": 0.85, "engine": 0.55}, "jitter_w": 2, "jitter_c": 0,
+			"hull": {"prow": [1, 2], "tail": [0, 1], "band": {"gun": 0.9, "bridge": 1.0, "core": 0.95, "aux": 0.95, "engine": 0.55}, "jitter_w": 2, "jitter_c": 0,
 				"ops": [
 					{"op": "jaw", "depth": [2, 3], "w": 1},
 					{"op": "wedge", "at": "stern", "slope": ["45"]},
@@ -29,20 +29,20 @@
 			"dressing": [{"kind": "clamps", "len": 3.0}]
 		},
 		"flanker": {
-			"hull": {"prow": [2, 4], "tail": [0, 1], "band": {"gun": 0.3, "bridge": 1.0, "core": 0.9, "aux": 0.8, "engine": 0.4}, "jitter_w": 0, "jitter_c": 0,
+			"hull": {"prow": [2, 4], "tail": [0, 1], "band": {"gun": 0.3, "bridge": 1.0, "core": 1.0, "aux": 0.8, "engine": 0.4}, "jitter_w": 0, "jitter_c": 0,
 				"ops": [
-					{"op": "horns", "w": [3, 4], "reach": [0, 2], "gap": 1},
+					{"op": "horns", "w": [3, 4], "reach": [0, 2], "gap": 2},
 					{"op": "wedge", "at": "stern", "slope": ["45"]},
 					{"op": "chamfer", "at": "stern_end", "kind": ["45"], "n": [1, 2]}
 				]},
 			"dressing": [{"kind": "horn_lamps", "len": 1.0}]
 		},
 		"siege": {
-			"hull": {"prow": [4, 6], "tail": [2, 3], "band": {"gun": 0.3, "bridge": 0.5, "core": 0.6, "aux": 0.6, "engine": 0.45}, "jitter_w": 0, "jitter_c": 0,
+			"hull": {"prow": [4, 6], "tail": [2, 3], "band": {"gun": 0.3, "engine": 0.45}, "jitter_w": 0, "jitter_c": 0,
 				"ops": [
 					{"op": "wedge", "at": "bow", "slope": ["45"]},
 					{"op": "wedge", "at": "stern", "slope": ["45"]},
-					{"op": "racks", "count": [4, 7], "h": 2, "gap": 2, "depth": 1}
+					{"op": "racks", "count": [4, 7], "h": 2, "gap": 2, "depth": 2}
 				]},
 			"dressing": [{"kind": "racks", "count": [4, 7], "where": "flank", "sym": true, "len": 1.6}]
 		},

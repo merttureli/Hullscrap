@@ -256,7 +256,7 @@ static func _bounds(poly: Array) -> Rect2i:
 
 
 ## The vertices an op's `at` (and `side`) selects, as positions: convex corners at the "tip" (the top row), the
-## "stern_end" (the bottom row), the "shoulder" (any other), concave steps in the "bow" or "stern" half; never one in `locked`.
+## "stern_end" (the bottom row), the "shoulder" (any other), concave steps in the "bow" or "stern" half; never one in `locked` or beside one.
 static func _targets(poly: Array, at: String, side: String, locked := {}) -> Array:
 	var box := _bounds(poly)
 	var mid_y := box.position.y + box.size.y / 2.0
@@ -286,7 +286,10 @@ static func _targets(poly: Array, at: String, side: String, locked := {}) -> Arr
 					ok = true
 		if ok and side != "":
 			ok = (f["v"].x < mid_x) == (side == "left")
-		if ok and not locked.has(f["v"]):
+		if ok and not locked.is_empty():  # (nor one beside it: a style's slope never runs into a role's corner)
+			var n := poly.size()
+			ok = not (locked.has(f["v"]) or locked.has(poly[(i + n - 1) % n]) or locked.has(poly[(i + 1) % n]))
+		if ok:
 			out.append(f["v"])
 	return out
 
@@ -529,6 +532,8 @@ static func _horns(poly: Array, op: Dictionary, rng: RandomNumberGenerator, lock
 	var c := w - 1
 	var r: Vector2i = poly[right]
 	var l: Vector2i = poly[left]
+	locked[poly[(right + poly.size() - 1) % poly.size()]] = true  # the notches between the horns and the gun deck stay open
+	locked[poly[(left + 1) % poly.size()]] = true
 	var i := poly.find(r)
 	poly.remove_at(i)
 	for p in [Vector2i(r.x - w, r.y), Vector2i(r.x - w, top), Vector2i(r.x - c, top), Vector2i(r.x, top + c)]:
