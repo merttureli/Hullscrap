@@ -446,3 +446,22 @@ func test_a_boarder_waits_inside_its_throw_range() -> void:
 	check(not ai.boarders_out(), "no boarders out")
 	var d: float = a.ships[0].flight.pos.distance_to(a.ships[1].flight.pos)
 	check(d < 0.95 * PilotAI.BOARD_THROW, "it waits inside its throw range (%d px between the centres, it throws from %d)" % [d, PilotAI.BOARD_THROW])
+
+
+## A bulwark that a foe keeps out of its reach presses in: after BULWARK_CHASE_S with no gun in reach it closes to BULWARK_PRESS_GAP.
+func test_a_kited_bulwark_presses_in() -> void:
+	var ship = _roled("concord", "medium", "bulwark", 71, 120.0)
+	var d := _arena(ship, 2600.0)
+	var a: Arena = d[0]
+	var ai: PilotAI = d[1]
+	var foe = a.ships[1]
+	foe.flight.linear_damping = 0.0
+	_step(a, ai, 8.0, func():  # the foe backs off as fast as the bulwark closes: none of its guns reaches
+		foe.flight.vel = (foe.flight.pos - a.ships[0].flight.pos).normalized() * maxf(0.0, a.ships[0].flight.vel.dot((foe.flight.pos - a.ships[0].flight.pos).normalized())))
+	foe.flight.vel = Vector2.ZERO
+	foe.flight.linear_damping = 1.0
+	check(not ai.in_reach() and ai._out_of_reach > 5.0, "kept out of reach (%.1f s)" % ai._out_of_reach)
+	_step(a, ai, 20.0)
+	check(ai._out_of_reach >= PilotAI.BULWARK_CHASE_S, "it presses in")
+	check(ai.gap_now() < PilotAI.BULWARK_PRESS_GAP + 150.0, "to a gap of %d px" % ai.gap_now())
+	check(ai.in_reach(), "where its guns reach")

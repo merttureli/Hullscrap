@@ -52,8 +52,8 @@ extends RefCounted
 ##   - "siege" (_siege): it holds the gap at SIEGE_HOLD of the reach of its long guns (siege_reach()) and fires in volleys (the session puts its guns in Volley);
 ##     once a volley is out (two guns or more) it backs off to SIEGE_BACK of its reach for SIEGE_BACK_S at least and while half of those
 ##     guns reload, then returns.
-##   - "bulwark" (_bulwark): it closes slowly (BULWARK_CLOSE px/s at most; at full speed once no gun of its own has reached the foe for
-##     BULWARK_CHASE_S, so a foe that keeps its range cannot hold it off) and turns its strongest shield sector (the most HP) toward the
+##   - "bulwark" (_bulwark): it closes slowly (BULWARK_CLOSE px/s at most; once no gun of its own has reached the foe for BULWARK_CHASE_S it
+##     presses in to BULWARK_PRESS_GAP at full speed for the rest of the fight, so a foe that keeps its range cannot hold it off) and turns its strongest shield sector (the most HP) toward the
 ##     foe, the balance shifted that way (_balance, to BULWARK_MAX_W at most); with one sector or none it shows the foe its bow. It breaks late
 ##     (its ai's break_structure).
 
@@ -118,7 +118,8 @@ const SIEGE_COOLING := 0.5  ## a volley is out when more than this share of its 
 const SIEGE_RELOAD_S := 0.5
 const BULWARK_CLOSE := 140.0  ## px/s a bulwark closes at, at most
 const BULWARK_SWAP := 1.25  ## it turns another sector to the foe once that holds this many times the HP of the one facing it
-const BULWARK_CHASE_S := 10.0  ## seconds with no gun of its own in reach after which a bulwark closes at full speed (a starter kited it for ever)
+const BULWARK_CHASE_S := 10.0  ## seconds with no gun of its own in reach after which a bulwark presses in at full speed for the rest of the fight (a starter kited it for ever)
+const BULWARK_PRESS_GAP := 2.0 * HULL_MARGIN  ## px between the hulls a pressing bulwark closes to (its hold distance had it sit where its far-side guns could not reach)
 const BULWARK_MAX_W := 1.5  ## the most shield weight a bulwark stacks on the sector facing the foe (at 2.0 a starter's guns never beat its recharge)
 
 var arena
@@ -149,7 +150,7 @@ var _fight_for := 0.0  # seconds a skirmisher fights on before it may run again
 var _reload := -1.0  # a siege boat's back-off: seconds of it left at least (-1: at range)
 var _flank_side := 0.0  # +1 or -1: the side of the foe's stern a flanker goes for (0: not chosen yet)
 var _facing_sector := 0  # the shield sector a bulwark shows the foe
-var _out_of_reach := 0.0  # seconds a bulwark has had no gun in reach
+var _out_of_reach := 0.0  # seconds a bulwark has had no gun in reach (BULWARK_CHASE_S and more: it presses in)
 var _sd := {}  # a style's reach and distances, worked out every HOLD_EVERY_S (_due())
 var _sd_in := 0.0
 
@@ -693,12 +694,15 @@ static func sector_dir(co, s: int) -> Vector2:
 func _bulwark(dt: float) -> void:
 	var co = arena.ships[me]
 	if _due(dt):
-		_sd = {"reach": in_reach()}
-	_out_of_reach = 0.0 if _sd["reach"] else _out_of_reach + dt
-	var close := BULWARK_CLOSE if _out_of_reach < BULWARK_CHASE_S else CLOSE_MAX
+		_sd = {"reach": in_reach(), "press": centres_at(BULWARK_PRESS_GAP)}
+	if _out_of_reach < BULWARK_CHASE_S:
+		_out_of_reach = 0.0 if _sd["reach"] else _out_of_reach + dt
+	var pressing := _out_of_reach >= BULWARK_CHASE_S
+	var close := CLOSE_MAX if pressing else BULWARK_CLOSE
+	var hold: float = _sd["press"] if pressing else -1.0
 	if co.sectors < 2 or co.layers_cap <= 0 or co.layers <= 0:
 		_facing_sector = 0
-		_fly(dt, -1.0, close)
+		_fly(dt, hold, close)
 		return
 	_facing_sector = clampi(_facing_sector, 0, co.sectors - 1)
 	var best := _facing_sector
@@ -708,7 +712,7 @@ func _bulwark(dt: float) -> void:
 	if Shields.hp_of(co, best) > BULWARK_SWAP * Shields.hp_of(co, _facing_sector) + 1e-6:
 		_facing_sector = best
 	if _facing_sector == 0:  # the bow: its guns and its best plate both point at the foe
-		_fly(dt, -1.0, close)
+		_fly(dt, hold, close)
 		return
 	var tgt = arena.ships[foe]
 	var to_foe: Vector2 = tgt.flight.pos - co.flight.pos
@@ -718,7 +722,7 @@ func _bulwark(dt: float) -> void:
 		_hold_d = hold_distance(u, _intact())
 	_hold_in -= dt
 	var turn := _turn_for(wrapf(u.angle() + PI / 2.0 - TAU * float(_facing_sector) / float(co.sectors) - co.flight.angle, -PI, PI))  # sector_dir() on the foe
-	var gap := to_foe.length() - _hold_d
+	var gap := to_foe.length() - (hold if pressing else _hold_d)
 	var brake: float = co.thrust * co.flight.thrust_to_accel / maxf(co.mass, 1.0) * co.flight.REVERSE * 0.6
 	var want_closing := signf(gap) * minf(sqrt(2.0 * brake * absf(gap)), close if gap > 0.0 else BACK_MAX)
 	var along: float = Vector2.UP.rotated(co.flight.angle).dot(u)  # its thrust closes the range this much (the nose may point away)
