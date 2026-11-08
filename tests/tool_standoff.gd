@@ -42,7 +42,7 @@ const PLAYER_EVERY := 3
 const JUMPS_A_STAGE := 12.5  ## the progression bot's stages (docs/audit/progression.md): about this many jumps each
 const FACTIONS := ["rustfangs", "concord", "lumen", "clans"]  ## the pirates a stage 3-6 region sends (the Hollow's ghosts are their own kind)
 const MAX_TRIES := 600  ## seeds looked at to fill the plain / shield quotas of a stage
-const FULL_TRIES := 100  ## hulls a build with `min_guns` tries
+const FULL_TRIES := 100  ## hulls a build tries for one that mounts all its guns and shields
 const STARTERS := {"courier": "res://data/ships/starter_courier.json", "rustbucket": "res://data/ships/starter_rustbucket.json", "prism": "res://data/ships/starter_prism.json"}
 const DENTAL := "res://data/ships/dental_plan.json"  ## the authored stage-1 pirate QA met (threat 3, one shield layer)
 const CELL_FACTIONS := ["rustfangs", "concord", "lumen", "wardens", "clans", "hollow"]  ## the six base factions of data/enemy_tables.json (cells=1)
@@ -50,14 +50,18 @@ const CELL_FACTIONS := ["rustfangs", "concord", "lumen", "wardens", "clans", "ho
 ## The player-like ship of each stage: size, weapons, shields, armour layers. Guns and shield layers are the median row of
 ## data/progression.json (stage 3: 5 guns, 2 layers; 4: 6 and 2; 5: 7 and 3; 6: 7 and 3), the mix is the one a shop and the blueprints
 ## give: Laser Mk1 and Mk2, Pulse Mk1 and Mk2 on the bow, the Laser Turret on the flanks. No missile, no ion: the bot never asks for one either.
+## Every build mounts every gun it lists (build_from; tests/test_bench_builds.gd). Shipgen fits three bow guns and three flank turrets on these
+## hulls, never a fourth of either, so the builds that listed four (5 to 7, until 2026-11) carry the same listed dps in fewer guns: 5 and 6 a Pulse
+## Mk3 for the Pulse Mk2 and the fourth turret (12.27 hp/s listed, was 12.10), 7 two Laser Mk3 for two of its Laser Mk2, and no fourth turret
+## (14.41, was 14.67). Build 1 takes a wider medium frame (30 wide), the only one of its seeds' hulls that mounts all four.
 const BUILDS := {
-	1: {"size": "medium", "weapons": ["laser_mk1", "laser_mk1", "pulse_mk1", "laser_turret_mk1"], "shields": ["shield_mk1"], "armour": 0},
+	1: {"size": "medium", "weapons": ["laser_mk1", "laser_mk1", "pulse_mk1", "laser_turret_mk1"], "shields": ["shield_mk1"], "armour": 0, "frame": {"width": 30, "max_interior": 26}},
 	2: {"size": "medium", "weapons": ["laser_mk1", "laser_mk1", "pulse_mk1", "laser_turret_mk1"], "shields": ["shield_mk1"], "armour": 1},
 	3: {"size": "medium", "weapons": ["laser_mk1", "laser_mk1", "pulse_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2"], "armour": 1},
 	4: {"size": "large", "weapons": ["laser_mk2", "laser_mk1", "pulse_mk1", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2"], "armour": 1},
-	5: {"size": "large", "weapons": ["laser_mk2", "laser_mk2", "pulse_mk2", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2", "shield_mk1"], "armour": 2},
-	6: {"size": "large", "weapons": ["laser_mk2", "laser_mk2", "pulse_mk2", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2", "shield_mk1"], "armour": 2},
-	7: {"size": "large", "weapons": ["laser_mk2", "laser_mk2", "laser_mk2", "pulse_mk2", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2", "shield_mk2", "shield_mk1"], "armour": 3, "min_guns": 6},  # a well-prepared ship (the flagship bench pstage=7): more guns, a third layer and a plate more than the stage 6 median; min_guns: only a hull that mounts that many of them (6 is the most: the pulse and a turret never fit)
+	5: {"size": "large", "weapons": ["laser_mk2", "laser_mk2", "pulse_mk3", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2", "shield_mk1"], "armour": 2},
+	6: {"size": "large", "weapons": ["laser_mk2", "laser_mk2", "pulse_mk3", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2", "shield_mk1"], "armour": 2},
+	7: {"size": "large", "weapons": ["laser_mk3", "laser_mk3", "pulse_mk2", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2", "shield_mk2", "shield_mk1"], "armour": 3},  # a well-prepared ship (the flagship bench pstage=7): better guns, a third layer and a plate more than the stage 6 median
 }
 
 var args := {}
@@ -189,15 +193,25 @@ func _fan_out(jobs: int) -> void:
 # --- the ships -------------------------------------------------------------------------------------
 
 ## The player-like ship of `stage`: Shipgen's own pipeline (the hull grammar of the Concord, the real mount rules, cables, validation)
-## with the loadout of BUILDS instead of a bought one. Null when it cannot be built. Shipgen drops a gun that finds no wall to mount through:
-## the stage builds 3 to 6 fly without their pulse gun (and 4 to 6 a turret less); a build with `min_guns` tries hulls (up to FULL_TRIES) until one mounts that many.
+## with the loadout of BUILDS instead of a bought one. Null when it cannot be built.
 static func build_player(stage: int) -> Ship:
-	var b: Dictionary = BUILDS[stage]
+	return build_from(stage, BUILDS[stage])
+
+
+## The ship of build `b` (a BUILDS entry) for `stage` (its seeds): the first of FULL_TRIES hulls that mounts every gun and shield of it.
+## Shipgen drops a gun that finds no wall to mount through, so a build's `frame` (keys of a data/enemy_tables.json size, `max` merged
+## key by key) widens its size class until all of them fit.
+static func build_from(stage: int, b: Dictionary) -> Ship:
 	var f: Dictionary = Shipgen.tables()["factions"]["concord"]
-	var sz: Dictionary = Shipgen.tables()["sizes"][b["size"]]
+	var sz: Dictionary = Shipgen.tables()["sizes"][b["size"]].duplicate(true)
+	for k in b.get("frame", {}):
+		if k == "max":
+			sz["max"].merge(b["frame"]["max"], true)
+		else:
+			sz[k] = b["frame"][k]
 	Shipgen._comps()
 	var weapons: Array = b["weapons"]
-	for attempt in (FULL_TRIES if b.has("min_guns") else 40):
+	for attempt in FULL_TRIES:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = 7000 + stage * 100 + attempt
 		var lo := {"weapons": weapons.duplicate(), "engines": ["engine_mk1", "engine_mk1", "engine_mk1"], "shields": b["shields"].duplicate(), "systems": [], "reactors": [],
@@ -233,19 +247,24 @@ static func build_player(stage: int) -> Ship:
 		var ship: Ship = made["ship"]
 		if not Shipgen.validate(ship).is_empty():
 			continue
-		if b.has("min_guns") and _guns_of(ship) < int(b["min_guns"]):
+		if not _has_all(ship, weapons + b["shields"]):
 			continue
 		ship.name = "Bench %d" % stage
 		return ship
 	return null
 
 
-## The guns (weapon parts) `ship` carries.
-static func _guns_of(ship: Ship) -> int:
-	var n := 0
+## Does `ship` carry every part of `ids` (with repeats)?
+static func _has_all(ship: Ship, ids: Array) -> bool:
+	var got := {}
 	for uid in ship.components.instances:
-		n += int(str(ship.components.def(ship.components.instances[uid]["id"]).get("family", "")) == "weapon")
-	return n
+		var id := str(ship.components.instances[uid]["id"])
+		got[id] = int(got.get(id, 0)) + 1
+	for id in ids:
+		got[id] = int(got.get(id, 0)) - 1
+		if int(got[id]) < 0:
+			return false
+	return true
 
 
 ## The campaign's danger of the first region whose pirates are `faction` (tool_balance.gd danger_for).
