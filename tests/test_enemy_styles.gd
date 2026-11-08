@@ -353,4 +353,4 @@ func test_the_styles_that_keep_away_close_in_once_the_foes_guns_are_out() -> voi
 		_step(a, ai, 15.0)
 		var u: Vector2 = (foe.flight.pos - a.ships[0].flight.pos).normalized()
 		var plain := ai.hold_distance(u, ai._intact()) - ai.extent(0, u) - ai.extent(1, -u)
-		check(ai.gap_now() < kept - 100.0 and ai.gap_now() < plain * 1.3, "%s: it closed from a gap of %d to %d (a plain pilot holds %d)" % [role, kept, ai.gap_now(), plain])
+		check(ai.gap_now() < kept - 100.0 and ai.gap_now() < plain + 150.0, "%s: it closed from a gap of %d to %d (a plain pilot holds %d)" % [role, kept, ai.gap_now(), plain])

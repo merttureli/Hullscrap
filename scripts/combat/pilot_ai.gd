@@ -50,7 +50,7 @@ extends RefCounted
 ##     goes round the foe's hull to get there; near that point it fights as the others do and is soon carried on across. Its
 ##     priority() puts the foe's engines and weapons first.
 ##   - "siege" (_siege): it holds the gap at SIEGE_HOLD of the reach of its long guns (siege_reach()) and fires in volleys (the session puts its guns in Volley);
-##     once a volley is out it backs off to SIEGE_BACK of its reach for SIEGE_BACK_S at least and while any of those guns reloads, then returns.
+##     once a volley is out it backs off to SIEGE_BACK of its reach for SIEGE_BACK_S at least and while half of those guns reload, then returns.
 ##   - "bulwark" (_bulwark): it closes slowly (BULWARK_CLOSE px/s at most) and turns its strongest shield sector (the most HP) toward the
 ##     foe, the balance shifted that way (_balance); with one sector or none it shows the foe its bow. It breaks late (its ai's break_structure).
 
@@ -629,8 +629,8 @@ func cooling_share() -> float:
 	return float(cooling) / float(n) if n > 0 else 0.0
 
 
-## Siege boat: a volley from range (more than SIEGE_COOLING of its guns there cooling), back off while any of them reloads and for
-## SIEGE_BACK_S at least, come back (see the top).
+## Siege boat: a volley from range (more than SIEGE_COOLING of its guns there cooling), back off for SIEGE_BACK_S at least and while
+## half of them still reload, come back (see the top).
 func _siege(dt: float) -> void:
 	if _due(dt):
 		var r := siege_reach()
@@ -644,8 +644,8 @@ func _siege(dt: float) -> void:
 		_reload = SIEGE_BACK_S
 	elif _reload >= 0.0:
 		_reload -= dt
-		if _reload < 0.0 and share > 0.0:
-			_reload = 0.0  # still reloading: it stays back
+		if _reload < 0.0 and share >= SIEGE_COOLING:
+			_reload = 0.0  # half its guns still reloading: it stays back (not for one slow gun of many: it waited on a 7 s missile and the fights ran to the cap)
 	_fly(dt, _sd["back"] if _reload >= 0.0 else _sd["hold"])
 
 
