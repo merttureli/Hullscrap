@@ -36,6 +36,26 @@ extends RefCounted
 ##   bow (the side with the most ram plating, else forward), points it at where the foe will be and
 ##   closes at full throttle, uses its engine ability within RAM_ABILITY_RANGE of the foe's hull, and after a collision
 ##   backs off for RAM_BACKOFF_S seconds before coming round again. Its guns still fire when they can.
+## - The fighting styles of the enemy roles (data/enemy_tables.json roles, the role's `ai.style`), each its own small function; the guns
+##   fire as above in all of them:
+##   - "skirmisher" (_skirmish): hit and run. It holds the gap between the hulls at SKIRMISH_HOLD of its longest reach; when the foe
+##     closes inside SKIRMISH_RUN of it (SKIRMISH_LOOK_S early from a foe that charges), it turns and burns away (as it flees) until it is
+##     out at SKIRMISH_TURN, then comes round again and fights for SKIRMISH_FIGHT_S before it runs again (unless the foe is on top of it).
+##   - "carrier" (_carry): it keeps the gap at CARRIER_MARGIN of the foe's longest reach, within its drones' reach (Drones.DRONE_REACH),
+##     and its bays launch and relaunch (Drones.ai_launch). With no drone left to fly it fights as the others do.
+##   - The skirmisher, the carrier and the siege boat keep away from the foe's guns: once those are all out they close and fight as the others do.
+##   - "boarder" (_board): bow to the foe, it closes fast (BOARD_CLOSE_MAX px/s) to inside its throwing range and its bays throw their pods (BOARD_THROW);
+##     while its people are aboard the foe (robots, or pods on the hull or in flight) it holds close (BOARD_GAP) and strafes.
+##   - "flanker" (_flank): it steers for the foe's stern quarter (FLANK_DEG off the foe's stern, by the foe's heading, at its hold) and
+##     goes round the foe's hull to get there; near that point it fights as the others do and is soon carried on across. Its
+##     priority() puts the foe's engines and weapons first.
+##   - "siege" (_siege): it holds the gap at SIEGE_HOLD of the reach of its long guns (siege_reach()) and fires in volleys (the session puts its guns in Volley);
+##     once a volley is out (SIEGE_VOLLEY guns reloading) it backs off to SIEGE_BACK of its reach for SIEGE_BACK_S at least and while
+##     that many reload, then returns; with one volley gun it holds at its reach and fires.
+##   - "bulwark" (_bulwark): it closes slowly (BULWARK_CLOSE px/s at most; once no gun of its own has reached the foe for BULWARK_CHASE_S it
+##     presses in to BULWARK_PRESS_GAP at full speed for the rest of the fight, so a foe that keeps its range cannot hold it off) and turns its strongest shield sector (the most HP) toward the
+##     foe, the balance shifted that way (_balance, to BULWARK_MAX_W at most); with one sector or none it shows the foe its bow. It breaks late
+##     (its ai's break_structure).
 
 const Shields = preload("res://scripts/combat/shields.gd")
 const Collisions = preload("res://scripts/combat/collisions.gd")
@@ -73,6 +93,34 @@ const RAM_MIN_CLOSE := 150.0  ## px/s: the closing speed it assumes when working
 const RAM_MAX_LEAD_S := 4.0
 const RAM_ALIGNED := 0.45  ## rad: full throttle when the heading is this close to the steering direction
 const FLEE_ALIGNED := 0.6  ## rad: a fleeing ship burns once its nose is this close to straight away from the foe
+const SKIRMISH_HOLD := 0.8  ## a skirmisher holds the gap between the hulls at this share of its longest reach (0.9 kept it out of a starter's guns: the fights ran to the cap)
+const SKIRMISH_RUN := 0.5  ## inside this share it turns and burns away, until it is back out at SKIRMISH_TURN
+const SKIRMISH_TURN := 0.7  ## the share at which a run ends: it turns back, and its way carries it out to the hold
+const SKIRMISH_RUN_MAX_S := 6.0  ## a run that has not opened the gap in this long ends: it turns and fights
+const SKIRMISH_FIGHT_S := 8.0  ## after a run it fights this long before it runs again (the hit of hit and run)
+const SKIRMISH_LOOK_S := 2.0  ## it runs this many seconds early from a foe that closes on it (the gap its closing speed eats while it turns)
+const SKIRMISH_CLEAR := 3.0 * HULL_MARGIN  ## px between the hulls: closer than this it breaks off even while it fights (it never rams)
+const CARRIER_MARGIN := 1.05  ## a carrier keeps the gap at this many times the foe's longest reach (1.15 kept it where nothing but its drones reached: fights ran to the cap)
+const CARRIER_DRONE_SHARE := 0.85  ## and its centre within this share of its drones' reach of the foe's
+const BOARD_CLOSE_MAX := 560.0  ## px/s a boarder closes at, at most
+const BOARD_GAP := 2.0 * HULL_MARGIN  ## px between the hulls a boarder holds while its people are aboard
+const BOARD_THROW := 0.5 * Drones.LIMPET_REACH  ## px between the centres a boarder throws its pods from (a nearer throw than the others': fewer are lost)
+const BOARD_HOLD := 0.8  ## with no boarders out it holds at this share of BOARD_THROW at most (held at the throw range itself it hovered on the edge and never threw)
+const FLANK_DEG := 45.0  ## a flanker's goal: this far off the foe's stern, to the side it came from
+const FLANK_NEAR := 0.35  ## within this share of its hold of the goal it fights as the others do
+const FLANK_SPEED := 330.0  ## px/s it closes on its goal at, at most (on top of the foe's own drift)
+const FLANK_ALIGNED := 0.5  ## rad: it burns once its nose is this close to the way it wants to go
+const SIEGE_HOLD := 0.8  ## a siege boat holds the gap at this share of its reach (siege_reach())
+const SIEGE_SHARE := 0.6  ## its reach: the longest range that this share of its volley guns have
+const SIEGE_BACK := 1.3  ## and backs off to this share while it reloads
+const SIEGE_BACK_S := 3.0  ## seconds it backs off after a volley, at least
+const SIEGE_VOLLEY := 2  ## a volley is out when this many of its volley guns (cooling_count()) cool for more than SIEGE_RELOAD_S (a share of them never came while some guns could not bear)
+const SIEGE_RELOAD_S := 0.5
+const BULWARK_CLOSE := 140.0  ## px/s a bulwark closes at, at most
+const BULWARK_SWAP := 1.25  ## it turns another sector to the foe once that holds this many times the HP of the one facing it
+const BULWARK_CHASE_S := 10.0  ## seconds with no gun of its own in reach after which a bulwark presses in at full speed for the rest of the fight (a starter kited it for ever)
+const BULWARK_PRESS_GAP := 2.0 * HULL_MARGIN  ## px between the hulls a pressing bulwark closes to (its hold distance had it sit where its far-side guns could not reach)
+const BULWARK_MAX_W := 1.5  ## the most shield weight a bulwark stacks on the sector facing the foe (at 2.0 a starter's guns never beat its recharge)
 
 var arena
 var me: int
@@ -83,7 +131,7 @@ var side := 1.0  ## +1 or -1: which way it strafes (when it has side engines)
 var bias := 0.0  ## radians: its aim error now, re-rolled with each retarget
 var target_uid := -1  ## the part of the foe it aims at (-1: its hull, at hull_aim)
 var hull_aim := Vector2.ZERO  ## with no part to aim at: the point of the foe's hull it aims at (the foe's cell coordinates, hull_point())
-var style := ""  ## "" (keeps its range and strafes) or "rammer"
+var style := ""  ## "" (keeps its range and strafes), "rammer", or a role's style (skirmisher, carrier, boarder, flanker, siege, bulwark)
 var morale = null  ## morale.gd of this fight (the session sets it): pilot_mode() says hold, flee or stop
 var foe_morale = null  ## the foe's morale.gd, when the foe is the enemy (the player's pilot in tests and tools): a fleeing foe's engines come first
 var facing := 0  ## the side of the ship it presents to the foe: 0 bow, 1 starboard, 2 stern, 3 port (pick_facing())
@@ -97,6 +145,14 @@ var _contact_seen := -1  # the last arena.contact_tick this pilot has reacted to
 var _hold_d := -1.0  # the distance it holds (hold_distance()), and seconds until it is worked out again
 var _hold_in := 0.0
 var _lined := {}  # weapon uid -> [arena tick, on_hull()] of its last check
+var _running := -1.0  # a skirmisher's run: seconds it has run (-1: not running)
+var _fight_for := 0.0  # seconds a skirmisher fights on before it may run again
+var _reload := -1.0  # a siege boat's back-off: seconds of it left at least (-1: at range)
+var _flank_side := 0.0  # +1 or -1: the side of the foe's stern a flanker goes for (0: not chosen yet)
+var _facing_sector := 0  # the shield sector a bulwark shows the foe
+var _out_of_reach := 0.0  # seconds a bulwark has had no gun in reach (BULWARK_CHASE_S and more: it presses in)
+var _sd := {}  # a style's reach and distances, worked out every HOLD_EVERY_S (_due())
+var _sd_in := 0.0
 
 
 ## `p_ai`: the `ai` entry of the ship's design ({"style": "rammer"}), if it has one.
@@ -139,11 +195,23 @@ func think(dt: float) -> void:
 		_flee()
 	elif style == "rammer":
 		_ram(dt)
+	elif style == "skirmisher":
+		_skirmish(dt)
+	elif style == "carrier":
+		_carry(dt)
+	elif style == "boarder":
+		_board(dt)
+	elif style == "flanker":
+		_flank(dt)
+	elif style == "siege":
+		_siege(dt)
+	elif style == "bulwark":
+		_bulwark(dt)
 	else:
 		_fly(dt)
 	_balance(dt)
 	_shoot(dt)
-	Drones.ai_launch(arena, me, foe)  # its bays launch when they can (drones.gd)
+	Drones.ai_launch(arena, me, foe, BOARD_THROW if style == "boarder" else Drones.LIMPET_REACH)  # its bays launch when they can (drones.gd)
 
 
 # --- flying ------------------------------------------------------------------------------------
@@ -172,14 +240,16 @@ func _intact() -> Dictionary:
 	return out
 
 
-func _fly(dt: float) -> void:
+## Keep the range and fight: `hold` (px between the centres) in place of hold_distance() when it is 0 or more; it closes at `close_max` px/s at most;
+## `bow`: it shows the foe its bow whatever side its guns face (it is closing, not passing).
+func _fly(dt: float, hold := -1.0, close_max := CLOSE_MAX, bow := false) -> void:
 	var co = arena.ships[me]
 	var tgt = arena.ships[foe]
 	var armed := _armed()
 	# The fixed guns by the side they face, each side weighed by its dps: the heaviest is presented to the foe.
 	var groups := fixed_groups(armed)
 	var to_foe0: Vector2 = tgt.flight.pos - co.flight.pos
-	facing = pick_facing(groups, (to_foe0.rotated(-co.flight.angle)).angle() + PI / 2.0, facing)
+	facing = 0 if bow else pick_facing(groups, (to_foe0.rotated(-co.flight.angle)).angle() + PI / 2.0, facing)
 	var axis := Vector2.UP
 	var lead_mount := {}
 	var pivots := Vector2.ZERO  # where the presented guns turn, summed
@@ -196,7 +266,7 @@ func _fly(dt: float) -> void:
 	if _hold_in <= 0.0 or _hold_d < 0.0:  # the hulls' reach changes slowly: worked out a few times a second
 		_hold_in = HOLD_EVERY_S
 		_hold_d = hold_distance(u, _intact())
-	var preferred := _hold_d
+	var preferred := _hold_d if hold < 0.0 else hold
 	# Flip the strafe now and then, and when the sideways drift gets too big.
 	_flip -= dt
 	if _flip <= 0.0:
@@ -223,7 +293,7 @@ func _fly(dt: float) -> void:
 	# Close or open the range with the thrust (it pushes along the heading, near the target's direction).
 	var brake: float = co.thrust * co.flight.thrust_to_accel / maxf(co.mass, 1.0) * co.flight.REVERSE * 0.6  # px/s^2 it can stop with
 	var gap := dist - preferred
-	var want_closing := signf(gap) * minf(sqrt(2.0 * brake * absf(gap)), CLOSE_MAX if gap > 0.0 else BACK_MAX)
+	var want_closing := signf(gap) * minf(sqrt(2.0 * brake * absf(gap)), close_max if gap > 0.0 else BACK_MAX)
 	var heading := Vector2.UP.rotated(co.flight.angle)
 	var throttle := 0.0
 	if heading.dot(u) > 0.5:
@@ -404,6 +474,268 @@ func _flee() -> void:
 	arena.set_input(me, 1.0 if Vector2.UP.rotated(co.flight.angle).dot(away) > cos(FLEE_ALIGNED) else 0.0, turn)
 
 
+# --- the fighting styles of the roles ------------------------------------------------------------
+
+## The distance between the centres at which the gap between the two hulls along the line between them is `gap` px.
+func centres_at(gap: float) -> float:
+	var u: Vector2 = (arena.ships[foe].flight.pos - arena.ships[me].flight.pos).normalized()
+	return extent(me, u) + extent(foe, -u) + gap
+
+
+## The gap between the two hulls along the line between the centres now (px).
+func gap_now() -> float:
+	var d: Vector2 = arena.ships[foe].flight.pos - arena.ships[me].flight.pos
+	return d.length() - extent(me, d.normalized()) - extent(foe, -d.normalized())
+
+
+## The longest range of the foe's weapons that are not shot out and have power (0 with none: then the styles that keep out of its reach
+## close in to fight; a gun with no power counted kept a siege boat standing off a starter that could not fire).
+func foe_reach() -> float:
+	var r := 0.0
+	var f = arena.ships[foe]
+	for uid in f.mounts:
+		var m: Dictionary = f.mounts[uid]
+		if not arena.weapons.status_of(arena, foe, uid) in ["disabled", "offline"] and (m["powered"] if m["virtual"] else f.powered.get(uid, false)):
+			r = maxf(r, float(arena.weapons.def(m["id"])["range"]))
+	return r
+
+
+## Does a gun of its own that is not shot out reach the foe's near edge from where it sits now?
+func in_reach() -> bool:
+	var armed := _intact()
+	var tgt = arena.ships[foe]
+	for uid in armed:
+		var origin: Vector2 = arena.weapons.muzzle_of(arena, me, armed[uid])
+		if origin.distance_to(tgt.flight.pos) - extent(foe, (origin - tgt.flight.pos).normalized()) <= float(arena.weapons.def(armed[uid]["id"])["range"]):
+			return true
+	return false
+
+
+## Is it time to work a style's reach and distances out again (every HOLD_EVERY_S, as hold_distance())? Keeps them in `_sd`.
+func _due(dt: float) -> bool:
+	_sd_in -= dt
+	if _sd_in > 0.0 and not _sd.is_empty():
+		return false
+	_sd_in = HOLD_EVERY_S
+	return true
+
+
+## Skirmisher: hit and run (see the top). The run is a flight (_flee) that ends at SKIRMISH_TURN of its reach, or after SKIRMISH_RUN_MAX_S.
+func _skirmish(dt: float) -> void:
+	if _due(dt):
+		var u: Vector2 = (arena.ships[foe].flight.pos - arena.ships[me].flight.pos).normalized()
+		_sd = {"r": reach(), "gap": gap_now(), "hold": centres_at(SKIRMISH_HOLD * reach()), "armed": foe_reach() > 0.0,
+			"closing": maxf(0.0, (arena.ships[me].flight.vel - arena.ships[foe].flight.vel).dot(u))}
+	if not _sd["armed"]:  # the foe's guns are out: nothing to run from
+		_running = -1.0
+		_fly(dt)
+		return
+	var r: float = _sd["r"]
+	var gap: float = _sd["gap"]
+	_fight_for -= dt
+	if _running >= 0.0:
+		_running += dt
+		if gap - float(_sd["closing"]) * SKIRMISH_LOOK_S >= SKIRMISH_TURN * r or _running > SKIRMISH_RUN_MAX_S:
+			_running = -1.0
+			_fight_for = SKIRMISH_FIGHT_S
+	elif (gap - float(_sd["closing"]) * SKIRMISH_LOOK_S < SKIRMISH_RUN * r and _fight_for <= 0.0) or gap < SKIRMISH_CLEAR:
+		_running = 0.0
+	if _running >= 0.0:
+		_flee()
+	else:
+		_fly(dt, _sd["hold"])
+
+
+## Does it still have drones to fly: a bay with a drone out, re-arming, or ready to launch?
+func has_drones() -> bool:
+	for uid in arena.ships[me].bays:
+		if Drones.can_launch(arena, me, uid) in ["", "drone out", "re-arming"]:
+			return true
+	return false
+
+
+## Carrier: beyond the foe's reach and within its drones' (see the top); the bays launch by themselves (Drones.ai_launch in think()).
+func _carry(dt: float) -> void:
+	if _due(dt):
+		var fr := foe_reach()
+		_sd = {"keep": has_drones() and fr > 0.0, "hold": minf(centres_at(CARRIER_MARGIN * fr), CARRIER_DRONE_SHARE * Drones.DRONE_REACH)}
+	_fly(dt, _sd["hold"] if _sd["keep"] else -1.0)
+
+
+## Are its people aboard the foe: a robot of the foe's intruders, or one of its own pods stuck on the foe's hull or flying at it?
+func boarders_out() -> bool:
+	if not arena.ships[foe].ship.intruders.is_empty():
+		return true
+	return arena.drones.any(func(d): return int(d["owner"]) == me and str(d["role"]) == "boarder")
+
+
+## Boarder: closes fast, throws, then holds close while its people are aboard (see the top).
+func _board(dt: float) -> void:
+	if _due(dt):
+		_sd = {"out": boarders_out(), "close": centres_at(BOARD_GAP)}
+	# Bow to the foe: a boarder closes and holds, it makes no broadside passes (one along the foe stalled it outside its throw).
+	if _sd["out"]:
+		_fly(dt, minf(_sd["close"], _hold_d) if _hold_d > 0.0 else _sd["close"], BOARD_CLOSE_MAX, true)
+	else:
+		_fly(dt, minf(_hold_d, BOARD_HOLD * BOARD_THROW) if _hold_d > 0.0 else BOARD_HOLD * BOARD_THROW, BOARD_CLOSE_MAX, true)
+
+
+## The flanker's goal (world px): FLANK_DEG off the foe's stern on its side, at the distance it holds.
+func flank_goal() -> Vector2:
+	var tgt = arena.ships[foe]
+	var co = arena.ships[me]
+	var stern: Vector2 = -Vector2.UP.rotated(tgt.flight.angle)
+	if _flank_side == 0.0:  # the side of the foe it is on now
+		_flank_side = 1.0 if stern.cross(co.flight.pos - tgt.flight.pos) >= 0.0 else -1.0
+	var hold := _hold_d if _hold_d > 0.0 else hold_distance(stern, _intact())
+	return tgt.flight.pos + stern.rotated(deg_to_rad(FLANK_DEG) * _flank_side) * hold
+
+
+## Flanker: for the foe's stern quarter, round its hull, then the guns (see the top).
+func _flank(dt: float) -> void:
+	var co = arena.ships[me]
+	var tgt = arena.ships[foe]
+	if _hold_d < 0.0:
+		_hold_d = hold_distance((tgt.flight.pos - co.flight.pos).normalized(), _intact())
+	var goal := flank_goal()
+	if co.flight.pos.distance_to(goal) <= FLANK_NEAR * _hold_d:
+		_fly(dt)
+		return
+	# Go round the foe: a goal behind the foe's hull is reached by the point beside it, out at the hold.
+	var keep: float = 0.8 * _hold_d
+	var seg: Vector2 = goal - co.flight.pos
+	var t := clampf((tgt.flight.pos - co.flight.pos).dot(seg) / maxf(seg.length_squared(), 1.0), 0.0, 1.0)
+	var near: Vector2 = co.flight.pos + seg * t
+	if near.distance_to(tgt.flight.pos) < keep:
+		var out: Vector2 = near - tgt.flight.pos
+		out = out.normalized() if out.length_squared() > 1.0 else (co.flight.pos - tgt.flight.pos).normalized().rotated(PI / 2.0 * _flank_side)
+		goal = tgt.flight.pos + out * _hold_d
+	var to_goal: Vector2 = goal - co.flight.pos
+	var accel: float = co.thrust * co.flight.thrust_to_accel / maxf(co.mass, 1.0)
+	var want_v: Vector2 = tgt.flight.vel + to_goal.normalized() * minf(FLANK_SPEED, sqrt(2.0 * accel * 0.5 * to_goal.length()))
+	var err: Vector2 = want_v - co.flight.vel
+	var turn := _turn_for(wrapf(err.angle() + PI / 2.0 - co.flight.angle, -PI, PI))
+	var aligned := Vector2.UP.rotated(co.flight.angle).dot(err.normalized()) > cos(FLANK_ALIGNED)
+	arena.set_input(me, 1.0 if aligned and err.length() > 20.0 else 0.0, turn)
+
+
+## Its guns that join a volley from the side it presents (not rapid, not point defence, not shot out; a fixed gun facing that side,
+## or a tracking one): uid -> range.
+func volley_guns() -> Dictionary:
+	var armed := _intact()
+	var out := {}
+	for uid in armed:
+		var w: Dictionary = arena.weapons.def(armed[uid]["id"])
+		if bool(w.get("rapid", false)) or (w.get("effects") is Dictionary and w["effects"].has("intercept")):
+			continue
+		if w["turret"] or facing_of(armed[uid]["dir"]) == facing:
+			out[uid] = float(w["range"])
+	return out
+
+
+## A siege boat's reach: the longest range that guns of SIEGE_SHARE of its volley guns have (reach() with none).
+func siege_reach() -> float:
+	var ranges: Array = volley_guns().values()
+	if ranges.is_empty():
+		return reach()
+	ranges.sort()
+	ranges.reverse()
+	return float(ranges[mini(ceili(SIEGE_SHARE * ranges.size()) - 1, ranges.size() - 1)])
+
+
+## How many of the volley guns that reach from its hold (siege_reach()) cool for more than SIEGE_RELOAD_S.
+func cooling_count() -> int:
+	var r := siege_reach()
+	var guns := volley_guns()
+	var cooling := 0
+	for uid in guns:
+		if float(guns[uid]) >= r - 1e-3:
+			cooling += int(arena.cooldown_left(me, uid) > SIEGE_RELOAD_S)
+	return cooling
+
+
+## How many of its volley guns reach from its hold (siege_reach()): a volley takes two.
+func volley_size() -> int:
+	var r := siege_reach()
+	var guns := volley_guns()
+	return guns.keys().filter(func(uid): return float(guns[uid]) >= r - 1e-3).size()
+
+
+## Siege boat: a volley from range (SIEGE_VOLLEY of its guns there cooling), back off for SIEGE_BACK_S at least and while that many
+## still reload, come back (see the top).
+func _siege(dt: float) -> void:
+	if _due(dt):
+		var r := siege_reach()
+		_sd = {"cooling": cooling_count(), "hold": centres_at(SIEGE_HOLD * r), "back": centres_at(SIEGE_BACK * r), "armed": foe_reach() > 0.0, "volley": volley_size() >= SIEGE_VOLLEY}
+	var cooling: int = _sd["cooling"]
+	if not _sd["armed"]:  # the foe's guns are out: no reason to stand off
+		_reload = -1.0
+		_fly(dt)
+		return
+	if not _sd["volley"]:  # one gun is no volley: it holds at its reach and fires as it is ready (backing off after each shot halved what it dealt)
+		_reload = -1.0
+		_fly(dt, _sd["hold"])
+		return
+	if _reload < 0.0 and cooling >= SIEGE_VOLLEY:
+		_reload = SIEGE_BACK_S
+	elif _reload >= 0.0:
+		_reload -= dt
+		if _reload < 0.0 and cooling >= SIEGE_VOLLEY:
+			_reload = 0.0  # a volley's worth still reloading: it stays back (not for one slow gun: it waited on a 7 s missile and the fights ran to the cap)
+	_fly(dt, _sd["back"] if _reload >= 0.0 else _sd["hold"])
+
+
+## The world direction sector `s` of ship `co`'s bubble faces (sector 0 the bow, clockwise).
+static func sector_dir(co, s: int) -> Vector2:
+	return Vector2.UP.rotated(co.flight.angle + TAU * float(s) / float(maxi(co.sectors, 1)))
+
+
+## Bulwark: slow, its strongest sector to the foe (see the top).
+func _bulwark(dt: float) -> void:
+	var co = arena.ships[me]
+	if _due(dt):
+		_sd = {"reach": in_reach(), "press": centres_at(BULWARK_PRESS_GAP)}
+	if _out_of_reach < BULWARK_CHASE_S:
+		_out_of_reach = 0.0 if _sd["reach"] else _out_of_reach + dt
+	var pressing := _out_of_reach >= BULWARK_CHASE_S
+	var close := CLOSE_MAX if pressing else BULWARK_CLOSE
+	var hold: float = _sd["press"] if pressing else -1.0
+	if co.sectors < 2 or co.layers_cap <= 0 or co.layers <= 0:
+		_facing_sector = 0
+		_fly(dt, hold, close)
+		return
+	_facing_sector = clampi(_facing_sector, 0, co.sectors - 1)
+	var best := _facing_sector
+	for s in co.sectors:
+		if Shields.hp_of(co, s) > Shields.hp_of(co, best) + 1e-6:
+			best = s
+	if Shields.hp_of(co, best) > BULWARK_SWAP * Shields.hp_of(co, _facing_sector) + 1e-6:
+		_facing_sector = best
+	if _facing_sector == 0:  # the bow: its guns and its best plate both point at the foe
+		_fly(dt, hold, close)
+		return
+	var tgt = arena.ships[foe]
+	var to_foe: Vector2 = tgt.flight.pos - co.flight.pos
+	var u := to_foe.normalized()
+	if _hold_in <= 0.0 or _hold_d < 0.0:
+		_hold_in = HOLD_EVERY_S
+		_hold_d = hold_distance(u, _intact())
+	_hold_in -= dt
+	var turn := _turn_for(wrapf(u.angle() + PI / 2.0 - TAU * float(_facing_sector) / float(co.sectors) - co.flight.angle, -PI, PI))  # sector_dir() on the foe
+	var gap := to_foe.length() - (hold if pressing else _hold_d)
+	var brake: float = co.thrust * co.flight.thrust_to_accel / maxf(co.mass, 1.0) * co.flight.REVERSE * 0.6
+	var want_closing := signf(gap) * minf(sqrt(2.0 * brake * absf(gap)), close if gap > 0.0 else BACK_MAX)
+	var along: float = Vector2.UP.rotated(co.flight.angle).dot(u)  # its thrust closes the range this much (the nose may point away)
+	var throttle := 0.0
+	if absf(along) > 0.4:
+		throttle = clampf((want_closing - co.flight.vel.dot(u)) / THROTTLE_BAND, -1.0, 1.0) * signf(along)
+	var strafe := 0.0
+	var right: float = Vector2.RIGHT.rotated(co.flight.angle).dot(u)  # its side engines close it this much
+	if float(co.thrusts["left"]) + float(co.thrusts["right"]) > 0.0 and absf(right) > 0.4:
+		strafe = clampf((want_closing - co.flight.vel.dot(u)) / THROTTLE_BAND, -1.0, 1.0) * signf(right)
+	arena.set_input(me, throttle, turn, strafe)
+
+
 ## Seconds between two steps of shield balance.
 func shift_interval() -> float:
 	return SHIFT_BASE_S - aim_skill
@@ -418,7 +750,10 @@ func _balance(dt: float) -> void:
 	if _shift_in > 0.0:
 		return
 	_shift_in = shift_interval()
-	Shields.shift_sector(co, Shields.sector_of_world_dir(co, arena.ships[foe].flight.pos - co.flight.pos))
+	var s := Shields.sector_of_world_dir(co, arena.ships[foe].flight.pos - co.flight.pos)
+	if style == "bulwark" and float(co.weights[s]) + Shields.Balance.STEP > BULWARK_MAX_W + 1e-6:
+		return  # a bulwark's facing sector holds no more than BULWARK_MAX_W
+	Shields.shift_sector(co, s)
 
 
 # --- shooting ------------------------------------------------------------------------------------
@@ -452,12 +787,12 @@ func pick_target() -> int:
 
 
 ## The part families it aims at before the hull, in order: the engines of a fleeing foe, then the weapons for a pilot of
-## SNIPE_SKILL or better.
+## SNIPE_SKILL or better; a flanker goes for the engines and then the weapons whatever its skill.
 func priority() -> Array[String]:
 	var out: Array[String] = []
-	if foe_morale != null and foe_morale.state == "fleeing":
+	if (foe_morale != null and foe_morale.state == "fleeing") or style == "flanker":
 		out.append("engine")
-	if aim_skill >= SNIPE_SKILL - 1e-6:
+	if aim_skill >= SNIPE_SKILL - 1e-6 or style == "flanker":
 		out.append("weapon")
 	return out
 

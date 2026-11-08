@@ -431,8 +431,8 @@ func test_race_ships_pick_their_races_limpets_and_pods() -> void:
 		for k in 60:
 			for size in ["small", "medium", "large"]:
 				var ship = Shipgen.from_spec(Shipgen.spec(pair[0], size, 500 + k, 300.0, false, 2))
-				if ship == null:
-					continue
+				if ship == null or Shipgen.tables()["roles"]["list"].get(str(ship.get_meta("shipgen")["role"]), {}).has("bay"):
+					continue  # (a carrier's or a boarder's bay is its role's, not the race's rolled kit)
 				for uid in Drones.bays_of(ship):
 					all += 1
 					mine += 1 if str(ship.components.instances[uid]["kit"]).begins_with(pair[1]) else 0

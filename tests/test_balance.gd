@@ -69,7 +69,7 @@ func test_the_threat_cuts_are_the_measured_ones() -> void:
 	var early := Shipgen.budget_for(1, 5, 1.0)
 	var late := Shipgen.budget_for(3, 35, 1.0)
 	for f in ["clans", "rustfangs", "lumen"]:
-		var weak := Threat.rate(Shipgen.build(f, "small", 256, early), courier)
+		var weak := Threat.rate(Shipgen.build(f, "small", 256, early, {"role": Shipgen.pick_role(f, "small", 256, true, 1)}), courier)  # (the role the seed rolls at stage 1, where a jump 5 fight is: no boarder's pods then)
 		check(int(weak["skulls"]) <= 2, "%s at jump 5 (budget %d): %d skulls, ratio %.2f" % [f, early, weak["skulls"], weak["ratio"]])
 	for f in ["clans", "rustfangs", "concord"]:  # (a Lumen ship spends its budget on shields and its reactor: a softer late threat)
 		var strong := Threat.rate(Shipgen.build(f, "large", 256, late), courier)
