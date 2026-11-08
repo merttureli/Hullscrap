@@ -332,7 +332,8 @@ func pick(c, node: Dictionary, ship = null, filter := Callable()) -> Dictionary:
 	if offers_crew(str(chosen.get("id", "")), c):
 		c.crew_offers += 1
 	var sid := str(chosen.get("id", ""))  # shown: it comes back less often (`fade_weight`)
-	c.story_views[sid] = int(c.story_views.get(sid, 0)) + 1
+	if sid != "":
+		c.story_views[sid] = int(c.story_views.get(sid, 0)) + 1
 	return chosen
 
 
