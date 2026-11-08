@@ -40,6 +40,7 @@ func test_a_region_weight_makes_the_homeland_louder() -> void:
 		c.cfg["region_weight"] = w
 		var n := 0
 		for i in 400:
+			c.story_views = {}  # (the weights, not the event memory, are measured)
 			if c.events.pick(c, {"id": "n1", "type": "wreck_field", "place": ""})["id"] == "homeland":
 				n += 1
 		share[w] = n
