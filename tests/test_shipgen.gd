@@ -444,7 +444,7 @@ func test_threat_is_one_to_five_skulls_against_the_players_ship() -> void:
 	check(skulls.size() >= 3, "the table of budgets spreads over several skulls: " + str(skulls.keys()))
 	# the same enemy is a bigger threat to a smaller ship
 	var enemy := Shipgen.build("concord", "medium", 5, 150.0)
-	var small_fry := Shipgen.build("clans", "small", 6, 30.0)
+	var small_fry := Shipgen.build("clans", "small", 6, 30.0, {"role": "gunboat"})  # (pinned: the seed's own roll is a quick skirmisher now, as strong as the Courier)
 	check(Shipgen.threat(enemy, small_fry)["ratio"] > Shipgen.threat(enemy, courier)["ratio"], "a weaker player ship sees more threat")
 	var by_design := Shipgen.threat_of("gen:concord:medium:5:15000", courier)
 	eq(by_design["skulls"], Shipgen.threat(enemy, courier)["skulls"], "the radar's call by design path gives the same skulls")

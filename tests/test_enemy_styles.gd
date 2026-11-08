@@ -16,11 +16,12 @@ const NEW_ROLES: Array[String] = ["skirmisher", "carrier", "boarder", "flanker",
 const DT := 1.0 / 60.0
 
 
-## The first ship of `role` (seeds from `seed_value` on) that `ok` accepts, built for a stage 3 fight; null when none of 30 is.
-func _roled(faction: String, size: String, role: String, seed_value: int, budget: float, ok := Callable()):
+## The first ship of `role` (seeds from `seed_value` on, the ones that fell back to a gunboat skipped) that `ok` accepts, built for a fight at
+## `stage`; null when none of 30 is.
+func _roled(faction: String, size: String, role: String, seed_value: int, budget: float, ok := Callable(), stage := 3):
 	for k in 30:
-		var ship = Shipgen.build(faction, size, seed_value + k, budget, {"role": role, "stage": 3})
-		if ship != null and (not ok.is_valid() or ok.call(ship)):
+		var ship = Shipgen.build(faction, size, seed_value + k, budget, {"role": role, "stage": stage})
+		if ship != null and ship.get_meta("shipgen")["role"] == role and (not ok.is_valid() or ok.call(ship)):
 			return ship
 	return null
 
@@ -82,7 +83,7 @@ func test_a_stage_with_no_bays_never_rolls_a_carrier_or_a_boarder() -> void:
 	for faction in ["lumen", "wardens", "clans", "rustfangs"]:
 		for sd in 40:
 			check(not Shipgen.pick_role(faction, "large", sd, true) in ["carrier", "boarder"], "%s seed %d: no bay role at stage 1" % [faction, sd])
-	var ship = Shipgen.build("lumen", "large", 3, 300.0, {"role": "carrier", "stage": 1})
+	var ship = _roled("lumen", "large", "carrier", 3, 300.0, Callable(), 1)
 	check(ship != null and not Drones.bays_of(ship).is_empty(), "a pinned carrier still flies its bay (the tools measure it)")
 
 
@@ -116,6 +117,7 @@ func _bays(ship) -> Array:
 
 func test_each_role_carries_its_kit() -> void:
 	var n := 12
+	var fell := 0
 	var sum := {}
 	for role in ["gunboat"] + NEW_ROLES:
 		sum[role] = {"accel": 0.0, "crew": 0.0, "missiles": 0, "shields": 0.0, "engines": 0.0}
@@ -128,6 +130,11 @@ func test_each_role_carries_its_kit() -> void:
 			sum[role]["shields"] += float(m["shields"].size()) / n
 			sum[role]["engines"] += float(m["engines"].size()) / n
 			sum[role]["missiles"] += int(m["weapons"].any(func(id): return Shipgen._is_missile(str(id))))
+			var got := str(m["role"])
+			if got != role:
+				check(got == "gunboat" and role in ["carrier", "boarder"], "%s seed %d: built as %s (a hull that takes no bay makes a gunboat)" % [role, 40 + sd, got])
+				fell += 1
+				continue
 			eq(ship.get_meta("ai").get("style", ""), "" if role == "gunboat" else role, "%s: its pilot flies its style" % role)
 			if role == "carrier":
 				check(not _bays(ship).is_empty() and _bays(ship).all(func(r): return r == "combat"), "a carrier flies drone bays with a combat kit: %s" % str(_bays(ship)))
@@ -141,6 +148,7 @@ func test_each_role_carries_its_kit() -> void:
 	check(sum["bulwark"]["shields"] >= sum["gunboat"]["shields"], "with no less shield (%.2f vs %.2f)" % [sum["bulwark"]["shields"], sum["gunboat"]["shields"]])
 	check(sum["boarder"]["crew"] > sum["gunboat"]["crew"], "a boarder carries more crew (%.1f vs %.1f)" % [sum["boarder"]["crew"], sum["gunboat"]["crew"]])
 	eq(sum["siege"]["missiles"], n, "every siege boat carries a missile launcher when one is for sale")
+	check(fell <= 6, "most carriers and boarders find a wall for their bay (%d of %d fell back to a gunboat)" % [fell, 2 * n])
 
 
 func test_a_bulwark_breaks_late_and_a_fighting_role_never_rams() -> void:

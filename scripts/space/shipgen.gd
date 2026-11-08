@@ -299,7 +299,7 @@ static func build(faction: String, size: String, seed_value: int, budget: float,
 		ram = false  # a fighting role flies its own style: the seed's ram roll is not for it
 	var shields := true
 	var cap := shield_cap(int(opts.get("stage", 0)))
-	if cap < 1.0 and not f.has("budget_mult") and not bool(rk.get("shielded", false)):  # (a role that is its shield, the bulwark, always may buy one)
+	if cap < 1.0 and not f.has("budget_mult"):
 		var sroll := RandomNumberGenerator.new()
 		sroll.seed = _mix(seed_value, faction, size, 98)
 		shields = sroll.randf() < cap
@@ -308,9 +308,10 @@ static func build(faction: String, size: String, seed_value: int, budget: float,
 		var rng := RandomNumberGenerator.new()
 		rng.seed = _mix(seed_value, faction, size, attempt)
 		var r := _attempt(faction, size, rng, budget, ram, attempt, shields, role)
-		if r["ship"] != null and rk.has("bay") and add_role_bay(r["ship"], faction, size, seed_value, rk) == 0:
-			failed.append("no wall takes the role's drone bay")  # a carrier (boarder) without its bay is none: the next roll makes another hull
-			continue
+		if r["ship"] != null and rk.has("bay") and add_role_bay(r["ship"], faction, size, seed_value, rk) == 0:  # a carrier (boarder) without its bay is none:
+			var again := opts.duplicate()  # the seed's ship is a gunboat
+			again["role"] = "gunboat"
+			return build(faction, size, seed_value, budget, again)
 		if r["ship"] != null:
 			var ship: Ship = r["ship"]
 			ship.get_meta("shipgen")["attempts"] = attempt + 1
@@ -322,10 +323,6 @@ static func build(faction: String, size: String, seed_value: int, budget: float,
 				add_enemy_bay(ship, faction, size, seed_value, int(opts.get("stage", 0)))
 			return ship
 		failed.append(r["why"])
-	if rk.has("bay") and failed.has("no wall takes the role's drone bay"):  # no hull of the seed took the bay: it flies as a gunboat
-		var again := opts.duplicate()
-		again["role"] = "gunboat"
-		return build(faction, size, seed_value, budget, again)
 	last_failed = failed
 	return null
 
@@ -1755,8 +1752,9 @@ static func _wire_cost(ship: Ship, c: Vector2i) -> int:
 # --- drone bays (docs/DRONES.md section 7) --------------------------------------------------------
 
 ## Mount a drone bay `bay_id` on `ship`: on a flank first, then the stern (`prefer`: the rotations to try), at the place along the wall nearest the middle where the mount rules
-## allow it, joined to the nearest cable, and kept only when the ship's power still covers every part. `kit_id` is loaded into it ("" leaves it empty). Returns its uid, -1 when none fit.
-static func add_bay(ship: Ship, bay_id: String, kit_id := "", prefer := [1, 3, 2]) -> int:
+## allow it, joined to the nearest cable, and kept only when the ship's power still covers every part (and `keep`, when given, says yes). `kit_id` is loaded into it ("" leaves it empty).
+## Returns its uid, -1 when none fit.
+static func add_bay(ship: Ship, bay_id: String, kit_id := "", prefer := [1, 3, 2], keep := Callable()) -> int:
 	var g: ShipGrid = ship.grid
 	var lo := Vector2i(1 << 20, 1 << 20)
 	var hi := Vector2i(-(1 << 20), -(1 << 20))
@@ -1792,7 +1790,7 @@ static func add_bay(ship: Ship, bay_id: String, kit_id := "", prefer := [1, 3, 2
 			var ok: bool = ship.power_state["powered"].get(uid, false)
 			for n in ship.power_state["networks"]:
 				ok = ok and float(n["supply"]) + 0.0001 >= float(n["demand"])
-			if ok:
+			if ok and (not keep.is_valid() or keep.call()):
 				if kit_id != "":
 					inst["kit"] = kit_id
 				return uid
@@ -1849,7 +1847,8 @@ static func add_enemy_bay(ship: Ship, faction: String, size: String, seed_value:
 
 ## The drone bays a role always flies (its `bay`, data/enemy_tables.json roles: `count` by size, else 1), of the tier the size takes (drones.bay),
 ## each loaded with a kit of the role's kit `roles` from the faction's drone kits (else from the role's own `kits`), rolled from the ship's seed,
-## with `parts` drone parts (else the drones' own). A bay that finds no wall is not placed. Returns how many it got.
+## with `parts` drone parts (else the drones' own), never where it cuts a room's lane (Lanes.blocked).
+## A bay that finds no wall is not placed. Returns how many it got.
 static func add_role_bay(ship: Ship, faction: String, size: String, seed_value: int, rk: Dictionary) -> int:
 	var cfg: Dictionary = tables().get("drones", {})
 	var bay_id := str(cfg.get("bay", {}).get(size, ""))
@@ -1872,6 +1871,7 @@ static func add_role_bay(ship: Ship, faction: String, size: String, seed_value: 
 	var rng := RandomNumberGenerator.new()
 	rng.seed = _mix(seed_value, faction, size, 96)
 	var made := 0
+	var cut := Lanes.blocked(ship)
 	for i in int(rb.get("count", {}).get(size, 1)):
 		var x := rng.randf() * total
 		var pick := ""
@@ -1880,7 +1880,7 @@ static func add_role_bay(ship: Ship, faction: String, size: String, seed_value: 
 			x -= float(pool[id])
 			if x <= 0.0:
 				break
-		if add_bay(ship, bay_id, pick, [1, 3, 2] if i == 0 else [3, 1, 2]) >= 0:
+		if add_bay(ship, bay_id, pick, [1, 3, 2] if i == 0 else [3, 1, 2], func(): return Lanes.blocked(ship) <= cut) >= 0:
 			made += 1
 			ship.inventory.add(pick, 1)
 	if made > 0:
