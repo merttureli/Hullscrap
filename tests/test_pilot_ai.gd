@@ -152,6 +152,19 @@ func test_the_hold_distance_counts_each_hull_and_each_gun() -> void:
 	check(gap < 0.7 * 900.0 - 50.0 and gap >= PilotAI.HULL_MARGIN - 1e-3, "the large ship's flank turrets ask for a closer gap than its bow guns would (%d)" % gap)
 
 
+func test_a_design_may_hold_at_its_own_share_of_the_range() -> void:  # (ai.hold_fraction, the race flagships' closer hold: fights-end 2026-11)
+	var a := Arena.new(1)
+	a.add_ship(Ship.from_design(COURIER), Vector2.ZERO)
+	a.add_ship(Session.load_ship(LARGE), Vector2(0.0, -2000.0), PI)
+	var u := Vector2.UP
+	var plain := PilotAI.new(a, 0, 1)
+	var close := PilotAI.new(a, 0, 1, {"hold_fraction": 0.35})
+	eq(plain.hold_fraction, PilotAI.RANGE_FRACTION, "by default the gap is 70% of the range")
+	var ext: float = plain.extent(0, u) + plain.extent(1, -u)
+	near(close.hold_distance(u, close._intact()) - ext, 0.35 * float(a.weapons.def("pulse_mk1")["range"]), "with hold_fraction 0.35 it holds at 35% of it", 40.0)
+	check(close.hold_distance(u, close._intact()) < plain.hold_distance(u, plain._intact()) - 200.0, "closer than the plain pilot")
+
+
 ## One short gun among long ones does not pull the ship in: it holds the gap that the guns with 60% of the dps reach (docs/GUNS.md 13).
 func test_one_short_gun_does_not_set_the_hold_distance() -> void:
 	var a := Arena.new(1)

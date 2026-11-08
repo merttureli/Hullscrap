@@ -8,6 +8,11 @@ extends SceneTree
 ##     Every fight carries the probe of tests/fight_probe.gd and a capped one its class. designs=<dir>: the flagship_<race>.json files of that folder
 ##     instead of the pack's; late=0: no time-based yield (the design's break_after_s is dropped); jsonl=<path>: each fight a line appended as it ends,
 ##     and a run started again skips what the file holds (run the shards yourself: shard=k/n, one jsonl each); sum=<path,path>: the tables of jsonl files.
+##     What-ifs on the designs as they are (no new hull): aim=<x> (the flagship pilot's aim_skill), yield=<frac> (it yields after losing that share of its blocks),
+##     style=<id> (its pilot style, pilot_ai.gd), hold=<x> (its ai.hold_fraction: the share of its guns' range it holds at), gun_hp=<x> (every gun of both
+##     ships that many times as tough, the inside and the outside half).
+##     run=<structure>: the bench player jumps away as a player would (J, the 10 s spool and its holds) once its structure is at or under that (0.75:
+##     half way to the wreck line, where the hull creaks) or it has had no working gun for RUN_UNARMED_S; the fight then ends "fled", a loss.
 
 const Ship = preload("res://scripts/ship/ship.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
@@ -25,6 +30,7 @@ const STEP := 1.0 / 60.0
 const SIM_EVERY := 12
 const PLAYER_EVERY := 3
 const OUT := "res://data/packs/flagships_1/ships/flagship_%s.json"
+const RUN_UNARMED_S := 10.0  ## run=: seconds with no working gun after which the bench player jumps away
 ## The frame of a flagship: wider and deeper than the generated `large` class (data/enemy_tables.json sizes).
 const FRAME := {"width": 42, "k_mid": 3, "max_interior": 36, "max": {"bow": 6, "flank": 6, "engine": 4, "reactor": 5, "shield": 3, "armour": 4, "crew": 14, "beds": 4}}
 
@@ -94,7 +100,11 @@ func make(race: String) -> void:
 	var names: Array = sp["names"]
 	for i in names.size():
 		d["crew_plan"].append({"name": names[i], "species": species[i % species.size()]})
-	d["ai"] = {"aim_skill": float(sp["aim"]), "morale": str(sp["morale"]), "faction": "flagship_" + race, "captain": str(sp["captain"]), "break_after_s": float(sp.get("after_s", 120)), "break_structure": snappedf(1.0 - (float(sp["yield_hp"]) / maxf(Structure.totals(ship).y, 1.0) if sp.has("yield_hp") else float(sp.get("yield_frac", 0.1))), 0.001)}  # it yields after losing yield_frac of its blocks (or yield_hp of them)
+	d["ai"] = {"aim_skill": float(sp["aim"]), "morale": str(sp["morale"]), "faction": "flagship_" + race, "captain": str(sp["captain"]), "break_structure": snappedf(1.0 - (float(sp["yield_hp"]) / maxf(Structure.totals(ship).y, 1.0) if sp.has("yield_hp") else float(sp.get("yield_frac", 0.1))), 0.001)}  # it yields after losing yield_frac of its blocks (or yield_hp of them)
+	if float(sp.get("after_s", 0.0)) > 0.0:
+		d["ai"]["break_after_s"] = float(sp["after_s"])  # a time-based yield (none since fights-end 2026-11: a flagship yields on damage only)
+	if sp.has("hold"):
+		d["ai"]["hold_fraction"] = float(sp["hold"])  # it fights closer than the 0.7 of its guns' range others keep (pilot_ai.gd)
 	if bool(sp.get("ram", false)):
 		d["ai"]["style"] = "rammer"
 	d["flagship"] = {"race": race, "role": str(sp.get("role", "flagship"))}
@@ -234,7 +244,7 @@ func bench() -> void:
 		var files := []
 		var pids := []
 		var pass_on := []
-		for key in ["races", "seeds", "cap", "stage", "first", "v", "pstage", "lag", "designs", "late"]:
+		for key in ["races", "seeds", "cap", "stage", "first", "v", "pstage", "lag", "designs", "late", "aim", "yield", "run", "style", "hold", "gun_hp"]:
 			if args.has(key):
 				pass_on.append("%s=%s" % [key, args[key]])
 		for k in jobs:
@@ -295,7 +305,7 @@ func bench() -> void:
 	print(class_table(rows))
 
 
-## Per (race, player build): the fights, the wins (won, captured, spared), the losses, the cap share and the classes of the capped ones (FightProbe.classify),
+## Per (race, player build): the fights, the wins (won, captured, spared), the losses (wrecked, or fled with run=), the cap share and the classes of the capped ones (FightProbe.classify),
 ## the mean time, and the hp each side landed a second on the other's blocks (p: the player).
 static func class_table(rows: Array) -> String:
 	var L: Array[String] = ["| race | player | n | win % | lost % | cap % | " + " | ".join(Probe.CLASSES) + " | mean s | p hp/s | e hp/s |", "|---|---|---|---|---|---|" + "---|".repeat(Probe.CLASSES.size() + 3)]
@@ -316,7 +326,7 @@ static func class_table(rows: Array) -> String:
 			bits.append(str(roundi(100.0 * capped.filter(func(r): return Probe.classify(r) == c).size() / n)))
 		var mean := func(f: Callable) -> float: return sel.reduce(func(acc, r): return acc + float(f.call(r)), 0.0) / n
 		L.append("| %s | %s | %d | %d | %d | %d | %s | %.0f | %.2f | %.2f |" % [k.get_slice("|", 0), k.get_slice("|", 1), sel.size(), roundi(100.0 * sel.filter(func(r): return r["state"] in ["won", "captured", "spared"]).size() / n),
-			roundi(100.0 * sel.filter(func(r): return r["state"] == "lost").size() / n), roundi(100.0 * capped.size() / n), " | ".join(bits), mean.call(func(r): return r["t"]),
+			roundi(100.0 * sel.filter(func(r): return r["state"] in ["lost", "fled"]).size() / n), roundi(100.0 * capped.size() / n), " | ".join(bits), mean.call(func(r): return r["t"]),
 			mean.call(func(r): return (float(r.get("p_hull", 0.0)) + float(r.get("p_part", 0.0))) / maxf(float(r["t"]), 1.0)), mean.call(func(r): return (float(r.get("e_hull", 0.0)) + float(r.get("e_part", 0.0))) / maxf(float(r["t"]), 1.0))])
 	return "\n".join(L)
 
@@ -345,6 +355,21 @@ static func summary(rows: Array) -> String:
 	return "\n".join(out)
 
 
+## The what-if gun_hp=: the hp of every gun of `ship` (its parts' and their outside halves') times `k`.
+static func _scale_guns(ship: Ship, k: float) -> void:
+	var comps = ship.components
+	for uid in comps.instances:
+		var inst: Dictionary = comps.instances[uid]
+		var d: Dictionary = comps.by_id.get(str(inst["id"]), {})
+		if str(d.get("family", "")) != "weapon":
+			continue
+		if not d.has("_scaled"):
+			d["hp"] = roundi(float(d.get("hp", 5)) * k)
+			d["_scaled"] = true
+		inst["hp"] = float(inst["hp"]) * k
+		inst["out_hp"] = float(inst["out_hp"]) * k
+
+
 ## Count the arena's new events into `d` by attacker (p: the player, e: the flagship): shots, shots a shield layer stopped, the damage on hull and on parts.
 func _scan(a, cursor: int, d: Dictionary) -> int:
 	var ev: Array = a.events
@@ -371,6 +396,15 @@ func fight(race: String, stage: int, s: int, cap: float) -> Dictionary:
 	var row := {"state": "error", "t": 0.0, "foe_hull": 1.0, "hull": 1.0}
 	if player == null or enemy == null:
 		return row
+	if args.has("aim"):
+		enemy.get_meta("ai")["aim_skill"] = float(args["aim"])
+	if args.has("style"):
+		enemy.get_meta("ai")["style"] = str(args["style"])
+	if args.has("hold"):
+		enemy.get_meta("ai")["hold_fraction"] = float(args["hold"])
+	if args.has("gun_hp"):  # what-if: every gun of both ships (inside and outside half) that many times as tough
+		for sh in [player, enemy]:
+			_scale_guns(sh, float(args["gun_hp"]))
 	var sim := ShipSim.new()
 	sim.ships = [player, enemy]
 	Jobs.spawn_crew(player)
@@ -380,13 +414,18 @@ func fight(race: String, stage: int, s: int, cap: float) -> Dictionary:
 	pilot.foe_morale = sess.morale
 	if str(args.get("late", "")) == "0":
 		sess.morale.break_after = 0.0  # no time-based yield: it yields on damage only
+	if args.has("yield"):
+		sess.morale.break_at = 1.0 - float(args["yield"])
 	var a = sess.arena
 	var n := 0
 	var ticks := int(cap * 60.0)
 	var d := {"p_shots": 0, "e_shots": 0, "p_hull": 0.0, "e_hull": 0.0, "p_part": 0.0, "e_part": 0.0, "p_shield": 0, "e_shield": 0}
 	var cursor := 0
 	var probe := Probe.new(a, pilot)
-	while sess.state() == "fighting" and n < ticks:
+	var run_at := float(args.get("run", -1.0))
+	var unarmed := 0.0
+	var fled := false
+	while sess.state() == "fighting" and n < ticks and not fled:
 		if n % PLAYER_EVERY == 0:
 			pilot.think(STEP * PLAYER_EVERY)
 		if sess.morale.state == "offering":
@@ -396,6 +435,14 @@ func fight(race: String, stage: int, s: int, cap: float) -> Dictionary:
 		sess.morale.tick(STEP)
 		probe.step()
 		n += 1
+		if run_at > 0.0 and sess.jump_charge < 0.0:
+			unarmed = unarmed + STEP if probe.working(Session.PLAYER) == 0 else 0.0
+			if unarmed >= RUN_UNARMED_S or (n % SIM_EVERY == 0 and Structure.structure_fraction(a.ships[Session.PLAYER]) <= run_at + 1e-6):
+				sess.start_jump()
+				row["t_run"] = n * STEP
+		if sess.jump_charge >= 0.0 and sess.state() == "fighting" and sess.jump_hold() == "":
+			sess.jump_charge += STEP
+			fled = sess.jump_ready()
 		if n % SIM_EVERY == 0:
 			sim.step(SIM_EVERY * STEP)
 			cursor = _scan(a, cursor, d)
@@ -404,7 +451,7 @@ func fight(race: String, stage: int, s: int, cap: float) -> Dictionary:
 	row.merge(probe.result())
 	row["break_at"] = sess.morale.break_at
 	row["morale"] = sess.morale.state
-	row["state"] = sess.state()
+	row["state"] = "fled" if fled else sess.state()
 	row["t"] = n * STEP
 	row["foe_hull"] = Structure.structure_fraction(a.ships[Session.ENEMY])
 	row["hull"] = Structure.structure_fraction(a.ships[Session.PLAYER])
