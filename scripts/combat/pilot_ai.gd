@@ -136,6 +136,8 @@ var _running := -1.0  # a skirmisher's run: seconds it has run (-1: not running)
 var _reload := -1.0  # a siege boat's back-off: seconds of it left at least (-1: at range)
 var _flank_side := 0.0  # +1 or -1: the side of the foe's stern a flanker goes for (0: not chosen yet)
 var _facing_sector := 0  # the shield sector a bulwark shows the foe
+var _sd := {}  # a style's reach and distances, worked out every HOLD_EVERY_S (_due())
+var _sd_in := 0.0
 
 
 ## `p_ai`: the `ai` entry of the ship's design ({"style": "rammer"}), if it has one.
@@ -480,10 +482,21 @@ func foe_reach() -> float:
 	return r if r > 0.0 else DEFAULT_RANGE
 
 
+## Is it time to work a style's reach and distances out again (every HOLD_EVERY_S, as hold_distance())? Keeps them in `_sd`.
+func _due(dt: float) -> bool:
+	_sd_in -= dt
+	if _sd_in > 0.0 and not _sd.is_empty():
+		return false
+	_sd_in = HOLD_EVERY_S
+	return true
+
+
 ## Skirmisher: hit and run (see the top). The run is a flight (_flee) that ends back out at the hold, or after SKIRMISH_RUN_MAX_S.
 func _skirmish(dt: float) -> void:
-	var r := reach()
-	var gap := gap_now()
+	if _due(dt):
+		_sd = {"r": reach(), "gap": gap_now(), "hold": centres_at(SKIRMISH_HOLD * reach())}
+	var r: float = _sd["r"]
+	var gap: float = _sd["gap"]
 	if _running >= 0.0:
 		_running += dt
 		if gap >= SKIRMISH_HOLD * r or _running > SKIRMISH_RUN_MAX_S:
@@ -493,7 +506,7 @@ func _skirmish(dt: float) -> void:
 	if _running >= 0.0:
 		_flee()
 	else:
-		_fly(dt, centres_at(SKIRMISH_HOLD * r))
+		_fly(dt, _sd["hold"])
 
 
 ## Does it still have drones to fly: a bay with a drone out, re-arming, or ready to launch?
@@ -506,10 +519,9 @@ func has_drones() -> bool:
 
 ## Carrier: beyond the foe's reach and within its drones' (see the top); the bays launch by themselves (Drones.ai_launch in think()).
 func _carry(dt: float) -> void:
-	if not has_drones():
-		_fly(dt)
-		return
-	_fly(dt, minf(centres_at(CARRIER_MARGIN * foe_reach()), CARRIER_DRONE_SHARE * Drones.DRONE_REACH))
+	if _due(dt):
+		_sd = {"drones": has_drones(), "hold": minf(centres_at(CARRIER_MARGIN * foe_reach()), CARRIER_DRONE_SHARE * Drones.DRONE_REACH)}
+	_fly(dt, _sd["hold"] if _sd["drones"] else -1.0)
 
 
 ## Are its people aboard the foe: a robot of the foe's intruders, or one of its own pods stuck on the foe's hull or flying at it?
@@ -521,8 +533,10 @@ func boarders_out() -> bool:
 
 ## Boarder: closes fast, throws, then holds close while its people are aboard (see the top).
 func _board(dt: float) -> void:
-	if boarders_out():
-		_fly(dt, minf(centres_at(BOARD_GAP), _hold_d) if _hold_d > 0.0 else centres_at(BOARD_GAP), BOARD_CLOSE_MAX)
+	if _due(dt):
+		_sd = {"out": boarders_out(), "close": centres_at(BOARD_GAP)}
+	if _sd["out"]:
+		_fly(dt, minf(_sd["close"], _hold_d) if _hold_d > 0.0 else _sd["close"], BOARD_CLOSE_MAX)
 	else:
 		_fly(dt, minf(_hold_d, BOARD_THROW) if _hold_d > 0.0 else -1.0, BOARD_CLOSE_MAX)
 
@@ -606,14 +620,17 @@ func cooling_share() -> float:
 ## Siege boat: a volley from range (more than SIEGE_COOLING of its guns there cooling), back off while any of them reloads and for
 ## SIEGE_BACK_S at least, come back (see the top).
 func _siege(dt: float) -> void:
-	var share := cooling_share()
+	if _due(dt):
+		var r := siege_reach()
+		_sd = {"share": cooling_share(), "hold": centres_at(SIEGE_HOLD * r), "back": centres_at(SIEGE_BACK * r)}
+	var share: float = _sd["share"]
 	if _reload < 0.0 and share > SIEGE_COOLING:
 		_reload = SIEGE_BACK_S
 	elif _reload >= 0.0:
 		_reload -= dt
 		if _reload < 0.0 and share > 0.0:
 			_reload = 0.0  # still reloading: it stays back
-	_fly(dt, centres_at((SIEGE_BACK if _reload >= 0.0 else SIEGE_HOLD) * siege_reach()))
+	_fly(dt, _sd["back"] if _reload >= 0.0 else _sd["hold"])
 
 
 ## The world direction sector `s` of ship `co`'s bubble faces (sector 0 the bow, clockwise).
