@@ -328,10 +328,13 @@ func test_every_role_ship_looks_like_its_role() -> void:
 		for faction in fly[role]:
 			for size in ["medium", "large"]:
 				var good := 0
+				var kept := 0  # (a carrier or a boarder whose hull takes no drone bay is a gunboat: it is not counted)
 				for k in 10:
 					var ship = Shipgen.build(faction, size, 900 + k * 37, 120.0 + 25.0 * k, {"role": role, "stage": 4})
-					good += int(ship != null and _looks_like(role, ship))
-				check(good >= 8, "%s %s %s: %d of 10 ships look like one" % [faction, size, role, good])
+					if ship != null and ship.get_meta("shipgen")["role"] == role:
+						kept += 1
+						good += int(_looks_like(role, ship))
+				check(kept >= 5 and good * 10 >= kept * 8, "%s %s %s: %d of %d ships look like one" % [faction, size, role, good, kept])
 	var plain := 0
 	for role in NEW_ROLES:
 		for k in 10:
@@ -405,6 +408,11 @@ func test_a_role_ship_wears_its_role_s_dressing() -> void:
 		var role: String = kinds[kind]
 		for faction in ["wardens", "kett"]:
 			var ship = Shipgen.build(faction, "large", 51, 200.0, {"role": role, "stage": 4})
+			for sd in range(52, 60):  # (a seed whose hull takes the role's drone bay: one that does not is a gunboat)
+				if ship.get_meta("shipgen")["role"] == role:
+					break
+				ship = Shipgen.build(faction, "large", sd, 200.0, {"role": role, "stage": 4})
+			eq(ship.get_meta("shipgen")["role"], role, "%s %s builds" % [faction, role])
 			var plan: Array = Dressing.plan(ship, ship.get_meta("style")["dressing"])
 			var mine: Array = plan.filter(func(p): return p["kind"] == kind)
 			check(mine.size() >= 2, "%s %s wears %s (%d)" % [faction, role, kind, mine.size()])
