@@ -145,14 +145,14 @@ func test_fins_sweep_out_of_the_stern_corners() -> void:
 	check(not m["cells"][Vector2i(8, 23)].is_empty() and not m["cells"][Vector2i(-9, 23)].is_empty(), "their leading edges are slopes")
 
 
-func test_a_jaw_juts_a_clamp_tooth_forward_of_each_bow_corner() -> void:
-	var m := _make([{"op": "jaw", "depth": [2, 2], "w": 1}], [], {}, 7, 7)
-	_clean(m, "jaw")
-	eq(_top(m["cells"]), -2, "the teeth reach two rows past the bow")
-	eq(_runs(m["cells"], -1), 2, "two teeth, apart")
-	check(m["cells"].has(Vector2i(-8, -2)) and m["cells"].has(Vector2i(7, -2)), "each on its corner")
-	check(not m["cells"].has(Vector2i(0, -1)), "the middle of the bow stays back for the guns")
-	eq(_make([{"op": "jaw", "depth": [2, 2], "w": 1}])["cells"].size(), _make([])["cells"].size(), "no jaw over the columns a narrow gun deck's gun and door need")
+func test_bow_fins_flare_the_bow_and_keep_its_line() -> void:
+	var plain := _make([])
+	var m := _make([{"op": "fins", "at": "tip", "depth": [2, 2]}])
+	_clean(m, "bow fins")
+	eq(_row(plain["cells"], 0), [-5, 4], "the plain bow row")
+	eq(_row(m["cells"], 0), [-7, 6], "the fins widen the bow row by their depth on each side")
+	eq(_top(m["cells"]), 0, "and reach no further forward: the guns' wall and the ship's length stay")
+	eq(_row(m["cells"], 2), _row(plain["cells"], 2), "the rows behind them are as they were")
 
 
 func test_horns_rise_from_the_shoulders_beside_the_gun_deck() -> void:
@@ -188,11 +188,11 @@ func test_racks_line_both_flanks_at_the_same_rows() -> void:
 
 
 func test_steps_make_a_ziggurat_of_the_bow() -> void:
-	var m := _make([{"op": "steps", "at": "tip", "n": [2, 2], "a": 1, "b": 2, "bevel": 1}], [], {}, 7, 7)
+	var m := _make([{"op": "steps", "at": "tip", "n": [2, 2], "a": 1, "b": 2, "bevel": 1}], [], {}, 7, 8)
 	_clean(m, "steps")
 	var w := func(y): return int(_row(m["cells"], y)[1]) - int(_row(m["cells"], y)[0]) + 1
 	check(w.call(0) < w.call(1) and w.call(1) < w.call(2), "each step down the bow is wider (%d, %d, %d)" % [w.call(0), w.call(1), w.call(2)])
-	eq([w.call(0), w.call(1), w.call(4)], [8, 12, 16], "two steps two columns each side, the gun deck below them as wide as before")
+	eq([w.call(0), w.call(1), w.call(4)], [10, 14, 18], "two steps two columns each side, the gun deck below them as wide as before")
 	var deep := _make([{"op": "steps", "at": "tip", "n": [3, 3], "a": 2, "b": 2, "bevel": 0}], [], {}, 7, 7)
 	eq(_row(deep["cells"], 2), _row(_make([], [], {}, 7, 7)["cells"], 2), "a step that would reach the deck behind is left out (the gun deck's flank is 5 rows)")
 	eq(_make([{"op": "steps", "at": "tip", "n": [2, 2], "a": 1, "b": 2, "bevel": 0}])["cells"].size(), _make([])["cells"].size(), "no step into the floor a narrow gun deck's gun and door need")
@@ -203,8 +203,8 @@ func test_the_style_ops_leave_the_corners_a_role_made() -> void:
 	var bevel := [{"op": "chamfer", "at": "tip", "kind": ["45"], "n": [3, 3]}, {"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}]
 	var style_only := _make([], bevel, {}, 7, 7)
 	check(not style_only["cells"].has(Vector2i(-8, 1)), "the style alone bevels the bow corner")
-	var m := _make([{"op": "jaw", "depth": [2, 2], "w": 1}], bevel, {}, 7, 7)
-	check(m["cells"].has(Vector2i(-8, -2)) and m["cells"].has(Vector2i(7, -2)), "after a jaw the style's tip bevel finds no corner of it")
+	var m := _make([{"op": "fins", "at": "tip", "depth": [2, 2]}], bevel, {}, 7, 7)
+	check(m["cells"].has(Vector2i(-10, 0)) and m["cells"].has(Vector2i(9, 0)), "after bow fins the style's tip bevel finds no corner of them")
 	var wedge := [{"op": "wedge", "at": "bow", "slope": ["45"], "chance": 1.0}]
 	eq(_row(_make([{"op": "keep", "at": "bow"}], wedge)["cells"], 4), _row(_make([])["cells"], 4), "a kept step is not filled by the style's wedge")
 	check(_row(_make([], wedge)["cells"], 4) != _row(_make([])["cells"], 4), "(which it fills without the keep)")
@@ -237,7 +237,7 @@ func test_with_look_lays_the_role_over_the_style_and_leaves_the_tables() -> void
 		eq(h["prow"], look["prow"], role + ": the role's prow")
 		eq(h["tail"], look["tail"], role + ": and tail")
 		for k in look["band"]:
-			eq(h["width"][k], look["band"][k], "%s: the role's %s width" % [role, k])
+			eq(h["width"][k], maxf(float(look["band"][k]), float(f["hull"]["band"][k])), "%s: the role's %s width, never under the style's" % [role, k])
 		eq(h["band"], f["hull"]["band"], role + ": the style's band still caps the decks")
 		check(int(h["jitter_w"][1]) <= int(look["jitter_w"]) and int(h["jitter_c"]) <= int(look["jitter_c"]), role + ": its jitter caps the style's")
 		eq(h["role_ops"], look["ops"], role + ": its ops")
@@ -298,9 +298,9 @@ func _looks_like(role: String, ship) -> bool:
 		widest = maxi(widest, _w(r))
 	match role:
 		"skirmisher":  # a narrow nose, swept fins past the stern: the last row is the two fin tips
-			return _w(rows[0]) * 2 <= widest and int(rows[n - 1][2]) == 2
-		"boarder":  # two clamp teeth ahead of a blunt bow as wide as the ship
-			return int(rows[0][2]) == 2 and rows.slice(0, 6).any(func(r): return int(r[2]) == 1 and _w(r) * 10 >= widest * 6)
+			return _w(rows[0]) * 10 <= widest * 6 and int(rows[n - 1][2]) == 2
+		"boarder":  # a blunt bow flared at its corners (clamp teeth), nearly as wide as the ship
+			return _w(rows[0]) >= _w(rows[4]) + 2 and _w(rows[0]) * 4 >= widest * 3
 		"flanker":  # horns beside the gun deck: rows of three pieces
 			return rows.slice(0, n / 2).filter(func(r): return int(r[2]) == 3).size() >= 3
 		"carrier":  # a wide deck with an island on one side: nearly as wide as long, the island's rows off the others' middle
@@ -314,11 +314,13 @@ func _looks_like(role: String, ship) -> bool:
 			for i in n / 4:
 				neck = mini(neck, _w(rows[i]))
 			return teeth >= 2 and neck * 10 <= widest * 7
-		"bulwark":  # stepped ends: square steps down the bow and the stern
-			var steps := 0
+		"bulwark":  # stepped ends: square steps down the bow and up to the stern
+			var bow := 0
+			var stern := 0
 			for i in range(1, mini(8, n)):
-				steps += int(_w(rows[i]) >= _w(rows[i - 1]) + 4)
-			return steps >= 2
+				bow += int(_w(rows[i]) >= _w(rows[i - 1]) + 4)
+				stern += int(_w(rows[n - 1 - i]) >= _w(rows[n - i]) + 4)
+			return bow >= 1 and stern >= 1 and bow + stern >= 2
 	return false
 
 

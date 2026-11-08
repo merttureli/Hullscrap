@@ -47,7 +47,8 @@ static func look_of(role: String) -> Dictionary:
 
 
 ## `f` (a faction's table) with the look of `role` laid over its hull: the role's prow and tail replace the style's, its `band`
-## becomes the deck widths (`width`: the style's `band` still caps what a deck holds, so the look drops no room), its jitter
+## widens the decks (`width`; never narrower than the style's, which its rooms and mounts were tuned for, and the style's `band`
+## still caps what a deck holds, so the look drops no room and no part), its jitter
 ## caps the style's (a symmetric people stays symmetric) and its ops become `role_ops`. The style keeps its own ops, asym,
 ## spine and max_fill. A copy; `f` itself for a role with no look, and for a rammer (`ram`: it keeps the style's ram bow).
 static func with_look(f: Dictionary, role: String, ram := false) -> Dictionary:
@@ -61,7 +62,8 @@ static func with_look(f: Dictionary, role: String, ram := false) -> Dictionary:
 			hull[k] = lh[k].duplicate()
 	if lh.has("band"):
 		var w: Dictionary = hull["band"].duplicate()
-		w.merge(lh["band"], true)
+		for k in lh["band"]:
+			w[k] = maxf(float(w.get(k, 1.0)), float(lh["band"][k]))
 		hull["width"] = w
 	if lh.has("jitter_w"):
 		hull["jitter_w"] = [mini(int(hull["jitter_w"][0]), int(lh["jitter_w"])), mini(int(hull["jitter_w"][1]), int(lh["jitter_w"]))]
@@ -143,7 +145,7 @@ static func make(style: Dictionary, bands: Array, t: int, rows: int, rng: Random
 			{"op": "chamfer", "at": "shoulder", "kind": ["45"], "n": "max"},
 		]
 	var locked := {}  # the corners a role's look made: the style's ops leave them as they are
-	var room: Array = []  # the floor columns at each end (bow, stern) beside what its mounts need (and a door, a mount's outside half a column past its breech)
+	var room: Array = []  # the floor columns at each end (bow, stern) beside what its mounts need (and a door, and a mount's outside half a column past its breech)
 	for b in [bands[0], bands[bands.size() - 1]]:
 		room.append(maxi(0, (int(b["x1"]) - int(b["x0"]) + 1 - maxi(int(b.get("need", 0)) + 2, MIN_OVERLAP)) / 2))
 	if level >= 1 and not bool(opts.get("ram", false)):  # (a rammer keeps its ram bow; the plain fallback its bevels)
@@ -153,7 +155,7 @@ static func make(style: Dictionary, bands: Array, t: int, rows: int, rng: Random
 			var before := {}
 			for v in poly:
 				before[v] = true
-			_role_op(poly, op, rng, opts.get("avoid", []), locked, room, t)
+			_role_op(poly, op, rng, opts.get("avoid", []), locked, room)
 			for v in poly:
 				if not before.has(v):
 					locked[v] = true
@@ -451,18 +453,25 @@ static func _arcs(poly: Array, op: Dictionary, rng: RandomNumberGenerator, arcs:
 
 # --- the role ops (data/role_looks.json) ---------------------------------------------------------------
 
-## One op of a role's look: wedge and chamfer as the style's, keep (lock the corners `at` selects, so the style's ops leave
-## them), fins, jaw, horns, island, racks and steps (below). Every slope they draw is 45 degrees, in every people's grammar.
-## `room`: the floor columns beside the mounts at the bow and the stern (make()): a step cuts no further in, a jaw's tooth stands no further in than them and the shell `t`.
-static func _role_op(poly: Array, op: Dictionary, rng: RandomNumberGenerator, avoid: Array, locked: Dictionary, room: Array, t: int) -> void:
+## One op of a role's look: wedge and chamfer as the style's (a chamfer of the bow's or the stern's corners no deeper than
+## `room`), keep (lock the corners `at` selects, so the style's ops leave them), fins, horns, island, racks and steps (below).
+## Every slope they draw is 45 degrees, in every people's grammar. `room`: the floor columns beside the mounts at the bow and
+## the stern (make()), which a chamfer or a step there never cuts into.
+static func _role_op(poly: Array, op: Dictionary, rng: RandomNumberGenerator, avoid: Array, locked: Dictionary, room: Array) -> void:
 	match str(op["op"]):
-		"wedge", "chamfer":
+		"wedge":
 			_apply(poly, op, rng, avoid, locked)
+		"chamfer":  # (at the bow or the stern, no deeper than the floor beside the mounts there)
+			var cap := 99 if not str(op["at"]) in ["tip", "stern_end"] else int(room[0 if str(op["at"]) == "tip" else 1])
+			if cap > 0:
+				var o := op.duplicate()
+				o["n"] = [mini(int(op["n"][0]), cap), mini(int(op["n"][1]), cap)]
+				_apply(poly, o, rng, avoid, locked)
 		"keep":
 			for v in _targets(poly, str(op["at"]), _side(op, rng), locked):
 				locked[v] = true
-		"fins", "jaw":
-			_teeth(poly, op, rng, locked, int(room[0]) + t)
+		"fins":
+			_fins(poly, op, rng, locked)
 		"horns":
 			_horns(poly, op, rng, locked)
 		"island":
@@ -473,33 +482,25 @@ static func _role_op(poly: Array, op: Dictionary, rng: RandomNumberGenerator, av
 			_steps(poly, op, rng, avoid, locked, int(room[0 if str(op["at"]) == "tip" else 1]))
 
 
-## A 45 degree tooth `depth` cells on each end corner: "fins" sweep out of the stern corners along the stern line (the stern
-## grows wider; `swept`: and as far back past it, a swept wing), "jaw" juts forward from the bow corners (a clamp tooth each
-## side of the bow, its tip `w` wide).
-static func _teeth(poly: Array, op: Dictionary, rng: RandomNumberGenerator, locked: Dictionary, room: int) -> void:
-	var fins := str(op["op"]) == "fins"
+## Fins: a 45 degree tooth `depth` cells out of each corner of the stern (`at` "stern_end", the default) or the bow ("tip"),
+## along the end's line: that end grows wider and its rows stay where they are, so the mounts there keep their wall
+## (`swept`: and as far again past the end, a swept wing). Both corners or neither.
+static func _fins(poly: Array, op: Dictionary, rng: RandomNumberGenerator, locked: Dictionary) -> void:
 	var d := rng.randi_range(int(op["depth"][0]), int(op["depth"][1]))
-	var w := int(op.get("w", 0))
-	var targets := _targets(poly, "stern_end" if fins else "tip", "", locked)
+	var targets := _targets(poly, str(op.get("at", "stern_end")), "", locked)
 	if targets.size() != 2:
 		return
-	var cuts: Array = []  # [corner, the two points in polygon order], both worked out before either is cut (both or none)
+	var cuts: Array = []  # [corner, the points in polygon order], both worked out before either is cut
 	for v in targets:
 		var f := _info(poly, poly.find(v))
-		if not f["axis"]:
-			return
 		var h_in: bool = f["din"].y == 0
 		var h_away: Vector2i = -f["din"] if h_in else f["dout"]  # along the end's edge, away from the corner
 		var v_away: Vector2i = f["dout"] if h_in else -f["din"]  # along the flank, away from the corner
-		var lh: int = f["lin"] if h_in else f["lout"]
-		var lv: int = f["lout"] if h_in else f["lin"]
-		if (fins and d >= lv) or (not fins and (2 * (d + w) + 2 > lh or d + w > room)):  # (a jaw leaves the bow between its teeth)
+		if not f["axis"] or d >= int(f["lout"] if h_in else f["lin"]):
 			return
-		var pts: Array = [v - h_away * d, v + v_away * d]  # a fin: the point out along the stern line, the one up the flank
-		if fins and bool(op.get("swept", false)):  # swept back past the stern too: its trailing edge comes back to the corner
+		var pts: Array = [v - h_away * d, v + v_away * d]  # the point out along the end's line, the one along the flank
+		if bool(op.get("swept", false)):  # its trailing edge comes back to the corner
 			pts = [v, v - h_away * d - v_away * d, v - h_away * d, v + v_away * d]
-		elif not fins:  # a jaw tooth: its tip ahead of the flank, its flat top `w` wide, its slope back to the bow line
-			pts = [v + h_away * (d + w), v - v_away * d + h_away * w, v - v_away * d] if w > 0 else [v + h_away * d, v - v_away * d]
 		if not h_in:
 			pts.reverse()
 		cuts.append([v, pts])
@@ -650,7 +651,7 @@ static func _rack_tooth(poly: Array, x: int, y: int, h: int, depth: int, down: b
 static func _steps(poly: Array, op: Dictionary, rng: RandomNumberGenerator, avoid: Array, locked: Dictionary, room: int) -> void:
 	var a := int(op.get("a", 2))
 	var b := int(op.get("b", 2))
-	var n := mini(rng.randi_range(int(op["n"][0]), int(op["n"][1])), room / b)
+	var n := mini(rng.randi_range(int(op["n"][0]), int(op["n"][1])), (room - int(op.get("bevel", 0))) / b)
 	var targets := _targets(poly, str(op["at"]), "", locked)
 	if targets.size() != 2:
 		return
