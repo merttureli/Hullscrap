@@ -1,8 +1,8 @@
 extends RefCounted
 ## The fit-out of each race flagship, the input of tests/tool_flagships.gd (docs/CONTENT.md section 25). Per race: stage (the run stage it first sails at), ship, captain, role,
 ## weapons / engines / shields / systems / reactors (the part ids; reactors are topped up with Reactor Mk2 until the power covers the demand), armour (layers), aim (the
-## pilot's aim_skill), beds, hull_seed (where to start trying hulls), interior (the widest deck, cells), morale (a style of data/morale.json), yield_hp (hp of its blocks it
-## loses before it yields) and after_s (seconds after which a hurt flagship yields), crew (species, repeated in turn) and names (the first is the captain), ammo (stock of each
+## pilot's aim_skill), beds, hull_seed (where to start trying hulls), interior (the widest deck, cells), morale (a style of data/morale.json), yield_frac (the share of its blocks it
+## loses before it yields; or yield_hp, that many hp; no time-based yield since fights-end 2026-11), hold (its pilot's ai.hold_fraction), crew (species, repeated in turn) and names (the first is the captain), ammo (stock of each
 ## ammo kind), edits (hand edits after the hull is built), ram, helm.
 
 const SPECS := {
@@ -18,6 +18,8 @@ const SPECS := {
 			"pulse_mk3",
 			"pulse_mk3",
 			"pulse_mk3",
+			"pulse_mk3",
+			"pulse_mk3",
 			"pulse_mk3"
 		],
 		"engines": [
@@ -26,7 +28,6 @@ const SPECS := {
 			"engine_scrap_mk2"
 		],
 		"shields": [
-			"kett_hive_battery",
 			"kett_hive_battery"
 		],
 		"systems": [
@@ -39,8 +40,9 @@ const SPECS := {
 			"reactor_mk2",
 			"reactor_mk2"
 		],
-		"armour": 2,
-		"aim": 0.9,
+		"armour": 1,
+		"aim": 0.78,
+		"hold": 0.4,
 		"beds": 3,
 		"hull_seed": 11,
 		"morale": "flagship_kett",
@@ -63,9 +65,8 @@ const SPECS := {
 		],
 		"blurb": "x",
 		"interior": 56,
-		"after_s": 210,
 		"ammo": 400,
-		"yield_hp": 45
+		"yield_frac": 0.1
 	},
 	"emberkin": {
 		"stage": 5,
@@ -88,8 +89,6 @@ const SPECS := {
 			"emberkin_pyre_drive"
 		],
 		"shields": [
-			"emberkin_hearth_shield",
-			"emberkin_hearth_shield",
 			"emberkin_hearth_shield"
 		],
 		"systems": [
@@ -102,8 +101,9 @@ const SPECS := {
 			"emberkin_furnace_core",
 			"reactor_mk2"
 		],
-		"armour": 3,
-		"aim": 0.95,
+		"armour": 2,
+		"aim": 0.78,
+		"hold": 0.4,
 		"beds": 3,
 		"hull_seed": 21,
 		"morale": "flagship_emberkin",
@@ -124,8 +124,7 @@ const SPECS := {
 		],
 		"blurb": "x",
 		"interior": 64,
-		"after_s": 210,
-		"yield_hp": 45
+		"yield_frac": 0.1
 	},
 	"prismatic": {
 		"stage": 6,
@@ -148,8 +147,6 @@ const SPECS := {
 			"engine_mk2"
 		],
 		"shields": [
-			"prismatic_lattice_shield",
-			"prismatic_lattice_shield",
 			"prismatic_lattice_shield"
 		],
 		"systems": [
@@ -161,8 +158,9 @@ const SPECS := {
 			"prismatic_song_reactor",
 			"reactor_mk2"
 		],
-		"armour": 3,
-		"aim": 0.95,
+		"armour": 2,
+		"aim": 0.78,
+		"hold": 0.4,
 		"beds": 3,
 		"hull_seed": 31,
 		"morale": "flagship_prismatic",
@@ -183,8 +181,7 @@ const SPECS := {
 		],
 		"blurb": "x",
 		"interior": 66,
-		"after_s": 210,
-		"yield_hp": 15
+		"yield_frac": 0.1
 	},
 	"basalt": {
 		"stage": 4,
@@ -207,8 +204,6 @@ const SPECS := {
 			"engine_mk2"
 		],
 		"shields": [
-			"shield_mk2",
-			"shield_mk2"
 		],
 		"systems": [
 			"basalt_stonehide_bay",
@@ -220,7 +215,8 @@ const SPECS := {
 			"reactor_mk1"
 		],
 		"armour": 3,
-		"aim": 0.85,
+		"aim": 0.78,
+		"hold": 0.4,
 		"beds": 3,
 		"hull_seed": 41,
 		"morale": "flagship_basalt",
@@ -248,8 +244,7 @@ const SPECS := {
 			"Mott-ba"
 		],
 		"blurb": "x",
-		"after_s": 210,
-		"yield_hp": 60,
+		"yield_frac": 0.1,
 		"interior": 54
 	},
 	"sporeling": {
@@ -265,7 +260,8 @@ const SPECS := {
 			"pulse_mk3",
 			"pulse_mk3",
 			"sporeling_pollen_turret",
-			"swarm_pod"
+			"swarm_pod",
+			"pulse_mk3"
 		],
 		"engines": [
 			"engine_mk2",
@@ -273,8 +269,6 @@ const SPECS := {
 			"engine_mk2"
 		],
 		"shields": [
-			"sporeling_mycelium_shield",
-			"sporeling_mycelium_shield",
 			"sporeling_mycelium_shield"
 		],
 		"systems": [
@@ -287,8 +281,9 @@ const SPECS := {
 			"sporeling_bloom_reactor",
 			"reactor_mk1"
 		],
-		"armour": 2,
-		"aim": 0.95,
+		"armour": 1,
+		"aim": 0.78,
+		"hold": 0.4,
 		"beds": 3,
 		"hull_seed": 51,
 		"prow_add": 3,
@@ -309,9 +304,8 @@ const SPECS := {
 			"Mott-sp"
 		],
 		"blurb": "x",
-		"after_s": 210,
 		"ammo": 200,
-		"yield_hp": 40,
+		"yield_frac": 0.1,
 		"interior": 60
 	},
 	"mire": {
@@ -335,8 +329,6 @@ const SPECS := {
 			"engine_mk2"
 		],
 		"shields": [
-			"mire_rain_shield",
-			"mire_rain_shield"
 		],
 		"systems": [
 			"mire_spray_deck",
@@ -348,8 +340,9 @@ const SPECS := {
 			"mire_wetwell_reactor",
 			"reactor_mk2"
 		],
-		"armour": 4,
-		"aim": 0.8,
+		"armour": 1,
+		"aim": 0.78,
+		"hold": 0.4,
 		"beds": 4,
 		"hull_seed": 61,
 		"morale": "flagship_mire",
@@ -371,9 +364,8 @@ const SPECS := {
 			"Moss"
 		],
 		"blurb": "x",
-		"after_s": 210,
 		"interior": 56,
-		"yield_hp": 80
+		"yield_frac": 0.1
 	},
 	"fenn": {
 		"stage": 5,
@@ -386,7 +378,9 @@ const SPECS := {
 			"pulse_mk3",
 			"pulse_mk3",
 			"pulse_mk3",
-			"fenn_spark_lattice"
+			"fenn_spark_lattice",
+			"pulse_mk3",
+			"pulse_mk3"
 		],
 		"engines": [
 			"fenn_haggle_engine",
@@ -394,9 +388,6 @@ const SPECS := {
 			"fenn_haggle_engine"
 		],
 		"shields": [
-			"shield_mk2",
-			"shield_mk2",
-			"shield_mk2"
 		],
 		"systems": [
 			"fenn_quickfix_bay",
@@ -408,7 +399,8 @@ const SPECS := {
 			"reactor_mk2"
 		],
 		"armour": 2,
-		"aim": 0.95,
+		"aim": 0.78,
+		"hold": 0.4,
 		"beds": 3,
 		"hull_seed": 71,
 		"morale": "flagship_fenn",
@@ -429,9 +421,8 @@ const SPECS := {
 		],
 		"blurb": "x",
 		"interior": 44,
-		"after_s": 210,
 		"ammo": 200,
-		"yield_hp": 10
+		"yield_frac": 0.1
 	},
 	"gauntling": {
 		"stage": 4,
@@ -453,8 +444,6 @@ const SPECS := {
 			"gauntling_overclock_engine"
 		],
 		"shields": [
-			"shield_mk2",
-			"shield_mk2"
 		],
 		"systems": [
 			"gauntling_graft_bay"
@@ -464,8 +453,9 @@ const SPECS := {
 			"gauntling_arc_core",
 			"reactor_mk1"
 		],
-		"armour": 3,
-		"aim": 0.85,
+		"armour": 2,
+		"aim": 0.78,
+		"hold": 0.4,
 		"beds": 2,
 		"hull_seed": 81,
 		"morale": "flagship_gauntling",
@@ -485,8 +475,7 @@ const SPECS := {
 			"Spark-5"
 		],
 		"blurb": "x",
-		"after_s": 210,
-		"yield_hp": 35
+		"yield_frac": 0.1
 	},
 	"grundl": {
 		"stage": 5,
@@ -510,8 +499,6 @@ const SPECS := {
 			"grundl_hauler_thrusters"
 		],
 		"shields": [
-			"grundl_freight_shield",
-			"grundl_freight_shield"
 		],
 		"systems": [
 			"grundl_cargo_deck"
@@ -521,8 +508,9 @@ const SPECS := {
 			"reactor_mk2",
 			"reactor_mk1"
 		],
-		"armour": 4,
+		"armour": 1,
 		"aim": 0.7,
+		"hold": 0.4,
 		"beds": 3,
 		"hull_seed": 91,
 		"morale": "flagship_grundl",
@@ -543,9 +531,8 @@ const SPECS := {
 			"Mott-gr"
 		],
 		"blurb": "x",
-		"after_s": 210,
 		"ammo": 600,
-		"yield_hp": 400
+		"yield_frac": 0.1
 	},
 	"human": {
 		"stage": 4,
@@ -558,7 +545,8 @@ const SPECS := {
 			"pulse_mk3",
 			"pulse_mk3",
 			"pulse_mk3",
-			"human_flak_screen"
+			"human_flak_screen",
+			"pulse_mk3"
 		],
 		"engines": [
 			"engine_mk2",
@@ -566,8 +554,6 @@ const SPECS := {
 			"engine_mk2"
 		],
 		"shields": [
-			"shield_mk2",
-			"shield_mk2",
 			"shield_mk2"
 		],
 		"systems": [
@@ -579,8 +565,9 @@ const SPECS := {
 			"human_reactor_plus",
 			"reactor_mk2"
 		],
-		"armour": 3,
-		"aim": 0.9,
+		"armour": 2,
+		"aim": 0.78,
+		"hold": 0.4,
 		"beds": 4,
 		"hull_seed": 101,
 		"morale": "flagship_human",
@@ -600,8 +587,7 @@ const SPECS := {
 			"Pvt. Lindqvist"
 		],
 		"blurb": "x",
-		"after_s": 210,
 		"ammo": 200,
-		"yield_hp": 25
+		"yield_frac": 0.1
 	}
 }
