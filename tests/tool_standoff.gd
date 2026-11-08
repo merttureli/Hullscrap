@@ -18,7 +18,8 @@ extends SceneTree
 ## structure the enemy lost, the time the guns were in range, and the enemy's own damage and shield use.
 ## cells=1 (the fights-end measurement, 2026-11): every (stage, faction, role) cell of `stages` (default 1,2,3,4,5) x `factions` (default the six base ones,
 ## CELL_FACTIONS) x the roles each flies (`roles`=a,b to keep some; a role the stage or the hull size never rolls, Shipgen.pick_role, is left out), `seeds`
-## (default 12) enemies a cell, of any threat. Stages 1 to 3: the three starters take turns; stages 4 and 5: the prepared build (pbuild, default 7). Every fight carries the probe of tests/fight_probe.gd (what each
+## (default 12) enemies a cell, of any threat. Stages 1 to 3: the three starters take turns; stages 4 and 5: the prepared build (pbuild, default 7);
+## players=stage: the stage's own build (BUILDS) at every stage. fielded=1: only the factions a stage fights (FIELDED). Every fight carries the probe of tests/fight_probe.gd (what each
 ## side's shots did, guns, distance) and a capped one its class (FightProbe.classify). jsonl=<path>: each fight is a line appended as it ends, and a
 ## run started again skips the fights (and enemy searches) already in it, so a restarted machine loses one fight a process; run the shards yourself
 ## (shard=k/n, one jsonl each) and print the tables with sum=<path,path> (lines or JSON arrays).
@@ -46,6 +47,11 @@ const FULL_TRIES := 100  ## hulls a build tries for one that mounts all its guns
 const STARTERS := {"courier": "res://data/ships/starter_courier.json", "rustbucket": "res://data/ships/starter_rustbucket.json", "prism": "res://data/ships/starter_prism.json"}
 const DENTAL := "res://data/ships/dental_plan.json"  ## the authored stage-1 pirate QA met (threat 3, one shield layer)
 const CELL_FACTIONS := ["rustfangs", "concord", "lumen", "wardens", "clans", "hollow"]  ## the six base factions of data/enemy_tables.json (cells=1)
+## fielded=1 (cells=1): the base factions a stage really fights, from the stages of data/regions (and the packs'): Rustfangs from stage 1 (Clan space), the
+## Concord's patrols from 1 and its regions from 2, the wardens from 3 (Lumen space, the Emberkin forges), the Hollow from 5 (the Revenant cairns). No
+## region or event sends the Lumen or the Clans.
+const FIELDED := {1: ["rustfangs", "concord"], 2: ["rustfangs", "concord"], 3: ["rustfangs", "concord", "wardens"], 4: ["rustfangs", "concord", "wardens"],
+	5: ["rustfangs", "concord", "wardens", "hollow"]}
 
 ## The player-like ship of each stage: size, weapons, shields, armour layers. Guns and shield layers are the median row of
 ## data/progression.json (stage 3: 5 guns, 2 layers; 4: 6 and 2; 5: 7 and 3; 6: 7 and 3), the mix is the one a shop and the blueprints
@@ -394,7 +400,7 @@ static func cell_enemies(stage: int, faction: String, role: String, n: int, star
 func cells() -> Array:
 	var out: Array = []
 	for st in Array(str(args.get("stages", "1,2,3,4,5")).split(",")).map(func(x): return int(x)):
-		for faction in (Array(str(args["factions"]).split(",")) if args.has("factions") else CELL_FACTIONS):
+		for faction in (Array(str(args["factions"]).split(",")) if args.has("factions") else (FIELDED[st] if args.has("fielded") else CELL_FACTIONS)):
 			for role in Shipgen.roles_of(str(faction)):
 				if args.has("roles") and not str(args["roles"]).split(",").has(role):
 					continue
@@ -404,6 +410,7 @@ func cells() -> Array:
 
 ## cells=1: this shard's cells (shard=k/n: every n-th cell), each fight a line of `jsonl` as it ends; what a line already holds is skipped.
 func run_cells() -> void:
+	var players := str(args.get("players", ""))  # players=stage: the stage build (BUILDS) at every stage, not the starters and build 7
 	var shard := Array(str(args.get("shard", "0/1")).split("/")).map(func(x): return int(x))
 	var n := int(args.get("seeds", 12))
 	var path := str(args.get("jsonl", OS.get_cache_dir().path_join("hullscrap_cells.jsonl")))
@@ -429,15 +436,16 @@ func run_cells() -> void:
 		if searched.has(key):
 			foes = searched[key]
 		else:
-			foes = cell_enemies(st, all[c][1], all[c][2], n, STARTERS.keys() if st <= 3 else [])
+			foes = cell_enemies(st, all[c][1], all[c][2], n, STARTERS.keys() if st <= 3 and players == "" else [])
 			fa.store_line(JSON.stringify({"cell": key, "enemies": foes}))
 			fa.flush()
 		for e in foes:
-			var who: String = e["starter"] if e["starter"] != "" else "build%d" % int(args.get("pbuild", 7))
+			var pb: int = st if players == "stage" else int(args.get("pbuild", 7))
+			var who: String = e["starter"] if e["starter"] != "" else "build%d" % pb
 			var fkey := "%s|%d|%s|%s|%d" % [who, st, e["faction"], e["role"], int(e["seed"])]
 			if done.has(fkey):
 				continue
-			var row := fight(st, e, str(e["starter"]), int(args.get("pbuild", 7)) if e["starter"] == "" else 0)
+			var row := fight(st, e, str(e["starter"]), pb if e["starter"] == "" else 0)
 			row.merge({"key": fkey, "cell": "%d|%s|%s" % [st, e["faction"], e["role"]], "role": e["role"], "who": who, "esize": e["size"]})
 			if row["state"] == "fighting":
 				row["class"] = Probe.classify(row)
