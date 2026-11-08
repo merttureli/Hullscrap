@@ -79,6 +79,18 @@ func test_a_faction_with_no_list_keeps_the_old_ranking() -> void:
 	eq(roles, ["escort", "bulwark", "gunboat", "sniper"], "the favoured categories rank the roles, the table's order breaking ties (shield 4: escort, bulwark; weapons 3, skill 3)")
 
 
+func test_the_bulwark_first_flies_at_stage_2() -> void:
+	var seen := {1: 0, 2: 0}
+	for faction in ["concord", "wardens"]:
+		for sd in 60:
+			for stage in [1, 2]:
+				seen[stage] += int(Shipgen.pick_role(faction, "medium", sd, stage == 1, stage) == "bulwark")
+	eq(seen[1], 0, "stage 1 pirates field no fortress")
+	check(seen[2] > 10, "from stage 2 the Concord and the Wardens fly it (%d of 120)" % seen[2])
+	var ship = Shipgen.from_spec(Shipgen.spec("concord", "medium", 5, 120.0, false, 1))
+	check(ship != null and ship.get_meta("shipgen")["role"] != "bulwark", "a stage 1 spec rolls another role")
+
+
 func test_a_stage_with_no_bays_never_rolls_a_carrier_or_a_boarder() -> void:
 	for faction in ["lumen", "wardens", "clans", "rustfangs"]:
 		for sd in 40:
@@ -271,7 +283,7 @@ func test_the_flanker_gets_behind_the_foes_beam() -> void:
 
 func test_the_siege_boat_fires_its_volley_then_backs_off() -> void:
 	var ship = _roled("concord", "large", "siege", 61, 260.0)
-	var d := _arena(ship, 3400.0)
+	var d := _arena(ship, 3600.0, 11, "gen:concord:large:7:30000")  # (a foe of many guns: a siege boat closes on one whose guns are all out)
 	var a: Arena = d[0]
 	var ai: PilotAI = d[1]
 	a.ships[0].ai_volley = true  # (the session sets it for every enemy)
@@ -316,6 +328,8 @@ func test_the_bulwark_closes_slowly_and_faces_its_best_sector() -> void:
 			best = s
 	check(facing != 0, "it turned the spent bow sector away (facing sector %d)" % facing)
 	check(Shields.hp_of(co, facing) >= Shields.hp_of(co, best) - 1e-6, "and shows the foe its strongest one (sector %d: %.1f HP, the best %.1f)" % [facing, Shields.hp_of(co, facing), Shields.hp_of(co, best)])
+	_step(a, ai, 10.0)
+	check(co.weights.all(func(w): return float(w) <= PilotAI.BULWARK_MAX_W + 1e-6), "no sector holds more than %.1f of its shield (%s)" % [PilotAI.BULWARK_MAX_W, str(co.weights)])
 	if had == null:
 		stats.erase("sectors")
 	else:

@@ -52,7 +52,8 @@ extends RefCounted
 ##   - "siege" (_siege): it holds the gap at SIEGE_HOLD of the reach of its long guns (siege_reach()) and fires in volleys (the session puts its guns in Volley);
 ##     once a volley is out it backs off to SIEGE_BACK of its reach for SIEGE_BACK_S at least and while half of those guns reload, then returns.
 ##   - "bulwark" (_bulwark): it closes slowly (BULWARK_CLOSE px/s at most) and turns its strongest shield sector (the most HP) toward the
-##     foe, the balance shifted that way (_balance); with one sector or none it shows the foe its bow. It breaks late (its ai's break_structure).
+##     foe, the balance shifted that way (_balance, to BULWARK_MAX_W at most); with one sector or none it shows the foe its bow. It breaks late
+##     (its ai's break_structure).
 
 const Shields = preload("res://scripts/combat/shields.gd")
 const Collisions = preload("res://scripts/combat/collisions.gd")
@@ -114,6 +115,7 @@ const SIEGE_COOLING := 0.5  ## a volley is out when more than this share of its 
 const SIEGE_RELOAD_S := 0.5
 const BULWARK_CLOSE := 140.0  ## px/s a bulwark closes at, at most
 const BULWARK_SWAP := 1.25  ## it turns another sector to the foe once that holds this many times the HP of the one facing it
+const BULWARK_MAX_W := 1.5  ## the most shield weight a bulwark stacks on the sector facing the foe (at 2.0 a starter's guns never beat its recharge)
 
 var arena
 var me: int
@@ -711,7 +713,10 @@ func _balance(dt: float) -> void:
 	if _shift_in > 0.0:
 		return
 	_shift_in = shift_interval()
-	Shields.shift_sector(co, Shields.sector_of_world_dir(co, arena.ships[foe].flight.pos - co.flight.pos))
+	var s := Shields.sector_of_world_dir(co, arena.ships[foe].flight.pos - co.flight.pos)
+	if style == "bulwark" and float(co.weights[s]) + Shields.Balance.STEP > BULWARK_MAX_W + 1e-6:
+		return  # a bulwark's facing sector holds no more than BULWARK_MAX_W
+	Shields.shift_sector(co, s)
 
 
 # --- shooting ------------------------------------------------------------------------------------
