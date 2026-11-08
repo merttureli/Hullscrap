@@ -50,7 +50,7 @@ extends RefCounted
 ##     goes round the foe's hull to get there; near that point it fights as the others do and is soon carried on across. Its
 ##     priority() puts the foe's engines and weapons first.
 ##   - "siege" (_siege): it holds the gap at SIEGE_HOLD of the reach of its long guns (siege_reach()) and fires in volleys (the session puts its guns in Volley);
-##     once a volley is out it backs off to SIEGE_BACK of its reach for SIEGE_BACK_S at least and while any of those guns reloads, then returns.
+##     once a volley is out it backs off to SIEGE_BACK of its reach for SIEGE_BACK_S at least and while half of those guns reload, then returns.
 ##   - "bulwark" (_bulwark): it closes slowly (BULWARK_CLOSE px/s at most) and turns its strongest shield sector (the most HP) toward the
 ##     foe, the balance shifted that way (_balance); with one sector or none it shows the foe its bow. It breaks late (its ai's break_structure).
 
@@ -90,12 +90,12 @@ const RAM_MIN_CLOSE := 150.0  ## px/s: the closing speed it assumes when working
 const RAM_MAX_LEAD_S := 4.0
 const RAM_ALIGNED := 0.45  ## rad: full throttle when the heading is this close to the steering direction
 const FLEE_ALIGNED := 0.6  ## rad: a fleeing ship burns once its nose is this close to straight away from the foe
-const SKIRMISH_HOLD := 0.9  ## a skirmisher holds the gap between the hulls at this share of its longest reach
-const SKIRMISH_RUN := 0.6  ## inside this share it turns and burns away, until it is back out at SKIRMISH_TURN
-const SKIRMISH_TURN := 0.75  ## the share at which a run ends: it turns back, and its way carries it out to the hold
+const SKIRMISH_HOLD := 0.8  ## a skirmisher holds the gap between the hulls at this share of its longest reach (0.9 kept it out of a starter's guns: the fights ran to the cap)
+const SKIRMISH_RUN := 0.5  ## inside this share it turns and burns away, until it is back out at SKIRMISH_TURN
+const SKIRMISH_TURN := 0.7  ## the share at which a run ends: it turns back, and its way carries it out to the hold
 const SKIRMISH_RUN_MAX_S := 6.0  ## a run that has not opened the gap in this long ends: it turns and fights
 const SKIRMISH_FIGHT_S := 8.0  ## after a run it fights this long before it runs again (the hit of hit and run)
-const CARRIER_MARGIN := 1.15  ## a carrier keeps the gap at this many times the foe's longest reach
+const CARRIER_MARGIN := 1.05  ## a carrier keeps the gap at this many times the foe's longest reach (1.15 kept it where nothing but its drones reached: fights ran to the cap)
 const CARRIER_DRONE_SHARE := 0.85  ## and its centre within this share of its drones' reach of the foe's
 const BOARD_CLOSE_MAX := 560.0  ## px/s a boarder closes at, at most
 const BOARD_GAP := 2.0 * HULL_MARGIN  ## px between the hulls a boarder holds while its people are aboard
@@ -629,8 +629,8 @@ func cooling_share() -> float:
 	return float(cooling) / float(n) if n > 0 else 0.0
 
 
-## Siege boat: a volley from range (more than SIEGE_COOLING of its guns there cooling), back off while any of them reloads and for
-## SIEGE_BACK_S at least, come back (see the top).
+## Siege boat: a volley from range (more than SIEGE_COOLING of its guns there cooling), back off for SIEGE_BACK_S at least and while
+## half of them still reload, come back (see the top).
 func _siege(dt: float) -> void:
 	if _due(dt):
 		var r := siege_reach()
@@ -644,8 +644,8 @@ func _siege(dt: float) -> void:
 		_reload = SIEGE_BACK_S
 	elif _reload >= 0.0:
 		_reload -= dt
-		if _reload < 0.0 and share > 0.0:
-			_reload = 0.0  # still reloading: it stays back
+		if _reload < 0.0 and share >= SIEGE_COOLING:
+			_reload = 0.0  # half its guns still reloading: it stays back (not for one slow gun of many: it waited on a 7 s missile and the fights ran to the cap)
 	_fly(dt, _sd["back"] if _reload >= 0.0 else _sd["hold"])
 
 
