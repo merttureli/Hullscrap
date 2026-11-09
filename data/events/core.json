@@ -2,16 +2,45 @@
 	"_doc": "The core events of the Drift campaign: enough to play and test the loop (docs/CONTENT.md section 8). The big event packs live in the other files of this folder; scripts/space/events.gd loads every *.json here. Keys: id, type (a node type, or page for a follow-up reached by goto), weight, once, requires, text, choices, after_win. Station events name their station in requires.node.",
 	"events": [
 		{
-			"id": "station_debt_intro", "type": "station", "weight": 100, "once": true,
-			"requires": {"node": "rusthold", "not_flag": "met_ma"},
-			"text": "Ma Gantry meets you on the dock herself. She is small, loud and holding a clipboard made from what used to be a door. \"That hull came out of my yards,\" she says. \"The dock office put a guidance program in every one, so it will talk at you. Mind it. It means well.\"",
+			"id": "station_opening_blank", "type": "station", "weight": 100, "once": true, "opening": true,
+			"requires": {"node": "rusthold", "flag": "build_first", "not_flag": "met_ma"},
+			"text": "The alarm has been going for an hour and nobody can switch it off. Ma Gantry's voice is on every speaker on the dock, loading people onto anything that flies: \"Barge, tugs, that thing with the wings, I don't care what it is.\" Out past the dock windows a green light is rolling along the gate lane, slow as weather. All you have is a frame on the cradle and a pile of parts beside it, and a dock hand shouting that the bay doors close in ten minutes.",
 			"choices": [
-				{"text": "\"Thanks, Ma.\"", "outcomes": [
-					{"weight": 100, "text": "\"Meridian's the Concord yard, a few lanes out. Don't tell them I sent you.\" She thumps a hoop of wire and cable onto the clipboard. \"And take this net. Scrap floats by for free out here. Bolt it to an outer wall.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "rep": {"clans": 1}, "items": {"net_mouth_scrap": 1}}}]},
-				{"text": "\"What's the catch?\"", "outcomes": [
-					{"weight": 100, "text": "\"For that,\" Ma agrees, tapping your hull with the clipboard. It rings like a dropped pan. She slides a hoop of wire and cable over anyway. \"Take the net, too. Scrap floats by for free out here.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "items": {"net_mouth_scrap": 1}}}]},
-				{"text": "[Fenn] Read the fine print aloud, slowly.", "requires": {"species": "fenn"}, "outcomes": [
-					{"weight": 100, "text": "Your Fenn finds a clause about \"reasonable wear\" and reads it out twice. Ma stares, then laughs like a bolt coming loose. \"Never do that again. Take the net. Scrap floats by for free out here.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "rep": {"clans": 1}, "items": {"net_mouth_scrap": 1}}}]}
+				{"text": "Take two survivors aboard.", "outcomes": [
+					{"weight": 40, "text": "Two people from the dock queue push through with one bag each: a human with a welder's scars and a Fenn who has already started counting your air. \"Nobody asked us to be useful,\" says the Fenn. \"We decided anyway.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "recruit": [{"species": "human"}, {"species": "fenn"}]}},
+					{"weight": 30, "text": "A Basalt carries a sleeping child's mother aboard on one shoulder and a toolbox on the other. The mother wakes, takes in the cabin and says, \"This will do.\" The Basalt sits down on the floor, which is what a Basalt does when it has decided to stay.", "effects": {"flag": "met_ma", "reveal": "meridian", "recruit": [{"species": "basalt"}, {"species": "human"}]}},
+					{"weight": 30, "text": "A Drakkin and a Rattler get to your ramp together, arguing over whose idea it was. Neither will say. Ma's voice cuts in on your comm: \"Take them. They're a matched set. Go to Meridian, it's the Concord yard, and don't tell them I sent you.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "recruit": [{"species": "drakkin"}, {"species": "rattler"}]}}
+				]},
+				{"text": "Help load the barge.", "outcomes": [
+					{"weight": 40, "text": "You spend the ten minutes at the barge's ramp, passing children hand to hand into the hold. Ma counts heads and does not say thank you. \"One of mine can ride with you,\" she says. \"Only one. The rest go where I go.\" A human with a welder's scars is already on your ramp.", "effects": {"flag": ["met_ma", "helped_barge"], "reveal": "meridian", "rep": {"clans": 1}, "recruit": {"species": "human"}}},
+					{"weight": 30, "text": "You spend the ten minutes at the barge's ramp, passing crates and children into the hold. Ma counts heads and does not say thank you. \"One of mine can ride with you,\" she says. \"Only one.\" A Fenn with a toolbag steps off the ramp and onto yours, as if she had always planned to.", "effects": {"flag": ["met_ma", "helped_barge"], "reveal": "meridian", "rep": {"clans": 1}, "recruit": {"species": "fenn"}}},
+					{"weight": 30, "text": "You spend the ten minutes at the barge's ramp, passing crates and children into the hold. Ma counts heads and does not say thank you. \"One of mine can ride with you,\" she says. \"Only one.\" A Rattler comes out of a vent, takes your sleeve in both hands and walks you to your own airlock.", "effects": {"flag": ["met_ma", "helped_barge"], "reveal": "meridian", "rep": {"clans": 1}, "recruit": {"species": "rattler"}}}
+				]},
+				{"text": "Grab what you can and go.", "outcomes": [
+					{"weight": 60, "text": "You run the dock with a cargo net and take what is loose: bolts, plate, coils of copper. Behind you the bay doors begin to close on someone who is shouting your name. You do not look back until you are clear of the dock. \"Meridian,\" says Ma on the comm, tiredly. \"Go.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "items": {"scrap": 80, "copper": 20}}},
+					{"weight": 40, "text": "The parts cage is open and nobody is guarding it. You take two radiators, a roll of plate and everything that will fit in the net. \"Meridian,\" says Ma on the comm, tiredly. \"The Concord yard. Go.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "items": {"scrap": 40, "radiator": 2}}}
+				]}
+			]
+		},
+		{
+			"id": "station_opening_hull", "type": "station", "weight": 100, "once": true, "opening": true,
+			"requires": {"node": "rusthold", "not_flag": ["met_ma", "build_first"]},
+			"text": "The alarm has been going for an hour and nobody can switch it off. Ma Gantry's voice is on every speaker on the dock, loading people onto anything that flies: \"Barge, tugs, that thing with the wings, I don't care what it is.\" Out past the dock windows a green light is rolling along the gate lane, slow as weather. The hull you have been patching sits in bay six with its lamps on, and a dock hand is shouting that the doors close in ten minutes.",
+			"choices": [
+				{"text": "Take two survivors aboard.", "outcomes": [
+					{"weight": 40, "text": "Two people from the dock queue push through with one bag each: a human with a welder's scars and a Fenn who has already started counting your air. \"Nobody asked us to be useful,\" says the Fenn. \"We decided anyway.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "recruit": [{"species": "human"}, {"species": "fenn"}]}},
+					{"weight": 30, "text": "A Basalt carries a sleeping child's mother aboard on one shoulder and a toolbox on the other. The mother wakes, takes in the cabin and says, \"This will do.\" The Basalt sits down on the floor, which is what a Basalt does when it has decided to stay.", "effects": {"flag": "met_ma", "reveal": "meridian", "recruit": [{"species": "basalt"}, {"species": "human"}]}},
+					{"weight": 30, "text": "A Drakkin and a Rattler get to your ramp together, arguing over whose idea it was. Neither will say. Ma's voice cuts in on your comm: \"Take them. They're a matched set. Go to Meridian, it's the Concord yard, and don't tell them I sent you.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "recruit": [{"species": "drakkin"}, {"species": "rattler"}]}}
+				]},
+				{"text": "Help load the barge.", "outcomes": [
+					{"weight": 40, "text": "You spend the ten minutes at the barge's ramp, passing children hand to hand into the hold. Ma counts heads and does not say thank you. \"One of mine can ride with you,\" she says. \"Only one. The rest go where I go.\" A human with a welder's scars is already on your ramp.", "effects": {"flag": ["met_ma", "helped_barge"], "reveal": "meridian", "rep": {"clans": 1}, "recruit": {"species": "human"}}},
+					{"weight": 30, "text": "You spend the ten minutes at the barge's ramp, passing crates and children into the hold. Ma counts heads and does not say thank you. \"One of mine can ride with you,\" she says. \"Only one.\" A Fenn with a toolbag steps off the ramp and onto yours, as if she had always planned to.", "effects": {"flag": ["met_ma", "helped_barge"], "reveal": "meridian", "rep": {"clans": 1}, "recruit": {"species": "fenn"}}},
+					{"weight": 30, "text": "You spend the ten minutes at the barge's ramp, passing crates and children into the hold. Ma counts heads and does not say thank you. \"One of mine can ride with you,\" she says. \"Only one.\" A Rattler comes out of a vent, takes your sleeve in both hands and walks you to your own airlock.", "effects": {"flag": ["met_ma", "helped_barge"], "reveal": "meridian", "rep": {"clans": 1}, "recruit": {"species": "rattler"}}}
+				]},
+				{"text": "Grab what you can and go.", "outcomes": [
+					{"weight": 60, "text": "You run the dock with a cargo net and take what is loose: bolts, plate, coils of copper. Behind you the bay doors begin to close on someone who is shouting your name. You do not look back until you are clear of the dock. \"Meridian,\" says Ma on the comm, tiredly. \"Go.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "items": {"scrap": 80, "copper": 20}}},
+					{"weight": 40, "text": "The parts cage is open and nobody is guarding it. You take two radiators, a roll of plate and everything that will fit in the net. \"Meridian,\" says Ma on the comm, tiredly. \"The Concord yard. Go.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "items": {"scrap": 40, "radiator": 2}}}
+				]}
 			]
 		},
 		{

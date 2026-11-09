@@ -73,6 +73,8 @@ const SHOP_PREFIX := "shop:"  ## the id of a small shop is "shop:<node id>:<POI 
 const HOSTILES_TEXT := "hostiles too close to jump"
 const SPOOL_TEXT := "spool the jump drive first"
 const NOT_AT_EXIT := "not at the exit beacon"
+const RUSTHOLD := "rusthold"
+const RUSTHOLD_TEXT := "Rusthold's lights stay on. Its radio goes quiet."
 const TOW_STEPS := 2  ## the Hollow tide steps a tow home costs (the jump's own step and one more)
 const TOW_FUEL := 2
 const HOSTILE_PATROL := {"id": "patrol_hostile", "type": "patrol", "once": false,
@@ -422,8 +424,18 @@ func _advance(n: int) -> Array:
 	var notes := []
 	jumps += n
 	notes.append_array(_tide_notes(tide.advance(n)))
+	notes.append_array(_rusthold_falls())
 	_mark_hollow(true)
 	return notes
+
+
+## On the first jump of a run Gantry Rusthold goes Hollow: a ghost station, no trade, no services (the opening, story v2).
+func _rusthold_falls() -> Array:
+	if region_id != "clan_space" or not drift.has(RUSTHOLD) or tide.fallen.has(RUSTHOLD) or flags.has(BUILD_FIRST):
+		return []
+	tide.fallen[RUSTHOLD] = true
+	chronicle.append({"jumps": jumps, "kind": "event", "id": "rusthold_falls", "text": RUSTHOLD_TEXT})
+	return [RUSTHOLD_TEXT]
 
 
 ## The line for `fell` places the Hollow tide has just taken (none for 0).

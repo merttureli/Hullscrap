@@ -65,7 +65,7 @@ func test_the_loader_reads_every_json_file_in_the_folder() -> void:
 		from[e.files[id]] = true
 	check(from.has("res://data/events/core.json"), "core.json is read")
 	check(from.has("res://data/events/drift_pack1.json") and from.has("res://data/events/drift_pack2.json") and from.has("res://data/events/stations.json"), "both packs and the station greetings are read")
-	check(e.has("station_debt_intro") and e.has("distress_hauler_fire") and e.has("asteroid_tumbling_rock"), "events of both files are there")
+	check(e.has("station_opening_hull") and e.has("distress_hauler_fire") and e.has("asteroid_tumbling_rock"), "events of both files are there")
 
 
 func test_every_outcome_of_every_event_applies_and_every_choice_can_be_taken() -> void:
@@ -138,7 +138,7 @@ func test_core_events_cover_every_node_type_and_station() -> void:
 				seen[ev["requires"].get("node", "")] = true
 	for t in ["pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "empty", "asteroid_field", "rusthold", "meridian", "prism"]:
 		check(seen.has(t), "core.json has an event for " + t)
-	var intro: Dictionary = e.get_event("station_debt_intro")
+	var intro: Dictionary = e.get_event("station_opening_hull")
 	check(intro["once"] and intro["requires"]["node"] == "rusthold", "Ma's introduction is a once-event at Rusthold")
 	check(JSON.stringify(intro).contains("met_ma"), "it sets the flag met_ma")
 	check(e.get_event("repo_collectors").is_empty() and e.get_event("repo_fight").is_empty(), "the repo crew are gone")
@@ -669,11 +669,11 @@ func test_waiting_with_an_empty_tank_brings_a_trader() -> void:
 	eq(c.jumps, 1, "and time passed")
 
 
-func test_station_events_greet_each_station_and_the_debt_intro_opens_the_run() -> void:
+func test_station_events_greet_each_station_and_the_opening_opens_the_run() -> void:
 	var c := Campaign.new(5)
 	var ship := _ship()
 	var a := c.arrive(ship)
-	eq(a["event"].get("id", ""), "station_debt_intro", "a new run opens with Ma Gantry at Rusthold")
+	eq(a["event"].get("id", ""), "station_opening_hull", "a new run opens with Ma Gantry at Rusthold")
 	var r := c.events.choose(a["event"], 0, c, ship, a["node"])
 	check(r["ok"] and c.flags.has("met_ma"), "the opening sets met_ma")
 	var greeting: Dictionary = c.arrive(ship)["event"]

@@ -657,7 +657,7 @@ func test_a_new_run_meets_ma_gantry_at_rustholds_beacon_then_the_station_menu() 
 	s.ship_pos = s.main_poi()["pos"]
 	map.open_poi(s.trigger(c, d["sim"].player_ship()), s)
 	check(map.visible and map.panel_only, "the panels open over the sector, with no map")
-	check(map.event_panel.visible and map.event_panel.event.get("id", "") == "station_debt_intro", "Ma Gantry's introduction is up")
+	check(map.event_panel.visible and map.event_panel.event.get("id", "") == "station_opening_hull", "the alarm night opening is up")
 	check(not map.station_panel.visible, "the menu waits")
 	eq(map.event_panel.choose(0), "", "'Thanks, Ma'")
 	check(map.event_panel.page == "result" and map.event_panel.result["text"] != "", "the outcome is shown")

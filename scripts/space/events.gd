@@ -26,6 +26,7 @@ extends RefCounted
 ##   a list (any one of them); `species_any` and `component_any` mean the same and can sit beside the plain key (both must hold).
 ## - At most `crew.offers_per_region` (data/drift.json) events that add crew fire in a region: once that many have (Campaign.crew_offers),
 ##   the others are out of the pool until the next region. Ada's pod and the events of the packs in `crew.offers_exempt_packs` are free.
+## - `opening` (true) marks the first event of a run: it may add crew without the rare-crew gate or the region's offer cap.
 ## - `landmark` (true, or a title) on an event makes it a landmark (docs/CONTENT.md section 13): when a choice with
 ##   effects is taken (the rule of `once`) it is recorded in the profile (the first time ever) and in the run log. A landmark
 ##   does not end the run. The effect `unlock` (an id of data/unlocks.json, or a list) earns something for the next runs and
@@ -69,7 +70,7 @@ const DIR := "res://data/events"
 const LOGS_DIR := "res://data/logs"
 const NODE_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty"]
 const EVENT_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty", "page", "call", "quest", "hollow", "boarding_npc", "boarding_site", "exp_planet", "exp_base", "exp_ruin", "exp_platform"]
-const EVENT_KEYS: Array = ["id", "type", "weight", "once", "requires", "title", "text", "choices", "after_win", "landmark", "fallback"]
+const EVENT_KEYS: Array = ["id", "type", "weight", "once", "requires", "title", "text", "choices", "after_win", "landmark", "fallback", "opening"]
 const EVENT_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max", "crew_min", "crew_max", "site", "role", "theme", "mark"]
 const CHOICE_KEYS: Array = ["text", "requires", "outcomes", "pay", "blue", "needs_suit"]
 const CHOICE_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max", "crew_min", "crew_max", "species", "species_any", "trait", "items", "pay", "component", "component_any", "credits", "site", "role", "theme", "mark", "gear", "skill", "suits"]
@@ -233,6 +234,8 @@ func _index_recruiters() -> void:
 				effects.append(_dict(_dict(o).get("effects")))
 				effects.append(_dict(_dict(_dict(o).get("after_win")).get("effects")))
 		var kind := ""
+		if bool(ev.get("opening", false)):
+			continue  # the opening hands out survivors as crew: never gated, never counted
 		for eff in effects:
 			for r in _list(eff.get("recruit")):
 				var rd := _dict(r)
@@ -849,6 +852,8 @@ func _check_event(ev: Dictionary, path: String, known: Dictionary, errs: Array[S
 		bad.call("once must be true or false")
 	if ev.has("fallback") and not ev["fallback"] is bool:
 		bad.call("fallback must be true or false")
+	if ev.has("opening") and not ev["opening"] is bool:
+		bad.call("opening must be true or false")
 	if ev.has("landmark") and not (ev["landmark"] is bool or (ev["landmark"] is String and ev["landmark"] != "")):
 		bad.call("landmark must be true, false or a title")
 	if ev.has("requires"):
