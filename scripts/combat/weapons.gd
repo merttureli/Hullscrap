@@ -263,6 +263,22 @@ func can_fire(arena, idx: int, uid: int, aim: Vector2) -> String:
 	return ""
 
 
+## Could mount `uid` of ship `idx` hit the world point `aim` once it is ready: within its range, and inside its arc (a turret) or gimbal, or (a
+## fixed gun) with its barrel at the edge of the gimbal lined up on the nearest foe's hull, the rule the pilots and AUTO fire by (Volley waits only for these).
+func can_bear(arena, idx: int, uid: int, aim: Vector2) -> bool:
+	var m = arena.ships[idx].mounts.get(uid)
+	if m == null:
+		return false
+	var w := def(m["id"])
+	var origin := muzzle_of(arena, idx, m)
+	if origin.distance_to(aim) > float(w["range"]):
+		return false
+	if in_arc(arena, idx, m, aim):
+		return true
+	var tgt := target_of(arena, idx)
+	return not w["turret"] and tgt >= 0 and _pilot(arena, idx, tgt).on_hull(origin, Vector2(m["aim"]).rotated(arena.ships[idx].flight.angle), float(w["range"]))
+
+
 ## Can mount `mount` of ship `idx` bear on the world point `aim`? A fixed gun, when the point lies inside
 ## its gimbal cone (else it fires along the edge of that cone); a turret, inside its arc.
 func in_arc(arena, idx: int, mount: Dictionary, aim: Vector2) -> bool:

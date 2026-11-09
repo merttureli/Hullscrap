@@ -88,6 +88,20 @@ func test_a_volley_waits_at_most_three_seconds() -> void:
 	eq(_shot_ticks().size(), 5, "after 3 s the ready guns go without the slow one")
 
 
+func test_a_volley_does_not_wait_for_a_gun_that_cannot_bear() -> void:  # (fights-end 2026-11: a flagship's pulses waited on its railgun)
+	_duel([1.0], true)
+	arena.weapons.defs["vg_back"] = {"kind": "laser", "damage_type": "energy", "damage": 0.1, "gimbal": 5, "cooldown": 2.5, "range": 2000}
+	var back: int = arena.add_mount(0, "vg_back", Vector2(10.5, 15.5), true, Vector2.LEFT)  # it looks west, the target is east
+	arena.ships[0].volley[1] = true
+	check(arena.fire(0, back, Vector2(800.0, 0.0), true), "the stern gun fires once (forced) and cools for 2.5 s")
+	check(not arena.weapons.can_bear(arena, 0, back, Vector2(800.0, 0.0)), "it cannot bear on the target east of it")
+	check(arena.weapons.can_bear(arena, 0, guns[0], Vector2(800.0, 0.0)), "the gun that faces it can")
+	for i in 12:  # the pilot asks only the gun that bears
+		arena.fire(0, guns[0], Vector2(800.0, 0.0))
+		arena.step(1.0 / 60.0)
+	eq(_shot_ticks().size(), 2, "it fires at once, not after the stern gun's 2.5 s (%s)" % str(_shot_ticks()))
+
+
 func test_ripple_is_unchanged() -> void:
 	_duel([1.0, 2.0, 3.0], false)
 	check(arena.fire(0, guns[0], Vector2(800.0, 0.0)), "a Ripple gun fires at once")

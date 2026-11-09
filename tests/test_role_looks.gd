@@ -13,6 +13,8 @@ const RATE_FACTIONS := ["rustfangs", "concord", "lumen", "wardens", "clans", "ho
 const RATE_SIZES := ["medium", "large"]
 const RATE_SEEDS := 5
 ## Ships of the old roles (pinned by `:role:`) before the role looks: the sha256 (first 16 hex) of their dict, name, crew, pilot and meta.
+## (The wardens' ships and their race's, the Sporeling's, changed hash in fights-end 2026-11 for their ai's morale alone, `hollow` to `warden`:
+## the same hull, parts and crew, checked with the old morale put back.)
 const OLD_SHIPS := {
 	"gen:rustfangs:small:40:6000:s3:role:gunboat": "e6c12806740770ab",
 	"gen:rustfangs:small:53:9500:s3:role:brawler": "8b59550c5a93b6b1",
@@ -32,12 +34,12 @@ const OLD_SHIPS := {
 	"gen:lumen:medium:235:9500:s3:role:gunboat": "f63964e8d271ec1b",
 	"gen:lumen:large:248:13000:s3:role:brawler": "56197fa131fde058",
 	"gen:lumen:large:261:16500:s3:role:escort": "d011fa0d1d48c96a",
-	"gen:wardens:small:274:20000:s3:role:sniper": "1ef4b9068e655791",
-	"gen:wardens:small:287:23500:s3:role:gunboat": "ff1f5f6e830b5a23",
-	"gen:wardens:medium:300:27000:s3:role:gunboat": "134a50f89392efcd",
-	"gen:wardens:medium:313:6000:s3:role:brawler": "6f1bb767de7dede1",
-	"gen:wardens:large:326:9500:s3:role:escort": "76016404ba4a8f1f",
-	"gen:wardens:large:339:13000:s3:role:sniper": "07bfe98193b98734",
+	"gen:wardens:small:274:20000:s3:role:sniper": "6e305b4892ae7fec",
+	"gen:wardens:small:287:23500:s3:role:gunboat": "8802f09660fcf94d",
+	"gen:wardens:medium:300:27000:s3:role:gunboat": "81446a06beec3610",
+	"gen:wardens:medium:313:6000:s3:role:brawler": "592aeac0beba4d14",
+	"gen:wardens:large:326:9500:s3:role:escort": "ce100d56beb53dff",
+	"gen:wardens:large:339:13000:s3:role:sniper": "53788011e7e69788",
 	"gen:clans:small:352:16500:s3:role:gunboat": "312a47292fdfbf00",
 	"gen:clans:small:365:20000:s3:role:gunboat": "84fbdd217d47fb38",
 	"gen:clans:medium:378:23500:s3:role:brawler": "274eb2f8d7e73908",
@@ -62,12 +64,12 @@ const OLD_SHIPS := {
 	"gen:grundl:medium:625:16500:s3:role:gunboat": "299f00939eabe66e",
 	"gen:grundl:large:638:20000:s3:role:brawler": "7db3573e139e3d3a",
 	"gen:grundl:large:651:23500:s3:role:escort": "ef074aea6546efb1",
-	"gen:sporeling:small:664:27000:s3:role:sniper": "0c55b64bda8609db",
-	"gen:sporeling:small:677:6000:s3:role:gunboat": "013345cc2b311a15",
-	"gen:sporeling:medium:690:9500:s3:role:gunboat": "b9d9a81f6c4b1c41",
-	"gen:sporeling:medium:703:13000:s3:role:brawler": "362aa31b2a058ef7",
-	"gen:sporeling:large:716:16500:s3:role:escort": "b0e908b60d9b4b2f",
-	"gen:sporeling:large:729:20000:s3:role:sniper": "11041516c893aa9e",
+	"gen:sporeling:small:664:27000:s3:role:sniper": "8efdb59f14c2ee9d",
+	"gen:sporeling:small:677:6000:s3:role:gunboat": "350c272a36c2ad7a",
+	"gen:sporeling:medium:690:9500:s3:role:gunboat": "e326df2cb87326fc",
+	"gen:sporeling:medium:703:13000:s3:role:brawler": "5fe46857294e8993",
+	"gen:sporeling:large:716:16500:s3:role:escort": "16fbc05d942c1d0d",
+	"gen:sporeling:large:729:20000:s3:role:sniper": "a722e40a24aab560",
 	"gen:prismatic:small:742:23500:s3:role:gunboat": "baa0be069538e9bd",
 	"gen:prismatic:small:755:27000:s3:role:gunboat": "5d906c384c1334e6",
 	"gen:prismatic:medium:768:6000:s3:role:brawler": "db51ed0a8d862903",

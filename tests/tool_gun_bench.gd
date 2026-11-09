@@ -10,7 +10,12 @@ extends SceneTree
 ##   gun, stationary, face to face for `secs`; the winner is the hull with more structure left. Win rate over the `seeds` hulls (plain and shielded).
 ## counters: point defence against missiles and slow shells (a hull with 3 pd_mk2 against the same hull without), shields against beams and lasers (the solo damage on
 ##   shielded hulls over plain ones, by family), and the armour table (the share of a gun's damage type the plating lets through).
-## Keys: tiers (default 1,2,3), seeds (default 6 of each kind), secs (60), jobs (processes, default 4), out (write the rows), sum (print the tables of out files).
+## land: where a gun's damage goes at the hold distance of a real fight (the fights-end measurement, 2026-11): every gun of a tier (and the starters' own) fires 3
+##   copies, as solo, for `secs` at `seeds` typical ships of each of the six base factions of the tier's stage (the rolled role, tests/tool_standoff.gd
+##   CELL_FACTIONS), stationary, `holds` px off its hull (one a tier, default 811,711,654: the hull gaps of tool_standoff at stages 1, 2 and 4; `gap` sets one for
+##   all). The probe of tests/fight_probe.gd splits the listed damage (damage x shots (x a beam's seconds) / cooldown x 3, over `secs`) into what its
+##   shield took, what the slope and the plating ate, what the blocks lost (hull and parts) and the rest (missed, bounced, overkill, or never fired).
+## Keys: gap (px, solo and land: one distance for every gun instead of 0.65 x its range), tiers (default 1,2,3), seeds (default 6 of each kind), secs (60), jobs (processes, default 4), out (write the rows), sum (print the tables of out files).
 ## Internal: shard (k/n), rows.
 
 const Ship = preload("res://scripts/ship/ship.gd")
@@ -22,10 +27,14 @@ const Standoff = preload("res://tests/tool_standoff.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
 const GV = preload("res://tests/gun_value.gd")
 const Wall = preload("res://tests/fixture_wall.gd")
+const Probe = preload("res://tests/fight_probe.gd")
+const Shipgen = preload("res://scripts/space/shipgen.gd")
 
 const STEP := 1.0 / 60.0
 const STAGE_OF_TIER := {1: 1, 2: 2, 3: 4}  ## the standoff stage whose enemies are of that tier
 const COPIES := 3
+const STARTER_GUNS := ["pulse_mk1", "bolt_thrower_scrap", "heat_lance_neon"]  ## the guns of the three starters (land mode reads them at tier 1)
+const HOLDS := [811.0, 711.0, 654.0]  ## land mode: the hull gap at tiers 1, 2, 3 (tool_standoff stages 1, 2 and 4)
 const BOW_CELL_Y := 1.5
 
 var args := {}
@@ -84,7 +93,7 @@ func _fan_out(jobs: int) -> void:
 	var pids := []
 	var files := []
 	var pass_on := []
-	for key in ["mode", "tiers", "seeds", "secs", "guns"]:
+	for key in ["mode", "tiers", "seeds", "secs", "guns", "gap", "holds"]:
 		if args.has(key):
 			pass_on.append("%s=%s" % [key, args[key]])
 	for k in jobs:
@@ -165,6 +174,17 @@ func tasks_for(mode: String) -> Array:
 		for kind in ["plain", "shield"]:
 			for e in Standoff.enemies(STAGE_OF_TIER[tier], kind, n):
 				specs.append(e)
+		if mode == "land":
+			var gl := guns_of(tier)
+			if tier == 1:
+				for id in STARTER_GUNS:
+					if not gl.has(id):
+						gl.append(id)
+			for faction in Standoff.CELL_FACTIONS:
+				for e in typical(STAGE_OF_TIER[tier], faction, n):
+					for id in gl:
+						out.append({"mode": "land", "tier": tier, "gun": id, "spec": e["spec"], "kind": faction, "seed": e["seed"], "role": e["role"]})
+			continue
 		match mode:
 			"solo", "counters":
 				for id in guns_of(tier):
@@ -195,7 +215,73 @@ func _median_gun(tier: int) -> String:
 func run_task(t: Dictionary) -> Dictionary:
 	if t["mode"] == "solo":
 		return solo(t)
+	if t["mode"] == "land":
+		return land(t)
 	return pair(t)
+
+
+## `n` typical enemies of `faction` at `stage`: the seeds of Standoff.enemies, the role the seed rolls, any shield: [{spec, seed, role}].
+static func typical(stage: int, faction: String, n: int) -> Array:
+	var out: Array = []
+	var j := roundi(Standoff.JUMPS_A_STAGE * (float(stage) - 0.5))
+	var tier := 3 if j >= 25 else (2 if j >= 10 else 1)
+	var budget := Shipgen.budget_for(tier, j, Standoff.danger_for(str(Shipgen.tables()["factions"][faction].get("lines_as", faction))), "normal", stage)
+	for tries in 40:
+		if out.size() >= n:
+			break
+		var seed_value := 101 + tries * 7919 + stage * 31
+		var rng := RandomNumberGenerator.new()
+		rng.seed = seed_value
+		var spec := Shipgen.spec(faction, Shipgen.pick_size(budget, rng), seed_value, budget, false, stage)
+		var ship: Ship = Session.load_ship(spec)
+		if ship != null:
+			out.append({"spec": spec, "seed": seed_value, "role": str(ship.get_meta("shipgen", {}).get("role", ""))})
+	return out
+
+
+## The listed damage a second of 3 copies of gun `id`: damage x shots (x a beam's seconds) / cooldown.
+func listed(id: String) -> float:
+	var w := weapons.def(id)
+	var secs_on := float(w.get("duration", 2.0)) if str(w["kind"]) == "beam" else 1.0
+	return COPIES * float(w["damage"]) * float(w.get("shots", 1)) * secs_on / maxf(float(w["cooldown"]), 0.01)
+
+
+## land: 3 copies of the gun at the tier's hold distance, the probe on the arena (see the top).
+func land(t: Dictionary) -> Dictionary:
+	var w := weapons.def(t["gun"])
+	var holds: Array = Array(str(args.get("holds", "")).split(",", false)).map(func(x): return float(x)) if args.has("holds") else HOLDS
+	var gap := float(args["gap"]) if args.has("gap") else float(holds[int(t["tier"]) - 1])
+	var a := Arena.new(1 + int(t["seed"]) % 100000)
+	a.weapons = weapons
+	var me := Wall.wall_ship(1)
+	me.inventory.add("missile", 999)
+	me.inventory.add("scrap", 999)
+	var foe: Ship = Session.load_ship(t["spec"])
+	a.add_ship(me, Vector2.ZERO)
+	a.add_ship(foe, Vector2.ZERO)
+	var co = a.ships[1]
+	var bow: float = (a.ships[0].pivot.y - BOW_CELL_Y) * a.CELL
+	co.flight.pos = Vector2(0.0, -(bow + gap + co.half.y * a.CELL))
+	co.flight.angle = 0.0
+	var uids := _mounts(a, 0, t["gun"], BOW_CELL_Y, Vector2.UP)
+	var probe := Probe.new(a)
+	a.aim_points[0] = co.flight.pos
+	for i in int(secs / STEP):
+		if i % 3 == 0:
+			_sweep(a, 0, 1, i)
+			_fire_all(a, 0, uids, 1)
+		a.ships[0].wrecked = false
+		a.step(STEP)
+		probe.step()
+		if co.wrecked:
+			break
+	var r := probe.result()
+	var fam := family_of(t["gun"])
+	var out := {"mode": "land", "tier": t["tier"], "gun": t["gun"], "family": fam if fam != "?" else str(w["kind"]),
+		"kind": t["kind"], "seed": t["seed"], "role": t["role"], "gap": gap, "range": float(w["range"]), "listed": listed(t["gun"]), "t": a.time(), "layers": int(co.layers), "blocks": r["e_blocks"]}
+	for k in ["shots", "hull", "part", "shield_hp", "passed", "plate", "slope", "bounce", "hits"]:
+		out[k] = r["p_" + k]
+	return out
 
 
 ## A fresh arena with the attacker (a bare wall ship, never wrecked) at the origin facing up, and `spec` stationary above it.
@@ -207,7 +293,7 @@ func _arena(spec: String, seed_value: int, range_px: float) -> Dictionary:
 	me.inventory.add("scrap", 999)
 	var foe: Ship = Session.load_ship(spec)
 	a.add_ship(me, Vector2.ZERO)
-	var gap := clampf(0.65 * range_px, 250.0, 650.0)
+	var gap := float(args["gap"]) if args.has("gap") else clampf(0.65 * range_px, 250.0, 650.0)  # gap=<px>: the hull-to-hull distance of every gun, e.g. 880 (0.7 x 1260, where a ship with lasers holds)
 	a.add_ship(foe, Vector2.ZERO)
 	var co = a.ships[1]
 	var bow: float = (a.ships[0].pivot.y - BOW_CELL_Y) * a.CELL
@@ -348,6 +434,8 @@ func report(mode: String) -> String:
 	var L: Array[String] = []
 	if mode == "pairs":
 		return pairs_report()
+	if mode == "land":
+		return land_report()
 	L.append("## Solo (fight value against the family base, %d s, 3 copies; model value beside)" % int(secs))
 	L.append("| tier | gun | family | dealt (hp) | structure lost | layers stripped | fight value | model value | within +-15% |")
 	L.append("|---|---|---|---|---|---|---|---|---|")
@@ -404,6 +492,33 @@ func pairs_report() -> String:
 				best = wr
 				best_id = str(id)
 		L.append("| %d | best: %s | | | %.0f%% (limit 60%%) |" % [tier, best_id, best * 100.0])
+	return "\n".join(L)
+
+
+## land: per (tier, family), then per (tier, gun), the listed damage a second of the 3 copies and where it went, a second over the run: the blocks (hull and
+## parts), the shield, the slope and plating, the rest; "landed %" is the blocks' share of the listed; then per (tier, faction) the same over every gun.
+func land_report() -> String:
+	var L: Array[String] = ["## Land (3 copies, %d s, stationary target at the hold distance; hp a second)" % int(secs), "| tier | group | n | gap px | listed | blocks | shield | slope + plating | rest | landed % | bounces/run |", "|---|---|---|---|---|---|---|---|---|---|---|"]
+	var groups := {}
+	for r in rows:
+		if r["mode"] != "land":
+			continue
+		for g in ["family " + str(r["family"]), str(r["gun"]), "on " + str(r["kind"])]:
+			var k := "%d|%s" % [int(r["tier"]), g]
+			if not groups.has(k):
+				groups[k] = []
+			groups[k].append(r)
+	var ks := groups.keys()
+	ks.sort()
+	for k in ks:
+		var sel: Array = groups[k]
+		var ps := func(f: String) -> float: return _mean(sel.map(func(r): return float(r[f]) / maxf(float(r["t"]), 1.0)))
+		var lst := _mean(sel.map(func(r): return r["listed"]))
+		var blocks: float = ps.call("hull") + ps.call("part")
+		var sh: float = ps.call("shield_hp")
+		var pl: float = ps.call("slope") + ps.call("plate")
+		L.append("| %s | %s | %d | %.0f | %.2f | %.2f | %.2f | %.2f | %.2f | %.0f | %.1f |" % [k.get_slice("|", 0), k.get_slice("|", 1), sel.size(), _mean(sel.map(func(r): return r["gap"])), lst, blocks, sh, pl,
+			lst - blocks - sh - pl, 100.0 * blocks / maxf(lst, 1e-6), _mean(sel.map(func(r): return r["bounce"]))])
 	return "\n".join(L)
 
 

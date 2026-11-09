@@ -1,14 +1,17 @@
 extends RefCounted
 ## Enemy morale: the ways a fight ends besides the wreck (structure under the defeat line) (data/morale.json, README "Combat"). A losing
 ## enemy breaks once: structure at or under `break_structure`, or no weapon able to fire for `unarmed_s`. It then rolls
-## its style (surrender / flee / fight weights) with the arena's seeded rng.
+## its style (surrender / flee / fight weights) with the arena's seeded rng. A ship with no weapon able to fire rolls its fight weight times
+## `unarmed_fight` (0: a disarmed ship yields or runs, never fights on; a style that can neither yield nor run, the hollow, still fights), and one
+## that fights on and then loses every weapon for `unarmed_s` breaks once more, the same way.
 ## - surrender ("offering"): the pilot holds fire and cuts throttle, and the offer (credits, an extra, now and
 ##   then a part) stands for `offer_s`. accept() ("spared") takes it; damage dealt to the enemy, or the time
 ##   running out, makes it "fighting_on": it fights to the end and morale never triggers again. The player's
 ##   turrets hold fire while it stands (a turret hit would refuse it) and go back to how they were after.
 ## - flee ("fleeing"): the pilot burns away stern to the player (pilot_ai.gd) while the jump drive charges for
 ##   `spool_s` (a style may set its own); the charge holds by spool_hold(): every engine out, the helm down or every crew
-##   member down (the same rule holds the player's own J spool, combat_session.gd). Full: "escaped", the ship is moved
+##   member down (the same rule holds the player's own J spool, combat_session.gd); held `held_surrender_s` in a row, it is cornered and
+##   surrenders instead (the offer, as above). Full: "escaped", the ship is moved
 ##   `escape_distance` px away and stopped. A style with `fades` (the Hollow's ghosts) flees every time and quicker: it
 ##   thins back into the Hollow, which Campaign.fight_done counts as a won fight with nothing to salvage.
 ## - captured: the enemy had crew aboard and all of it is down (or gone) for `captured_s`: guns and helm stop.
@@ -33,13 +36,14 @@ var spool := 0.0  ## seconds the jump drive has charged (fleeing)
 var escape_pos := Vector2.ZERO  ## where the enemy was when it jumped away (escaped)
 var escape_time := -1.0  ## the arena time it jumped
 var refused_at := -1.0  ## arena time the offer was refused (fighting_on after an offer), else -1
-var rolls := 0  ## style rolls made: one per fight at most
+var rolls := 0  ## style rolls made: one per fight, a second for a ship that fights on and loses every weapon
 var faction := ""  ## the faction of a generated enemy (its ai `faction`), whose lines in cfg["lines"] it says; "" for an authored design
 var break_at := 0.95  ## the structure at which it breaks: morale.json's break_structure, or the `break_structure` of its design's ai (a race flagship yields at its own line)
 var break_after := 0.0  ## seconds into the fight after which a hurt enemy breaks whatever its structure (the `break_after_s` of its design's ai; 0 = never): a race flagship, too big to wreck, yields when the fight has dragged on
 var captain := ""  ## the name of its captain (the `captain` of its ai, else the first of its crew plan) when it has a faction
 
 var _unarmed := 0.0  # seconds with no weapon able to fire
+var _held := 0.0  # seconds in a row the jump drive of a fleeing enemy has been held
 var _down := 0.0  # seconds every crew member has been down
 var _had_crew := false  # crew has been seen aboard (the sim spawns an enemy's crew on its first tick)
 var _hurt := false  # the enemy has been hurt at some time of the fight (break_after)
@@ -104,10 +108,13 @@ static func fades_style(style: String) -> bool:
 	return s is Dictionary and bool(s.get("fades", false))
 
 
-## Roll the style: "surrender", "flee" or "fight" (the last when every weight is 0).
-func roll_style() -> String:
+## Roll the style: "surrender", "flee" or "fight" (the last when every weight is 0). `unarmed`: the ship has no weapon able to fire, so its
+## fight weight counts `unarmed_fight` times (unless it can neither surrender nor flee).
+func roll_style(unarmed := false) -> String:
 	rolls += 1
 	var w := weights()
+	if unarmed and w["surrender"] + w["flee"] > 0.0:
+		w["fight"] *= float(cfg.get("unarmed_fight", 1.0))
 	var total: float = w["surrender"] + w["flee"] + w["fight"]
 	var r: float = arena.rng.randf() * total
 	if r < w["surrender"]:
@@ -141,6 +148,8 @@ func tick(dt: float) -> void:
 	match state:
 		"steady":
 			_watch_break(dt)
+		"fighting_on":
+			_watch_unarmed(dt)
 		"offering":
 			_tick_offer(dt)
 		"fleeing":
@@ -271,14 +280,29 @@ func _watch_break(dt: float) -> void:
 		_hurt = _hurt or (int(ev[k]["ship"]) == player and str(ev[k]["type"]) == "hit")
 	_hcursor = ev.size()
 	var late: bool = break_after > 0.0 and arena.time() >= break_after and _hurt
-	if co.structure <= break_at + 1e-6 or _unarmed >= float(cfg["unarmed_s"]) - 1e-6 or late:
-		match roll_style():
-			"surrender":
-				_begin_offer()
-			"flee":
-				state = "fleeing"
-			_:
-				state = "fighting_on"
+	var unarmed: bool = _unarmed >= float(cfg["unarmed_s"]) - 1e-6
+	if co.structure <= break_at + 1e-6 or unarmed or late:
+		_break(unarmed)
+
+
+## The roll and what follows it (`unarmed`: see roll_style).
+func _break(unarmed: bool) -> void:
+	match roll_style(unarmed):
+		"surrender":
+			_begin_offer()
+		"flee":
+			state = "fleeing"
+		_:
+			state = "fighting_on"
+
+
+## Fighting on: a ship that then has no weapon able to fire for `unarmed_s` breaks once more, as an unarmed one (at most once).
+func _watch_unarmed(dt: float) -> void:
+	if rolls >= 2:
+		return
+	_unarmed = 0.0 if _can_shoot() else _unarmed + dt
+	if _unarmed >= float(cfg["unarmed_s"]) - 1e-6:
+		_break(true)
 
 
 ## Has the enemy a weapon that could fire (working, powered, with ammo)?
@@ -365,6 +389,12 @@ func _is_attack(e: Dictionary) -> bool:
 func _tick_flee(dt: float) -> void:
 	if hold() == "":
 		spool += dt
+		_held = 0.0
+	else:
+		_held += dt
+		if _held >= float(cfg.get("held_surrender_s", INF)) - 1e-6:
+			_begin_offer()  # cornered: the drive will not charge, so it offers what it has
+			return
 	if spool >= spool_total() - 1e-6:
 		_escape()
 

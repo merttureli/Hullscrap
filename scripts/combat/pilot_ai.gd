@@ -2,7 +2,7 @@ extends RefCounted
 ## The enemy pilot: flies one ship of the arena against another and shoots. Deterministic: its few
 ## random choices (aim jitter, which way it strafes) come from its own generator, seeded from the
 ## arena's seed, and it only reads the arena. Call think(dt) once per arena substep, before stepping.
-## - Range: it keeps a gap of RANGE_FRACTION of the range most of its dps reaches (REACH_SHARE of it, so one short gun does not pull a many-gun ship in; at least HULL_MARGIN) between the two hulls,
+## - Range: it keeps a gap of RANGE_FRACTION (a design's `ai.hold_fraction`, a race flagship's closer one) of the range most of its dps reaches (REACH_SHARE of it, so one short gun does not pull a many-gun ship in; at least HULL_MARGIN) between the two hulls,
 ##   measured along the line between the centres from each hull's reach that way (extent()), since muzzles and the parts
 ##   it aims at sit on the hull's edge. (It used to hold that between the centres, and later at least both bounding circles
 ##   apart: a large hull, or a starter's frame round a small core, then kept it out of its own guns' range.)
@@ -127,6 +127,7 @@ var me: int
 var foe: int
 var rng := RandomNumberGenerator.new()
 var aim_skill := DEFAULT_AIM_SKILL  ## 0..1: how true the pilot's aim is and how quickly it shifts its shield balance (the design's ai.aim_skill)
+var hold_fraction := RANGE_FRACTION  ## of a gun's range: the gap it keeps (the design's ai.hold_fraction)
 var side := 1.0  ## +1 or -1: which way it strafes (when it has side engines)
 var bias := 0.0  ## radians: its aim error now, re-rolled with each retarget
 var target_uid := -1  ## the part of the foe it aims at (-1: its hull, at hull_aim)
@@ -162,6 +163,7 @@ func _init(p_arena, p_me: int, p_foe: int, p_ai := {}) -> void:
 	foe = p_foe
 	style = str(p_ai.get("style", ""))
 	aim_skill = clampf(float(p_ai.get("aim_skill", DEFAULT_AIM_SKILL)), 0.0, 1.0)
+	hold_fraction = clampf(float(p_ai.get("hold_fraction", RANGE_FRACTION)), 0.2, 1.0)
 	_shift_in = shift_interval()
 	_bow = bow_of(arena.ships[me])
 	hull_aim = hull_point()
@@ -379,7 +381,7 @@ func hold_distance(u: Vector2, armed: Dictionary) -> float:
 		var m: Dictionary = armed[uid]
 		var w: Dictionary = arena.weapons.def(m["id"])
 		var dps := float(w["damage"]) * float(w["shots"]) / maxf(float(w["cooldown"]), 0.1)
-		var r := RANGE_FRACTION * float(w["range"])
+		var r := hold_fraction * float(w["range"])
 		var mo: Vector2 = arena.local_to_world(me, m["pos"]) - co.flight.pos
 		var off := absf(mo.cross(u))
 		total += dps
@@ -394,7 +396,7 @@ func hold_distance(u: Vector2, armed: Dictionary) -> float:
 			gap = e[0]
 			break
 	if gap == INF:
-		gap = RANGE_FRACTION * DEFAULT_RANGE if reach.is_empty() else reach[-1][0]
+		gap = hold_fraction * DEFAULT_RANGE if reach.is_empty() else reach[-1][0]
 	return ext + extent(foe, -u) + maxf(HULL_MARGIN, gap)
 
 

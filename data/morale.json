@@ -1,7 +1,9 @@
 {
-  "_doc": "Enemy morale, read by scripts/combat/morale.gd. A losing enemy breaks ONCE per fight: when its structure (the hp of its blocks over their maximum, structure.gd) is at or under break_structure (0.95: a twentieth of the blocks' hp gone. It was 0.9, the damage the old hull pool's break took, tests/tool_balance.gd, but the player-like ship of tests/tool_standoff.gd takes 1.7 to 3.6 hp a second off 1,300 to 2,900 hp, so at 0.9 the median stage 3-5 fight ran 100 to 180 s; 0.93 was worse than 0.95 in the same runs), or when no weapon of it has been able to fire for unarmed_s seconds. It then rolls its style (styles: the weights of surrender, flee and fight; a design picks one with \"morale\" in its `ai` entry, else `default`; a style may also set its own `spool_s` and `fades`, see FLEE). SURRENDER: it holds fire and cuts throttle and offers `offer` for offer_s seconds (Y accepts; any damage you deal to it, or the time running out, and it fights to the end). The offer is credits [min, max] (base, tier 1: the campaign multiplies it), one of `extra` (item and a count range) and, with part_chance, one of its intact parts. FLEE: it turns its stern to you and burns while its jump drive charges for spool_s seconds; the charge holds (Morale.spool_hold, the rule that also holds the player's own J spool) while every engine of the ship is out (disabled, offline or unpowered), or its helm is down (none working and powered), or every crew member aboard is down. At full charge it is gone (moved escape_distance px away). The style `ghost` (the Hollow's ghost ships, data/enemy_tables.json) is a flight that always happens and is short: it never surrenders or fights on, and its drive spools for its own spool_s (6 s) with the same engine, helm and crew holds; `fades` means it thins back into the Hollow, which counts as a won fight with nothing to loot or salvage (Campaign.fight_done). The Lattice wardens, the Leviathans and the Hollow's own beacon warden (a spec tagged :warden, Shipgen.build) keep `hollow`, which never breaks. CAPTURED: if its crew was aboard and every member is down (or none is left) for captured_s seconds, the ship goes dark and is yours. refused_banner_s: how long the banner \"They take that as a no\" stays up. hail_s: [from, to] seconds into the fight in which a generated enemy shows its hail (after the threat banner). lines: what each faction says (see its own _doc).",
+  "_doc": "Enemy morale, read by scripts/combat/morale.gd. A losing enemy breaks ONCE per fight: when its structure (the hp of its blocks over their maximum, structure.gd) is at or under break_structure (0.95: a twentieth of the blocks' hp gone. It was 0.9, the damage the old hull pool's break took, tests/tool_balance.gd, but the player-like ship of tests/tool_standoff.gd takes 1.7 to 3.6 hp a second off 1,300 to 2,900 hp, so at 0.9 the median stage 3-5 fight ran 100 to 180 s; 0.93 was worse than 0.95 in the same runs), or when no weapon of it has been able to fire for unarmed_s seconds. It then rolls its style (a ship with no weapon able to fire rolls its fight weight times unarmed_fight, 0: a disarmed ship yields or runs, never fights on, unless its style can do neither; one that fights on and then loses every weapon for unarmed_s breaks once more, the same way, fights-end 2026-11) (styles: the weights of surrender, flee and fight; a design picks one with \"morale\" in its `ai` entry, else `default`; a style may also set its own `spool_s` and `fades`, see FLEE). SURRENDER: it holds fire and cuts throttle and offers `offer` for offer_s seconds (Y accepts; any damage you deal to it, or the time running out, and it fights to the end). The offer is credits [min, max] (base, tier 1: the campaign multiplies it), one of `extra` (item and a count range) and, with part_chance, one of its intact parts. FLEE: it turns its stern to you and burns while its jump drive charges for spool_s seconds; the charge holds (Morale.spool_hold, the rule that also holds the player's own J spool) while every engine of the ship is out (disabled, offline or unpowered), or its helm is down (none working and powered), or every crew member aboard is down; held held_surrender_s seconds in a row, it is cornered and surrenders instead (the offer above). At full charge it is gone (moved escape_distance px away). The style `ghost` (the Hollow's ghost ships, data/enemy_tables.json) is a flight that always happens and is short: it never surrenders or fights on, and its drive spools for its own spool_s (6 s) with the same engine, helm and crew holds; `fades` means it thins back into the Hollow, which counts as a won fight with nothing to loot or salvage (Campaign.fight_done). The Leviathans and the Hollow's own beacon warden (a spec tagged :warden, Shipgen.build) keep `hollow`, which never breaks. The Lattice wardens fly `warden` (fights-end 2026-11; they were `hollow` and 95-100% of their fights ran to the cap): guardians who stand aside or withdraw to the gate when beaten, never fight on, and pay a lane's small toll (credits and fuel), not a pirate's ransom. CAPTURED: if its crew was aboard and every member is down (or none is left) for captured_s seconds, the ship goes dark and is yours. refused_banner_s: how long the banner \"They take that as a no\" stays up. hail_s: [from, to] seconds into the fight in which a generated enemy shows its hail (after the threat banner). lines: what each faction says (see its own _doc).",
   "break_structure": 0.95,
   "unarmed_s": 5.0,
+  "unarmed_fight": 0.0,
+  "held_surrender_s": 10.0,
   "offer_s": 12.0,
   "spool_s": 15.0,
   "captured_s": 3.0,
@@ -21,6 +23,7 @@
     "ram": {"surrender": 0.0, "flee": 0.4, "fight": 0.6},
     "concord": {"surrender": 0.4, "flee": 0.4, "fight": 0.2},
     "hollow": {"surrender": 0.0, "flee": 0.0, "fight": 1.0},
+    "warden": {"surrender": 0.8, "flee": 0.2, "fight": 0.0, "offer": {"credits": [10, 25], "extra": [{"item": "fuel", "count": [1, 2]}], "part_chance": 0.0}},
     "ghost": {"surrender": 0.0, "flee": 1.0, "fight": 0.0, "spool_s": 6.0, "fades": true},
     "flagship_basalt": {"surrender": 1.0, "flee": 0.0, "fight": 0.0, "offer": {"credits": [50, 90], "extra": [{"item": "titanium", "count": [1, 3]}], "part_chance": 0.0}},
     "flagship_emberkin": {"surrender": 1.0, "flee": 0.0, "fight": 0.0, "offer": {"credits": [60, 100], "extra": [{"item": "fuel", "count": [2, 4]}], "part_chance": 0.0}},
@@ -164,13 +167,17 @@
 				"Turn back. We were told to be polite once. We have forgotten how."
 			],
 			"surrender": [
-				"Standing down."
+				"Standing down. The lane is yours to pass; take what the road is owed.",
+				"Enough. We stand aside. Pass, and keep to the lane.",
+				"The gate does not fall for this. We yield the lane, this once."
 			],
 			"flee": [
-				"Withdrawing to the gate."
+				"Withdrawing to the gate.",
+				"Falling back to the beacon. The lane will hold without us."
 			],
 			"refuse": [
-				"Offer not recognised."
+				"Offer not recognised.",
+				"Then we hold, as long as we are able."
 			]
 		},
 		"hollow": {

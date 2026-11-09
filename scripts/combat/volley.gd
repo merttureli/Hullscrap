@@ -5,7 +5,7 @@ extends RefCounted
 ## watches each group: while a gun of it keeps asking (the button is held, the AUTO turret is on target, the pilot wants to shoot) and
 ## another gun of the group is still cooling or feeding, the asking guns wait - at most MAX_WAIT_S after the first asked. When none is
 ## cooling they fire together, spread over STAGGER_S (a short stagger for the look). Guns that are unpowered, jammed, out of arc ... do not
-## hold the volley up. The shots leave within a fraction of a second, so the sector they cross opens once (shields.gd merges the windows)
+## hold the volley up, nor does a cooling gun that could not bear on the aim once ready (Weapons.can_bear: a stern gun, a gun out of range). The shots leave within a fraction of a second, so the sector they cross opens once (shields.gd merges the windows)
 ## and the ship's shield stays up longer; the mode has no bonus of its own (docs/GUNS.md 14).
 ## Point defence (intercept) and rapid guns never join a volley. Deterministic: no randomness here.
 
@@ -95,7 +95,8 @@ static func tick(arena) -> void:
 		v["pending"] = left
 
 
-## Is a gun of the group (other than the asking ones) still cooling down or waiting for its belt: the volley holds for it.
+## Is a gun of the group (other than the asking ones) still cooling down or waiting for its belt, and able to bear on `aim` once ready: the
+## volley holds for it. (One that could not bear held it up to MAX_WAIT_S for nothing: a flagship's pulses waited on its railgun, fights-end 2026-11.)
 static func _cooling(arena, idx: int, group: int, asking: Dictionary, aim: Vector2) -> bool:
 	var uids: Array = arena.ships[idx].mounts.keys()
 	uids.sort()
@@ -103,7 +104,7 @@ static func _cooling(arena, idx: int, group: int, asking: Dictionary, aim: Vecto
 		if asking.has(uid) or not mode(arena, idx, uid) or arena.weapons.mount_group(arena, idx, uid) != group:
 			continue
 		var why: String = arena.weapons.can_fire(arena, idx, uid, aim)
-		if why in ["cooling down", "feeding"]:
+		if why in ["cooling down", "feeding"] and arena.weapons.can_bear(arena, idx, uid, aim):
 			return true
 		var cd: int = int(arena.ships[idx].cooldowns.get(uid, 0))
 		if why == "" and cd > 0 and arena.tick - cd <= READY_GRACE:

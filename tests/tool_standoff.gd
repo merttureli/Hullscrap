@@ -4,8 +4,8 @@ extends SceneTree
 ## It builds a player-like ship for a stage from data/progression.json's median row (its guns, shield layers and power), with a human mix of
 ## weapons (lasers and the pulse line, what the shops and blueprints offer by then), and fights it through the real arena (as
 ## tests/tool_balance.gd does: both pilots on the AI, the crews in ShipSim, morale ending fights the way the game does, the player takes any
-## surrender) against generated enemies of that stage that carry no shield, enemies that do, Hollow ghosts, and the Lattice wardens (the
-## faction of morale style `hollow`, which never breaks: the control that a morale change must leave as it was), N seeds each.
+## surrender) against generated enemies of that stage that carry no shield, enemies that do, Hollow ghosts, and the Lattice wardens (morale
+## style `warden` since 2026-11; until then `hollow`, which never breaks), N seeds each.
 ##   godot --headless --path . --script res://tests/tool_standoff.gd [-- key=value ...]
 ## Keys: paim (what-if: the player pilot's aim_skill; 0.8+ snipes guns first), stages (default 3,4,5; 1 to 5 have a build), seeds (per stage and kind, default 20), cap (s, default 180), kinds (plain,shield,ghost,warden), jobs (processes, default 2),
 ## out (a JSON of every fight's row), sum (print the table of an out file instead of fighting: sum=<path,path>). Internal: shard (k/n), rows.
@@ -16,6 +16,13 @@ extends SceneTree
 ## (only=courier,prism keeps just those starters) it prints the starter table: who wins, how long, and when the starter's first gun (and its last) is disabled. Not for a stage's player-like ship.
 ## Each row: the end, the time, the enemy's shield layers, the shots of the player and where they went (shield layer, hull, part), the
 ## structure the enemy lost, the time the guns were in range, and the enemy's own damage and shield use.
+## cells=1 (the fights-end measurement, 2026-11): every (stage, faction, role) cell of `stages` (default 1,2,3,4,5) x `factions` (default the six base ones,
+## CELL_FACTIONS) x the roles each flies (`roles`=a,b to keep some; a role the stage or the hull size never rolls, Shipgen.pick_role, is left out), `seeds`
+## (default 12) enemies a cell, of any threat. Stages 1 to 3: the three starters take turns; stages 4 and 5: the prepared build (pbuild, default 7);
+## players=stage: the stage's own build (BUILDS) at every stage. fielded=1: only the factions a stage fights (FIELDED). Every fight carries the probe of tests/fight_probe.gd (what each
+## side's shots did, guns, distance) and a capped one its class (FightProbe.classify). jsonl=<path>: each fight is a line appended as it ends, and a
+## run started again skips the fights (and enemy searches) already in it, so a restarted machine loses one fight a process; run the shards yourself
+## (shard=k/n, one jsonl each) and print the tables with sum=<path,path> (lines or JSON arrays).
 
 const Ship = preload("res://scripts/ship/ship.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
@@ -28,6 +35,7 @@ const Content = preload("res://scripts/data/content.gd")
 const Structure = preload("res://scripts/ship/structure.gd")
 const Morale = preload("res://scripts/combat/morale.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
+const Probe = preload("res://tests/fight_probe.gd")
 
 const STEP := 1.0 / 60.0
 const SIM_EVERY := 12
@@ -35,19 +43,31 @@ const PLAYER_EVERY := 3
 const JUMPS_A_STAGE := 12.5  ## the progression bot's stages (docs/audit/progression.md): about this many jumps each
 const FACTIONS := ["rustfangs", "concord", "lumen", "clans"]  ## the pirates a stage 3-6 region sends (the Hollow's ghosts are their own kind)
 const MAX_TRIES := 600  ## seeds looked at to fill the plain / shield quotas of a stage
+const FULL_TRIES := 100  ## hulls a build tries for one that mounts all its guns and shields
 const STARTERS := {"courier": "res://data/ships/starter_courier.json", "rustbucket": "res://data/ships/starter_rustbucket.json", "prism": "res://data/ships/starter_prism.json"}
 const DENTAL := "res://data/ships/dental_plan.json"  ## the authored stage-1 pirate QA met (threat 3, one shield layer)
+const CELL_FACTIONS := ["rustfangs", "concord", "lumen", "wardens", "clans", "hollow"]  ## the six base factions of data/enemy_tables.json (cells=1)
+## fielded=1 (cells=1): the base factions a stage really fights, from the stages of data/regions (and the packs'): Rustfangs from stage 1 (Clan space), the
+## Concord's patrols from 1 and its regions from 2, the wardens from 3 (Lumen space, the Emberkin forges), the Hollow from 5 (the Revenant cairns). No
+## region or event sends the Lumen or the Clans.
+const FIELDED := {1: ["rustfangs", "concord"], 2: ["rustfangs", "concord"], 3: ["rustfangs", "concord", "wardens"], 4: ["rustfangs", "concord", "wardens"],
+	5: ["rustfangs", "concord", "wardens", "hollow"]}
 
 ## The player-like ship of each stage: size, weapons, shields, armour layers. Guns and shield layers are the median row of
 ## data/progression.json (stage 3: 5 guns, 2 layers; 4: 6 and 2; 5: 7 and 3; 6: 7 and 3), the mix is the one a shop and the blueprints
 ## give: Laser Mk1 and Mk2, Pulse Mk1 and Mk2 on the bow, the Laser Turret on the flanks. No missile, no ion: the bot never asks for one either.
+## Every build mounts every gun it lists (build_from; tests/test_bench_builds.gd). Shipgen fits three bow guns and three flank turrets on these
+## hulls, never a fourth of either, so the builds that listed four (5 to 7, until 2026-11) carry the same listed dps in fewer guns: 5 and 6 a Pulse
+## Mk3 for the Pulse Mk2 and the fourth turret (12.27 hp/s listed, was 12.10), 7 two Laser Mk3 for two of its Laser Mk2, and no fourth turret
+## (14.41, was 14.67). Build 1 takes a wider medium frame (30 wide), the only one of its seeds' hulls that mounts all four.
 const BUILDS := {
-	1: {"size": "medium", "weapons": ["laser_mk1", "laser_mk1", "pulse_mk1", "laser_turret_mk1"], "shields": ["shield_mk1"], "armour": 0},
+	1: {"size": "medium", "weapons": ["laser_mk1", "laser_mk1", "pulse_mk1", "laser_turret_mk1"], "shields": ["shield_mk1"], "armour": 0, "frame": {"width": 30, "max_interior": 26}},
 	2: {"size": "medium", "weapons": ["laser_mk1", "laser_mk1", "pulse_mk1", "laser_turret_mk1"], "shields": ["shield_mk1"], "armour": 1},
 	3: {"size": "medium", "weapons": ["laser_mk1", "laser_mk1", "pulse_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2"], "armour": 1},
 	4: {"size": "large", "weapons": ["laser_mk2", "laser_mk1", "pulse_mk1", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2"], "armour": 1},
-	5: {"size": "large", "weapons": ["laser_mk2", "laser_mk2", "pulse_mk2", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2", "shield_mk1"], "armour": 2},
-	6: {"size": "large", "weapons": ["laser_mk2", "laser_mk2", "pulse_mk2", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2", "shield_mk1"], "armour": 2},
+	5: {"size": "large", "weapons": ["laser_mk2", "laser_mk2", "pulse_mk3", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2", "shield_mk1"], "armour": 2},
+	6: {"size": "large", "weapons": ["laser_mk2", "laser_mk2", "pulse_mk3", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2", "shield_mk1"], "armour": 2},
+	7: {"size": "large", "weapons": ["laser_mk3", "laser_mk3", "pulse_mk2", "laser_turret_mk1", "laser_turret_mk1", "laser_turret_mk1"], "shields": ["shield_mk2", "shield_mk2", "shield_mk1"], "armour": 3},  # a well-prepared ship (the flagship bench pstage=7): better guns, a third layer and a plate more than the stage 6 median
 }
 
 var args := {}
@@ -76,10 +96,18 @@ func _initialize() -> void:
 func _run() -> void:
 	if args.has("sum"):
 		for path in str(args["sum"]).split(","):
-			rows.append_array(JSON.parse_string(FileAccess.get_file_as_string(path)))
+			rows.append_array(read_rows(path))
+		if rows.any(func(r): return r.has("cell")):
+			print(cells_table(rows))
+			quit(0)
+			return
 		print(table(rows))
 		if rows.any(func(r): return r.has("starter")):
 			print(starter_table(rows))
+		quit(0)
+		return
+	if args.has("cells"):
+		run_cells()
 		quit(0)
 		return
 	var jobs := int(args.get("jobs", 2))
@@ -125,6 +153,20 @@ func _run() -> void:
 	quit(0)
 
 
+## The rows of a file: a JSON array, or one JSON object a line (jsonl; lines that are no fight, the cached enemy searches, are left out).
+static func read_rows(path: String) -> Array:
+	var text := FileAccess.get_file_as_string(path)
+	var got = JSON.parse_string(text) if text.begins_with("[") else null
+	if got is Array:
+		return got
+	var out: Array = []
+	for line in text.split("\n", false):
+		var r = JSON.parse_string(line)
+		if r is Dictionary and r.has("state"):
+			out.append(r)
+	return out
+
+
 static func _write(path: String, text: String) -> void:
 	var fa := FileAccess.open(path, FileAccess.WRITE)
 	fa.store_string(text)
@@ -159,12 +201,23 @@ func _fan_out(jobs: int) -> void:
 ## The player-like ship of `stage`: Shipgen's own pipeline (the hull grammar of the Concord, the real mount rules, cables, validation)
 ## with the loadout of BUILDS instead of a bought one. Null when it cannot be built.
 static func build_player(stage: int) -> Ship:
-	var b: Dictionary = BUILDS[stage]
+	return build_from(stage, BUILDS[stage])
+
+
+## The ship of build `b` (a BUILDS entry) for `stage` (its seeds): the first of FULL_TRIES hulls that mounts every gun and shield of it.
+## Shipgen drops a gun that finds no wall to mount through, so a build's `frame` (keys of a data/enemy_tables.json size, `max` merged
+## key by key) widens its size class until all of them fit.
+static func build_from(stage: int, b: Dictionary) -> Ship:
 	var f: Dictionary = Shipgen.tables()["factions"]["concord"]
-	var sz: Dictionary = Shipgen.tables()["sizes"][b["size"]]
+	var sz: Dictionary = Shipgen.tables()["sizes"][b["size"]].duplicate(true)
+	for k in b.get("frame", {}):
+		if k == "max":
+			sz["max"].merge(b["frame"]["max"], true)
+		else:
+			sz[k] = b["frame"][k]
 	Shipgen._comps()
 	var weapons: Array = b["weapons"]
-	for attempt in 40:
+	for attempt in FULL_TRIES:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = 7000 + stage * 100 + attempt
 		var lo := {"weapons": weapons.duplicate(), "engines": ["engine_mk1", "engine_mk1", "engine_mk1"], "shields": b["shields"].duplicate(), "systems": [], "reactors": [],
@@ -200,9 +253,24 @@ static func build_player(stage: int) -> Ship:
 		var ship: Ship = made["ship"]
 		if not Shipgen.validate(ship).is_empty():
 			continue
+		if not _has_all(ship, weapons + b["shields"]):
+			continue
 		ship.name = "Bench %d" % stage
 		return ship
 	return null
+
+
+## Does `ship` carry every part of `ids` (with repeats)?
+static func _has_all(ship: Ship, ids: Array) -> bool:
+	var got := {}
+	for uid in ship.components.instances:
+		var id := str(ship.components.instances[uid]["id"])
+		got[id] = int(got.get(id, 0)) + 1
+	for id in ids:
+		got[id] = int(got.get(id, 0)) - 1
+		if int(got[id]) < 0:
+			return false
+	return true
 
 
 ## The campaign's danger of the first region whose pirates are `faction` (tool_balance.gd danger_for).
@@ -287,10 +355,112 @@ static func starter_enemies(name: String, stage: int, n: int) -> Array:
 	return out
 
 
+# --- the cells (cells=1) ---------------------------------------------------------------------------
+
+## Does a ship of `size` at `stage` ever fly `role` (Shipgen.pick_role's rules: the least size, the first stage, no bay role where a stage's enemies carry none)?
+static func role_fits(role: String, size: String, stage: int) -> bool:
+	var r: Dictionary = Shipgen.tables()["roles"]["list"][role]
+	var order: Array = ["small", "medium", "large"]
+	var no_bay := float(Shipgen.tables().get("drones", {}).get("stage_mult", {}).get(str(stage), 1.0)) <= 0.0
+	return order.find(size) >= order.find(str(r.get("min_size", "small"))) and not (no_bay and r.has("bay")) and stage >= int(r.get("min_stage", 0))
+
+
+## `n` enemies of the cell (stage, faction, role), the seeds of enemies() for one faction, of any threat (the campaign rates nothing when it
+## picks a fight, Campaign.gen_spec): [{spec, faction, role, seed, layers, size, kind, skulls, starter}]. With starters (stages 1 to 3) they take turns.
+static func cell_enemies(stage: int, faction: String, role: String, n: int, starters: Array) -> Array:
+	var out: Array = []
+	var j := roundi(JUMPS_A_STAGE * (float(stage) - 0.5))
+	var tier := 3 if j >= 25 else (2 if j >= 10 else 1)
+	var budget := Shipgen.budget_for(tier, j, danger_for(str(Shipgen.tables()["factions"][faction].get("lines_as", faction))), "normal", stage)
+	var mine := {}
+	for name in starters:
+		mine[name] = Session.load_ship(STARTERS[name])
+	for tries in MAX_TRIES:
+		if out.size() >= n:
+			break
+		var seed_value := 101 + tries * 7919 + stage * 31
+		var rng := RandomNumberGenerator.new()
+		rng.seed = seed_value
+		var size := Shipgen.pick_size(budget, rng)
+		if not role_fits(role, size, stage):
+			continue
+		var spec := Shipgen.spec(faction, size, seed_value, budget, false, stage) + ":role:" + role
+		var ship: Ship = Session.load_ship(spec)
+		if ship == null or str(ship.get_meta("shipgen", {}).get("role", "")) != role:
+			continue  # (a carrier that found no wall for its bay is a gunboat)
+		var name: String = starters[out.size() % starters.size()] if not starters.is_empty() else ""
+		out.append({"spec": spec, "faction": faction, "role": role, "seed": seed_value, "layers": Shields.layers_of_ship(ship, ship.power_state.get("powered", {})), "size": size,
+			"kind": "%s %s" % [faction, role], "skulls": Threat.rate(ship, mine[name])["skulls"] if name != "" else -1, "starter": name})
+	if out.size() < n:
+		printerr("standoff: stage %d %s %s: %d of %d enemies in %d tries" % [stage, faction, role, out.size(), n, MAX_TRIES])
+	return out
+
+
+## The cells of cells=1, in order: [stage, faction, role].
+func cells() -> Array:
+	var out: Array = []
+	for st in Array(str(args.get("stages", "1,2,3,4,5")).split(",")).map(func(x): return int(x)):
+		for faction in (Array(str(args["factions"]).split(",")) if args.has("factions") else (FIELDED[st] if args.has("fielded") else CELL_FACTIONS)):
+			for role in Shipgen.roles_of(str(faction)):
+				if args.has("roles") and not str(args["roles"]).split(",").has(role):
+					continue
+				out.append([st, str(faction), str(role)])
+	return out
+
+
+## cells=1: this shard's cells (shard=k/n: every n-th cell), each fight a line of `jsonl` as it ends; what a line already holds is skipped.
+func run_cells() -> void:
+	var players := str(args.get("players", ""))  # players=stage: the stage build (BUILDS) at every stage, not the starters and build 7
+	var shard := Array(str(args.get("shard", "0/1")).split("/")).map(func(x): return int(x))
+	var n := int(args.get("seeds", 12))
+	var path := str(args.get("jsonl", OS.get_cache_dir().path_join("hullscrap_cells.jsonl")))
+	var done := {}
+	var searched := {}
+	if FileAccess.file_exists(path):
+		for line in FileAccess.get_file_as_string(path).split("\n", false):
+			var r = JSON.parse_string(line)
+			if r is Dictionary and r.has("cell") and r.has("enemies"):
+				searched[r["cell"]] = r["enemies"]
+			elif r is Dictionary and r.has("key"):
+				done[r["key"]] = true
+				rows.append(r)
+	var fa := FileAccess.open(path, FileAccess.READ_WRITE if FileAccess.file_exists(path) else FileAccess.WRITE)
+	fa.seek_end()
+	var all := cells()
+	for c in all.size():
+		if c % shard[1] != shard[0]:
+			continue
+		var st: int = all[c][0]
+		var key := "%d|%s|%s|%d" % [st, all[c][1], all[c][2], n]
+		var foes: Array
+		if searched.has(key):
+			foes = searched[key]
+		else:
+			foes = cell_enemies(st, all[c][1], all[c][2], n, STARTERS.keys() if st <= 3 and players == "" else [])
+			fa.store_line(JSON.stringify({"cell": key, "enemies": foes}))
+			fa.flush()
+		for e in foes:
+			var pb: int = st if players == "stage" else int(args.get("pbuild", 7))
+			var who: String = e["starter"] if e["starter"] != "" else "build%d" % pb
+			var fkey := "%s|%d|%s|%s|%d" % [who, st, e["faction"], e["role"], int(e["seed"])]
+			if done.has(fkey):
+				continue
+			var row := fight(st, e, str(e["starter"]), pb if e["starter"] == "" else 0)
+			row.merge({"key": fkey, "cell": "%d|%s|%s" % [st, e["faction"], e["role"]], "role": e["role"], "who": who, "esize": e["size"]})
+			if row["state"] == "fighting":
+				row["class"] = Probe.classify(row)
+			rows.append(row)
+			fa.store_line(JSON.stringify(row))
+			fa.flush()
+			print("%s stage %d %s %s seed %d: %s in %.0f s%s" % [who, st, e["faction"], e["role"], e["seed"], row["state"], row["t"], " (%s)" % row["class"] if row.has("class") else ""])
+	fa.close()
+
+
 # --- one fight -------------------------------------------------------------------------------------
 
-func fight(stage: int, e: Dictionary, starter := "") -> Dictionary:
-	var player: Ship = Session.load_ship(STARTERS[starter]) if starter != "" else build_player(stage)
+## One fight of the player-like ship of `stage` (or of build `pbuild`, or the starter `starter`) against enemy `e`, `cap` seconds at most: its row.
+func fight(stage: int, e: Dictionary, starter := "", pbuild := 0) -> Dictionary:
+	var player: Ship = Session.load_ship(STARTERS[starter]) if starter != "" else build_player(pbuild if pbuild > 0 else stage)
 	var enemy: Ship = Session.load_ship(e["spec"])
 	var row := {"stage": stage, "kind": e["kind"], "faction": e["faction"], "seed": e["seed"], "spec": e["spec"], "e_layers": e["layers"]}
 	if starter != "":
@@ -317,6 +487,8 @@ func fight(stage: int, e: Dictionary, starter := "") -> Dictionary:
 	var cursor := 0
 	var n := 0
 	var ticks := int(cap * 60.0)
+	var probe := Probe.new(a, pilot)
+	var brk := {}
 	while sess.state() == "fighting" and n < ticks:
 		if n % PLAYER_EVERY == 0:
 			pilot.think(STEP * PLAYER_EVERY)
@@ -325,7 +497,12 @@ func fight(stage: int, e: Dictionary, starter := "") -> Dictionary:
 			sess.accept_surrender()
 		sess.ai.think(STEP)
 		a.step(STEP)
+		var was: String = sess.morale.state
 		sess.morale.tick(STEP)
+		probe.step()
+		if was == "steady" and sess.morale.state != "steady" and brk.is_empty():  # the enemy broke: when, why, and what it rolled
+			brk = {"m_t": a.time(), "m_rolled": sess.morale.state, "m_at": Structure.structure_fraction(a.ships[Session.ENEMY]),
+				"m_why": "unarmed" if sess.morale._unarmed >= float(sess.morale.cfg["unarmed_s"]) - 1e-6 else ("late" if sess.morale.break_after > 0.0 and a.time() >= sess.morale.break_after else "structure")}
 		n += 1
 		if n % SIM_EVERY == 0:
 			sim.step(SIM_EVERY * STEP)
@@ -341,8 +518,10 @@ func fight(stage: int, e: Dictionary, starter := "") -> Dictionary:
 	if st == "escaped" and sess.morale.style == "ghost":
 		st = "faded"  # a ghost that thinned back into the Hollow: a won fight with nothing to salvage (Campaign.fight_done)
 	row.merge({"state": st, "t": n * STEP, "foe_hull": Structure.structure_fraction(foe), "hull": Structure.structure_fraction(a.ships[Session.PLAYER]), "morale": sess.morale.state,
-		"style": sess.morale.style})
+		"style": sess.morale.style, "e_aim": float(foe.ship.get_meta("ai", {}).get("aim_skill", -1.0)), "e_pilot": str(foe.ship.get_meta("ai", {}).get("style", ""))})
 	row.merge(d)
+	row.merge(probe.result())
+	row.merge(brk)
 	sim.free()
 	return row
 
@@ -488,4 +667,32 @@ static func starter_table(list: Array) -> String:
 			roundi(100.0 * (n - lost - cap) / n), roundi(100.0 * lost / n), roundi(100.0 * cap / n), roundi(100.0 * g1.size() / n), "%.0f" % _median(g1) if not g1.is_empty() else "-",
 			roundi(100.0 * gall.size() / n), "%.0f" % _median(gall) if not gall.is_empty() else "-",
 			"%.2f" % _mean(sel.map(func(r): return (float(r["p_hull"]) + float(r["p_part"])) / maxf(float(r["t"]), 1.0)))])
+	return "\n".join(L)
+
+
+## The cells table (cells=1 rows): per stage, then per (stage, faction) and per (stage, role), the fights, who wins (any end but a loss or the cap,
+## as starter_table), the losses, the cap share and how the capped ones split into the classes of FightProbe.classify (percent of all the fights).
+static func cells_table(list: Array) -> String:
+	var L: Array[String] = ["| stage | group | n | wins % | lost % | at cap % | " + " | ".join(Probe.CLASSES) + " |", "|---|---|---|---|---|---|" + "---|".repeat(Probe.CLASSES.size())]
+	var groups := {}
+	for r in list:
+		if str(r["state"]) == "error":
+			continue
+		for g in ["all", str(r["faction"]), "role " + str(r["role"]), "player " + str(r["who"])]:
+			var k := "%d|%s" % [int(r["stage"]), g]
+			if not groups.has(k):
+				groups[k] = []
+			groups[k].append(r)
+	var ks := groups.keys()
+	ks.sort_custom(func(x, y): return [int(x.get_slice("|", 0)), x.get_slice("|", 1) != "all", x.get_slice("|", 1)] < [int(y.get_slice("|", 0)), y.get_slice("|", 1) != "all", y.get_slice("|", 1)])
+	for k in ks:
+		var sel: Array = groups[k]
+		var n := float(sel.size())
+		var lost := sel.filter(func(r): return str(r["state"]) == "lost").size()
+		var capped := sel.filter(func(r): return str(r["state"]) == "fighting")
+		var bits: Array[String] = []
+		for c in Probe.CLASSES:
+			bits.append(str(roundi(100.0 * capped.filter(func(r): return Probe.classify(r) == c).size() / n)))
+		L.append("| %s | %s | %d | %d | %d | %d | %s |" % [k.get_slice("|", 0), k.get_slice("|", 1), sel.size(), roundi(100.0 * (n - lost - capped.size()) / n), roundi(100.0 * lost / n),
+			roundi(100.0 * capped.size() / n), " | ".join(bits)])
 	return "\n".join(L)
