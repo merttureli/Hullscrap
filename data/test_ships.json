@@ -1,0 +1,170 @@
+{
+ "_doc": "The test ships of the K page (scripts/combat/test_fights.gd). `build` is the loadout tests/tool_test_ships.gd rebuilds the design from (make); `stage` is the stage whose median enemy the ship is measured against; `pool` the parts it may carry; bands: the allowed ratio of the ship's Threat power to that median (pinned in tests/test_test_ships.gd).",
+ "pools": {
+  "_doc": "Parts a player can really hold, by how late: early = the Rustfang/Concord stations and the starter recipes (data/drift.json stations, recipes.json); mid = + the Mk2 blueprints and the Meridian stock; late = + the shop blueprints (laser_mk3, pulse_mk3; drift.json shops) bought or found. Every test ship's guns and shields are from its pool (tests/test_test_ships.gd).",
+  "early": [
+   "laser_mk1",
+   "pulse_mk1",
+   "laser_turret_mk1",
+   "shield_mk1"
+  ],
+  "mid": [
+   "laser_mk1",
+   "laser_mk2",
+   "pulse_mk1",
+   "pulse_mk2",
+   "laser_turret_mk1",
+   "shield_mk1",
+   "shield_mk2"
+  ],
+  "late": [
+   "laser_mk1",
+   "laser_mk2",
+   "laser_mk3",
+   "pulse_mk1",
+   "pulse_mk2",
+   "pulse_mk3",
+   "laser_turret_mk1",
+   "shield_mk1",
+   "shield_mk2",
+   "pulse_heavy"
+  ]
+ },
+ "ships": [
+  {
+   "id": "scraped_by",
+   "name": "Scraped by",
+   "blurb": "Stage 4, but it stayed under the curve: light guns, one thin shield, little armour.",
+   "stage": 4,
+   "pool": "early",
+   "build": {
+    "size": "large",
+    "weapons": [
+     "laser_mk1",
+     "laser_mk1",
+     "pulse_mk1",
+     "laser_turret_mk1"
+    ],
+    "shields": [
+     "shield_mk1"
+    ],
+    "armour": 0
+   },
+   "design": "res://data/ships/test/scraped_by.json"
+  },
+  {
+   "id": "curve_early",
+   "name": "On the curve, early",
+   "blurb": "Stage 2, level with what the stage throws at you.",
+   "stage": 2,
+   "pool": "early",
+   "build": {
+    "size": "medium",
+    "weapons": [
+     "laser_mk1",
+     "pulse_mk1"
+    ],
+    "shields": [],
+    "armour": 0
+   },
+   "design": "res://data/ships/test/curve_early.json"
+  },
+  {
+   "id": "curve_mid",
+   "name": "On the curve, mid",
+   "blurb": "Stage 4, level with the curve: the median ship of a run.",
+   "stage": 4,
+   "pool": "mid",
+   "build": {
+    "size": "large",
+    "weapons": [
+     "laser_mk2",
+     "laser_mk1",
+     "pulse_mk1",
+     "laser_turret_mk1",
+     "laser_turret_mk1",
+     "laser_turret_mk1"
+    ],
+    "shields": [
+     "shield_mk2"
+    ],
+    "armour": 1
+   },
+   "design": "res://data/ships/test/curve_mid.json"
+  },
+  {
+   "id": "ahead",
+   "name": "Ahead",
+   "blurb": "Stage 5, a run that is going well: better guns and a second shield layer.",
+   "stage": 5,
+   "pool": "late",
+   "build": {
+    "size": "large",
+    "weapons": [
+     "laser_mk2",
+     "laser_mk2",
+     "pulse_mk2",
+     "laser_turret_mk1",
+     "laser_turret_mk1",
+     "laser_turret_mk1"
+    ],
+    "shields": [
+     "shield_mk2",
+     "shield_mk1"
+    ],
+    "armour": 2
+   },
+   "design": "res://data/ships/test/ahead.json"
+  },
+  {
+   "id": "flagship_ready",
+   "name": "Flagship-ready",
+   "blurb": "What a well-upgraded, well-prepared run brings to a flagship (the prepared build of the balance tools).",
+   "stage": 5,
+   "pool": "late",
+   "build": {
+    "size": "large",
+    "weapons": [
+     "laser_mk3",
+     "laser_mk3",
+     "pulse_mk2",
+     "laser_turret_mk1",
+     "laser_turret_mk1",
+     "laser_turret_mk1"
+    ],
+    "shields": [
+     "shield_mk2",
+     "shield_mk2",
+     "shield_mk1"
+    ],
+    "armour": 3
+   },
+   "design": "res://data/ships/test/flagship_ready.json"
+  },
+  {
+   "id": "lucky",
+   "name": "Lucky run",
+   "blurb": "A stage 4 hull with late-game gear found early: two Laser Mk3, a heavy pulse gun and six shield layers.",
+   "stage": 4,
+   "pool": "late",
+   "build": {
+    "size": "large",
+    "weapons": [
+     "laser_mk3",
+     "laser_mk3",
+     "pulse_heavy",
+     "laser_turret_mk1",
+     "laser_turret_mk1",
+     "laser_turret_mk1"
+    ],
+    "shields": [
+     "shield_mk2",
+     "shield_mk2",
+     "shield_mk2"
+    ],
+    "armour": 3
+   },
+   "design": "res://data/ships/test/lucky.json"
+  }
+ ]
+}

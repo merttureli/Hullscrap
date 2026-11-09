@@ -77,6 +77,28 @@ func choose_ship(path: String) -> String:
 	return ""
 
 
+## Test fights (combat_view.gd): `ship` takes the player's slot and the real ship leaves the simulation, untouched. Returns what return_player needs.
+func lend_player(ship: Ship) -> Dictionary:
+	var real: Ship = ships[0]
+	var stash := {"ship": real, "rng": _rngs.get(real), "jobs": _jobs.get(real), "crewed": _crewed.get(real, false), "lent": ship}
+	ships[0] = ship
+	return stash
+
+
+## Put the real ship back, with the dice and the job board it had.
+func return_player(stash: Dictionary) -> void:
+	var real: Ship = stash["ship"]
+	for table in [_rngs, _jobs, _crewed]:
+		table.erase(stash["lent"])
+	ships[0] = real
+	if stash["rng"] != null:
+		_rngs[real] = stash["rng"]
+	if stash["jobs"] != null:
+		_jobs[real] = stash["jobs"]
+	if stash["crewed"]:
+		_crewed[real] = true
+
+
 func _ready() -> void:
 	var hud := get_node_or_null("../HUD")
 	if hud == null:

@@ -22,6 +22,9 @@ const EffectFx = preload("res://scripts/combat/effect_fx.gd")
 const Shields = preload("res://scripts/combat/shields.gd")
 const Intent = preload("res://scripts/combat/intent.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
+const Structure = preload("res://scripts/ship/structure.gd")
+const TestFights = preload("res://scripts/combat/test_fights.gd")
+const TestFightPanel = preload("res://scripts/ui/test_fight_panel.gd")
 const ShipView = preload("res://scripts/view/ship_view.gd")
 const Art = preload("res://scripts/view/art.gd")
 const TileArt = preload("res://scripts/view/tile_art.gd")
@@ -72,6 +75,8 @@ var aim_override: Variant = null  ## a world point, or null for the mouse
 var input_override: Variant = null  ## {"throttle", "turn"}, or null for W/S/A/D
 var hold_override := {}  ## fire group -> true: held down as if by the mouse
 
+var _page: Control  ## the test-fight page (K in play mode, test_fight_panel.gd); null in a bare view, where K starts the test pirate at once
+var _test := {}  ## the test fight on: {ship_name, enemy_name, stash}; {} for an ordinary fight
 var _views: Array = []
 var _fx_node: Node2D
 var _glow: Node2D  # additive layer inside _fx_node for the glow of projectiles and effects
@@ -124,6 +129,12 @@ func _ready() -> void:
 	set_process(true)
 
 
+## A page or a test fight is up: the sector holds still (sector_view.gd) so the run stands as it was.
+var testing: bool:
+	get:
+		return not _test.is_empty() or (_page != null and _page.visible)
+
+
 func _make_stars() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 99
@@ -150,6 +161,9 @@ func _make_hud() -> void:
 	_bar = WeaponBar.new()
 	_bar.visible = false
 	layer.add_child(_bar)
+	_page = TestFightPanel.new()
+	_page.view = self
+	layer.add_child(_page)
 	_bar_extras = Control.new()
 	_bar_extras.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_bar_extras.draw.connect(_draw_bar_extras)
@@ -180,7 +194,8 @@ func _make_hud() -> void:
 # --- entering and leaving ------------------------------------------------------------------------
 
 ## Start a fight with the ship in `path` (the test pirate by default). "" when it began, else why not. `opts`:
-## {enemy_pos}: where the enemy appears in a sector fight (else ahead of the ship).
+## {enemy_pos}: where the enemy appears in a sector fight (else ahead of the ship). {test: {player, ship_name, enemy_name}}: a test fight (the page): `player`
+## (a copy or a test ship) fights in the player's place, the real ship stays out of the simulation and out of the sector, and nothing reaches the run.
 func enter(path := Session.PIRATE_PATH, opts := {}) -> String:
 	if active:
 		return "already fighting"
@@ -190,8 +205,12 @@ func enter(path := Session.PIRATE_PATH, opts := {}) -> String:
 	var enemy: Ship = Session.load_ship(path)
 	if enemy == null:
 		return "cannot load " + path
+	var test: Dictionary = opts.get("test", {})
+	if not test.is_empty():
+		_test = {"ship_name": test["ship_name"], "enemy_name": test["enemy_name"], "stash": sim.lend_player(test["player"])}
+		player = test["player"]
 	sim.ships.append(enemy)
-	var place: Dictionary = sector.fight_place(opts.get("enemy_pos")) if sector != null and sector.has_method("fight_place") else {}
+	var place: Dictionary = {} if not test.is_empty() else (sector.fight_place(opts.get("enemy_pos")) if sector != null and sector.has_method("fight_place") else {})
 	in_sector = not place.is_empty()
 	_over_t = 0.0
 	session = Session.new()
@@ -237,6 +256,11 @@ func leave() -> void:
 		return
 	var foe = session.arena.ships[Session.ENEMY]
 	var mine = session.arena.ships[Session.PLAYER]
+	var test_row := {}
+	if not _test.is_empty():
+		var st: String = session.state()
+		test_row = TestFights.result_row(str(_test["ship_name"]), str(_test["enemy_name"]), TestFights.ending_text(st if st != "fighting" else "fled", session.morale.state == "offering", session.jump_ready()),
+			session.arena.time(), Structure.structure_fraction(mine), Structure.structure_fraction(foe))
 	var result := {"state": session.state() if session.state() != "fighting" else "fled", "enemy": foe.ship,
 		"in_sector": in_sector, "pose": {"pos": mine.flight.pos, "vel": mine.flight.vel, "angle": mine.flight.angle, "ang_vel": mine.flight.ang_vel}, "enemy_pos": foe.flight.pos, "threat": session.threat}
 	if result["state"] == "spared":
@@ -260,6 +284,11 @@ func leave() -> void:
 		cam.zoom = _saved_cam["zoom"]
 	active = false
 	session = null
+	if not test_row.is_empty():  # a test fight tells nobody but the page: the real ship comes back, the wreck and the loot go nowhere
+		sim.return_player(_test["stash"])
+		_test = {}
+		_page.show_result(test_row)
+		return
 	finished.emit(result)
 
 
@@ -267,7 +296,10 @@ func leave() -> void:
 func restart() -> void:
 	if not active or session.state() != "lost":
 		return
+	var was_test := not _test.is_empty()
 	leave()
+	if was_test:
+		return  # (a test fight back to the page: nothing of the run to reload)
 	# reload the ship the player picked (its design file); the empty starter hull only if none was picked
 	if sim != null and sim.design_path != "":
 		var why_d: String = sim.choose_ship(sim.design_path)
@@ -312,6 +344,8 @@ func _unhandled_input(e: InputEvent) -> void:
 			if e.keycode == KEY_K and not e.ctrl_pressed and build != null and not build.combat:  # (build.combat with no fight: the soldier is aboard another vessel)
 				if build.build_on:
 					build.message = "Press B for play mode, then K to fight"
+				elif _page != null:
+					_page.open("rammer" if e.shift_pressed else "")
 				else:
 					var why := enter(Session.RAMMER_PATH if e.shift_pressed else Session.PIRATE_PATH)  # Shift+K: the Rustfang rammer
 					if why != "":

@@ -92,7 +92,7 @@ const COLUMNS: Array = [
 	],
 	[
 		["COMBAT (a fight, or K in play mode)", [
-			["K", "Play mode: meet the test pirate"],
+			["K", "Play mode: test fights (pick your ship and the enemy)"],
 			["Mouse", "Steer; fixed guns aim where the ship points"],
 			["W / S", "Throttle forward / back"],
 			["A / D", "Strafe"],
@@ -103,7 +103,7 @@ const COLUMNS: Array = [
 			["Arrows / End", "Shift the shield toward a side / back to even"],
 			["Esc / Tab", "Leave when over; Tab slows time"],
 			["Y", "Accept a surrender"],
-			["J", "Spool the jump drive (10 s); engines or helm down hold it"],
+			["J", "Spool the jump drive (10 s)"],
 			["R", "After your ship is wrecked"],
 		]],
 		["CRAFTING (C)", [

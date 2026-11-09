@@ -77,6 +77,7 @@ Beta 4.1 is a fights, balance and content update on top of Beta 4, from a conten
 - **The skulls** no longer overrate ships armed with light kinetic guns.
 - **Fights end**: an enemy with no working gun surrenders or runs instead of fighting on, one whose jump drive you hold for 10 s surrenders, the Lattice wardens stand aside or withdraw to the gate when beaten, and an enemy volley no longer waits on a gun that cannot bear.
 - **Guns last**: every gun is plated and takes 0.4 of a hit, so guns stay in the fight 2.5 times as long on both sides; pilots now wait at most 0.5 s for a safer shield sector, and hold where their turrets reach too.
+- **K in play mode is a test-fight page**: pick your ship (a copy of the one you fly, or one of six test ships from "scraped by" to "lucky run") and any enemy (a faction or race x role x stage with a seed, a race flagship, the test pirate or the rammer, or Random), fight it with the real rules, and read the session's results list. The run is never changed.
 
 ### Crew and repairs
 - **Crew keep their breath**: they take a job in an airless room only if they can finish it and walk out with air to spare. Send someone in yourself (middle click) and they go, with a warning.
