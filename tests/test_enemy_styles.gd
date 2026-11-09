@@ -302,7 +302,7 @@ func test_the_siege_boat_fires_its_volley_then_backs_off() -> void:
 		if at_volley[0] < 0.0 and ai._reload >= 0.0:
 			at_volley[0] = a.time()
 			at_volley[1] = dist
-		elif at_volley[0] >= 0.0 and a.time() < at_volley[0] + PilotAI.SIEGE_BACK_S + 5.0:
+		elif at_volley[0] >= 0.0 and a.time() < at_volley[0] + PilotAI.SIEGE_BACK_S + 12.0:  # (+5 s until fights-end C: with HOLD_MAX 0.5 its volleys come every 4 s or so, so it backs off over several reloads, not in one)
 			least[0] = minf(least[0], dist)
 			most[0] = maxf(most[0], dist) if dist > least[0] else most[0])
 	check(at_volley[0] >= 0.0, "it fired a volley (%d shots)" % _events(a, "shot", 0))
