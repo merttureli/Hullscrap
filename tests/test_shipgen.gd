@@ -486,11 +486,12 @@ func test_the_campaign_rolls_tier_fights_from_the_region() -> void:
 	# the budget grows with the jumps and the tier
 	var early := float(c.fight_path("tier", "pirate").split(":")[4]) / 100.0
 	c.jumps = 30
+	c.current = c.neighbours(c.current)[0]  # (a node's foe is rolled once and kept: a fresh node rolls at the new tier)
 	var late := float(c.fight_path("tier", "pirate").split(":")[4]) / 100.0
 	check(late > 3.0 * early, "the budget at jump 30 (%.0f) is far above jump 0 (%.0f)" % [late, early])
 	c.jumps = 16
-	var rammer := c.fight_path("tier", "pirate")
-	check(c.misses() >= 2 and rammer.ends_with(":ram"), "two missed payments send a rammer: " + rammer)
+	var late_pirate := c.fight_path("tier", "pirate")
+	check(Shipgen.is_spec(late_pirate) and not late_pirate.ends_with(":ram"), "no missed payments send a rammer any more: " + late_pirate)
 
 
 # --- a generated ship fights -------------------------------------------------------------------------

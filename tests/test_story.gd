@@ -19,9 +19,9 @@ const Wardens = preload("res://scripts/space/wardens.gd")
 
 const RUSTBUCKET := "res://data/ships/starter_rustbucket.json"
 const PACK := "story_1"
-## The spine: id -> [node type, first stage, last stage, the flags a run holds when it happens]. Debt calls are not a node (the clock picks them).
+## The spine: id -> [node type, first stage, last stage, the flags a run holds when it happens]. Calls are not a node (the campaign offers them on arrival).
 const SPINE := {
-	"ma_snap_call": ["debt", 1, 2, ["met_ma"]],
+	"ma_snap_call": ["call", 1, 2, ["met_ma"]],
 	"hollow_welcome_aboard": ["hollow", 2, 4, []],
 	"ada_hears_loop": ["quest", 2, 4, ["ada_aboard"]],
 	"hollow_laid_for_twelve": ["hollow", 5, 8, []],
@@ -139,26 +139,23 @@ func test_a_quest_beacon_gives_the_beat_of_the_stage_first() -> void:
 	check(float(Events.shared().get_event("ledger_last_call")["weight"]) > float(Events.shared().get_event("doors_briefing")["weight"]), "the last call comes before the briefing when both are open")
 
 
-func test_the_first_reminder_of_ma_is_the_snap_call() -> void:
+func test_the_first_call_of_ma_is_the_snap_call() -> void:
 	var hits := 0
 	var trials := 30
 	for seed_value in range(1, trials + 1):
 		var c := Campaign.new(seed_value)
 		c.flags["met_ma"] = true
-		c.debt = 1000
 		c.jumps = 6
-		var ev: Dictionary = c._debt_event(_ship())
+		var ev: Dictionary = c._call_event(_ship())
 		hits += int(str(ev.get("id", "")) == "ma_snap_call")
-	check(hits >= int(trials * 0.85), "Ma's reminder is the Snap call in %d of %d runs" % [hits, trials])
+	check(hits >= int(trials * 0.85), "Ma's first call is the Snap call in %d of %d runs" % [hits, trials])
 	var c2 := Campaign.new(2)
 	c2.flags["met_ma"] = true
-	c2.debt = 1000
 	c2.jumps = 6
 	var ship := _ship()
 	var e: Dictionary = Events.shared().get_event("ma_snap_call")
-	var r: Dictionary = Events.shared().choose(e, 0, c2, ship, {"id": "n0", "type": "debt", "place": ""})
-	check(r["ok"], "the hundred can be paid on the call: " + str(r.get("why", "")))
-	eq(c2.debt, 900, "and comes off the debt")
+	var r: Dictionary = Events.shared().choose(e, 0, c2, ship, {"id": "n0", "type": "call", "place": ""})
+	check(r["ok"], "the night can be asked about: " + str(r.get("why", "")))
 	eq(r["logs"].size(), 2, "and Ma hands over the two Concord pages")
 	check(c2.used.has("ma_snap_call"), "the call is spent")
 

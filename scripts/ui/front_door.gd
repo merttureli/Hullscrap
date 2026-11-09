@@ -120,13 +120,13 @@ func _process(_dt: float) -> void:
 		return
 	get_tree().paused = menu.visible or over.visible or ending.visible or help.visible or prompt.visible
 	if map != null:
-		var open: bool = map.visible and map.event_panel != null and not map.event_panel.visible and not map.station_panel.visible  # after Ma's first call is read
+		var open: bool = map.visible and map.event_panel != null and not map.event_panel.visible and not map.station_panel.visible  # after the opening event is read
 		if open and not _map_seen:
 			_hint("map")
 		_map_seen = open
 		if not map.visible and sim != null and sim.has_method("player_ship") and sim.player_ship() != null \
 				and sim.player_ship().inventory.count("net_mouth_scrap") > 0:
-			_hint("net")  # Ma's gift is in the hold: show where it goes
+			_hint("net")  # the net mouth is in the hold: show where it goes
 	if craft != null:
 		if craft.visible and not _craft_seen:
 			_hint("craft")  # the first time the panel opens

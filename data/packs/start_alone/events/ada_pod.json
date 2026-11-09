@@ -1,7 +1,7 @@
 {
 	"events": [
 		{
-			"id": "ada_pod", "type": "distress", "weight": 190, "once": true,
+			"id": "ada_pod", "type": "distress", "weight": 400, "once": true,
 			"requires": {"stage_min": 1, "stage_max": 2, "not_flag": "ada_met"},
 			"title": "A pod, and somebody waving",
 			"text": "One escape pod, turning end over end on the last of its cells. Where its name was painted there is bare plate, scraped down by somebody with time on their hands. The beacon has pinged so long it has worn the same four notes into a tune. Through the cracked canopy a woman in an orange mechanic's suit, red hair tied up in a rag, has both arms over her head and is waving them the way you wave at a ship you have been waiting for a very long time.",

@@ -31,6 +31,7 @@ const FIELDS: Array[String] = ["id", "name", "home_species", "faction", "stages"
 	"places", "debris", "pois", "ambient", "stock", "recruit", "enemies", "race_share", "hazards", "events", "blurb", "override", "reason", "_doc"]
 const REQUIRED: Array[String] = ["id", "name", "home_species", "faction", "stages", "weight", "rarity", "danger", "palette", "ambient", "enemies", "events", "blurb"]
 const PLACE_KEYS: Array[String] = ["id", "name", "type", "faction", "pos", "jitter", "hidden_until", "start", "beacon", "capital"]
+const BARGE := "gantry_barge"  ## Ma's barge: run.barge in data/drift.json, a station in every region
 const FIXED_TYPES: Array[String] = ["station", "gate", "exit"]  ## node types only fixed places have (never rolled by weight)
 
 static var _key := ""
@@ -117,7 +118,8 @@ static func _pick(rng: RandomNumberGenerator, weights: Dictionary) -> String:
 
 
 ## The drift.gd config of region `r`'s map: `cfg` (data/drift.json) with the region's `map` keys and `node_weights` laid
-## over, and its places: the region's own, the arrival node (`run.entry`) when none is the start, and the exit beacon
+## over, and its places: the region's own, the arrival node (`run.entry`) when none is the start, Ma's barge (`run.barge`, in every
+## region) and the exit beacon
 ## (`run.exit`) unless `final` (the ending region has no way on).
 static func map_cfg(r: Dictionary, cfg: Dictionary, final := false) -> Dictionary:
 	var out := cfg.duplicate(true)
@@ -131,6 +133,8 @@ static func map_cfg(r: Dictionary, cfg: Dictionary, final := false) -> Dictionar
 		var entry: Dictionary = run_of(cfg)["entry"].duplicate(true)
 		entry["start"] = true
 		places.push_front(entry)
+	if run_of(cfg).has("barge"):
+		places.append(run_of(cfg)["barge"].duplicate(true))  # Ma's barge: one in every region, toward the exit
 	if not final:
 		places.append(run_of(cfg)["exit"].duplicate(true))
 	out["places"] = places

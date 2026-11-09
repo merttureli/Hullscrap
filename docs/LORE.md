@@ -15,7 +15,7 @@ Forty years ago the **Lattice** went dark in one night. It was the network of ga
 - With no gates, the Drift became an island. Nothing new gets built from scratch out here: **everything flies on salvage**. That's the game's economy, and its name.
 
 ## The player
-You inherited (won at cards, stole, were "loaned") a barely-working hull and the debts that come with it. You're a **hullscrapper**: you fly out to wrecks, cut them apart, sell what works, and fit the rest to your own ship.
+You got out of Gantry Rusthold the night it went quiet, in a hull that was only half built. You're a **hullscrapper**: you fly out to wrecks, cut them apart, sell what works, and fit the rest to your own ship.
 
 **The long arc**: rumours say the dead gates still have power in their cores, and whoever restarts one owns the way out of the Drift.
 - Every faction wants that. You start out wanting rent money.
@@ -104,7 +104,7 @@ All are data; traits appear in `data/crew.json` as they're implemented.
 - **Every item blurb has a voice**, the one of the culture that made it. Scrap blurbs are jokes or warnings, Concord blurbs read like spec sheets with tired asides, Lumen blurbs are cryptic.
 - **Reputation**: three bars (Clans, Concord, Lumen). Your choices in quests and fights move them. Prices, recruits and which blueprints you're offered depend on them.
 - **Names**:
-  - Scrapper ships are named like boats and insults ("Second Mortgage", "Ma's Kettle", "Not Again");
+  - Scrapper ships are named like boats and insults ("Second Wind", "Ma's Kettle", "Not Again");
   - Concord ships have registry numbers plus a virtue ("CS-114 Diligence");
   - Lumen ships are named after light phenomena ("Caustic", "Afterimage").
 

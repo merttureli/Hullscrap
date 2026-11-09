@@ -91,7 +91,7 @@ func test_the_ledger_says_what_the_game_does() -> void:
 	var goals: Dictionary = {}
 	for g in a.goals(1):
 		goals[g["id"]] = g
-	check(str(goals["s1_intake"]["why"]).contains("net mouth Ma gave you") and not str(goals["s1_intake"]["why"]).contains("Craft a net mouth"), "the intake goal: Ma gave you one")
+	check(str(goals["s1_intake"]["why"]).contains("Mount the net mouth") and not str(goals["s1_intake"]["why"]).contains("Craft a net mouth"), "the intake goal: the hull already has one")
 	check(str(goals["s1_cover"]["why"]).contains("one medbay") and not str(goals["s1_cover"]["why"]).contains("bed"), "the cover goal: a medbay, not a bed")
 	var tip := str(a.tip_words("first_fight")["text"])
 	check(tip.contains("J spools the jump drive (10 s)") and tip.contains("engines or helm"), "the first fight tip says what J does")

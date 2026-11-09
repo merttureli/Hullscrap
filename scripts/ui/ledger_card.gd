@@ -1,5 +1,5 @@
 extends Control
-## The Ledger's card (the guidance program of scripts/sim/advisor.gd; Ma Gantry Loans installs it on every ship it finances): a small card under
+## The Ledger's card (the guidance program of scripts/sim/advisor.gd; the Rusthold dock office installed it on every hull from its yards): a small card under
 ## the top bar in play mode, build mode and on the map, showing the next goal of the stage (title, one line why, progress "Guns 2/3"); one amber line
 ## when a warning is up; a click or L unfolds the whole checklist (ticks for the done ones). A goal met ticks with a soft sound and a green line.
 ## Where it sits: top left in play mode (nothing is there), the right column under the part card in build mode (the middle is the ship's), the bottom

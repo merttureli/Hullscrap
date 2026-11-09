@@ -28,6 +28,7 @@ var entry_id := ""
 var far_id := ""  ## the node farthest along the axis (the map view fits the front between the entry and this one)
 var exit_id := ""  ## the region's exit beacon: it holds (optional)
 var linger_t := 0.0  ## seconds lingered towards the next step
+var fallen := {}  ## node id -> true for places the story has taken whatever the front says (Rusthold on the first jump)
 var _proj := {}  # node id -> px along the axis (negative behind the entry)
 var _holds := {}  # node id -> true for the nodes the tide never takes
 var _warned := {}  # warning seconds already told in this linger period -> true
@@ -104,11 +105,13 @@ func _hollow_at(id: String, s: int) -> bool:
 
 ## Has the tide taken node `id`? Stations, the exit and unknown nodes never fall.
 func is_hollow(id: String) -> bool:
-	return _hollow_at(id, steps)
+	return fallen.has(id) or _hollow_at(id, steps)
 
 
 ## Steps until node `id` goes Hollow: 0 if it is, -1 if it never does (a station, the exit, an unknown node).
 func jumps_until(id: String) -> int:
+	if fallen.has(id):
+		return 0
 	if not _proj.has(id) or _holds.has(id):
 		return -1
 	for n in range(0, grace + jumps_to_cross + 2):
@@ -154,7 +157,7 @@ func advance(n := 1) -> int:
 
 ## `dt` seconds of play pass in the same place (the map is shut, no build mode, no fight). At linger_s the tide
 ## advances one step (RISES_TEXT), the count starts again, and the lines for the HUD and the chronicle come back:
-## "The tide rises in 60 s" once at each of the warn seconds, then the rise. Never touches the jump counter or the debt.
+## "The tide rises in 60 s" once at each of the warn seconds, then the rise. Never touches the jump counter.
 func linger(dt: float) -> Array:
 	var lines := []
 	if dt <= 0.0 or spent():
@@ -199,7 +202,7 @@ static func clock(seconds: float) -> String:
 # --- save format --------------------------------------------------------------------------------------------
 
 func to_save() -> Dictionary:
-	return {"steps": steps, "linger": linger_t}
+	return {"steps": steps, "linger": linger_t, "fallen": fallen.keys()}
 
 
 ## Take a saved state. Returns "" or why not (and nothing changes).
@@ -207,6 +210,9 @@ func load_save(d: Dictionary) -> String:
 	if not ((d.get("steps") is int or d.get("steps") is float) and (d.get("linger", 0.0) is int or d.get("linger", 0.0) is float)):
 		return "bad tide"
 	steps = maxi(int(d["steps"]), 0)
+	fallen = {}
+	for id in (d.get("fallen", []) if d.get("fallen") is Array else []):
+		fallen[str(id)] = true
 	linger_t = clampf(float(d.get("linger", 0.0)), 0.0, linger_s - 0.001)
 	_warned.clear()
 	for w in warns:  # the warnings already given in this period are not told again

@@ -21,13 +21,14 @@ var from := {}  ## where a recruit came from: "event:<id>", "station" -> times
 
 
 ## Run `i` (a seed): a campaign of `last_stage` stages with `design`. Returns {start (crew at the start), crew (stage -> crew aboard at the end of
-## it, for the stages in CHECKPOINTS and `last_stage`), met_ada, took_ada, distress12 (distress events met in stages 1-2)}.
+## it, for the stages in CHECKPOINTS and `last_stage`), met_ada, took_ada, distress12 (distress events met in stages 1-2), opening_crew
+## (the survivors the opening event handed out)}.
 func run(i: int, design: String, last_stage := 8) -> Dictionary:
 	_pick.seed = 4242 + i * 31
 	var c := Campaign.new(9000 + i)
 	var ship = Ship.from_design(design)
 	Jobs.spawn_crew(ship)
-	var out := {"start": ship.crew.size(), "crew": {}, "met_ada": false, "took_ada": false, "distress12": 0}
+	var out := {"start": ship.crew.size(), "crew": {}, "met_ada": false, "took_ada": false, "distress12": 0, "opening_crew": 0}
 	var guard := 0
 	while c.stage <= mini(c.stages(), last_stage) and guard < 400:
 		guard += 1
@@ -150,6 +151,8 @@ func _chain(ev: Dictionary, c: Campaign, ship, out: Dictionary) -> void:
 		if ship.crew.size() > before:
 			var k := "event:" + id
 			from[k] = int(from.get(k, 0)) + ship.crew.size() - before
+			if bool(e.get("opening", false)):
+				out["opening_crew"] += ship.crew.size() - before  # the survivors of the alarm night are a gift, not a crew offer
 		if str(r["fight"]) != "":
 			var roll := _pick.randf()
 			var res := {"state": "won" if roll < 0.7 else "fled", "enemy": r["fight"], "threat": 2}

@@ -2,7 +2,7 @@ extends "res://tests/base_test.gd"
 ## The soak test: a campaign played end to end without a screen, in sector space (docs/CONTENT.md section 11). For each
 ## starter ship and three seeds it makes 25 light-speed jumps along random lanes (the drive spools, then fires). In each
 ## sector the autopilot (helm.gd, at a time scale) flies the ship to the node's own POI and sometimes to one more, so
-## their events run (random allowed choices), stations dock (fuel when low, a payment on the debt), passing ships come
+## their events run (random allowed choices), stations dock (fuel when low), passing ships come
 ## by, and fights happen in place through the real arena, the pilot AI flying the player's ship too; a win or a capture
 ## ends in the salvage pick (salvage.gd). A fight over FIGHT_CAP_S simulated seconds counts as a draw and the player
 ## retreats; one ends too when the enemy is out of range. After every step it checks the numbers (no negative fuel,
@@ -324,16 +324,13 @@ func _shop(where: String, c: Campaign, ship, id: String, pick: RandomNumberGener
 	check(int(c.station_cfg(id)["qty"].get(item, 0)) == left - 1, where + ": the shelf is one lighter")
 
 
-## Docked at a station: pay a due payment, buy fuel when low, sell a little, repair, and look at the stock.
+## Docked at a station: buy fuel when low, sell a little, repair, and look at the stock.
 func _station(where: String, c: Campaign, ship, pick: RandomNumberGenerator) -> void:
 	if c.station_cfg(c.current).is_empty() or c.dock_block(c.current) != "":
 		return
 	stats["docks"] += 1
 	var st := c.station_cfg(c.current)
 	var services: Array = st["services"]
-	if services.has("debt") and c.behind() > 0 and ship.inventory.count("credits") >= int(c.cfg["debt"]["payment"]):
-		var r := c.pay_debt(ship, int(c.cfg["debt"]["payment"]))
-		check(r["ok"], where + ": paying the debt: " + str(r["text"]))
 	if services.has("fuel"):
 		var guard := 0
 		while ship.inventory.count("fuel") < 4 and guard < 12:
@@ -513,7 +510,7 @@ func _audit_fight(where: String, s: Session) -> void:
 
 # --- the numbers ---------------------------------------------------------------------------------------
 
-## The state is sane: no negative cargo or hull, every held id known, the debt and reputation in range.
+## The state is sane: no negative cargo or hull, every held id known, the reputation in range.
 func _audit(where: String, c: Campaign, ship) -> void:
 	for id in ship.inventory.counts:
 		var n: int = ship.inventory.counts[id]
@@ -521,7 +518,7 @@ func _audit(where: String, c: Campaign, ship) -> void:
 		check(_known_item(ship, str(id)), "%s: unknown item id '%s' in the cargo" % [where, id])
 	check(ship.inventory.count("fuel") >= 0 and ship.inventory.count("credits") >= 0, where + ": negative fuel or credits")
 	check(Structure.structure_fraction(ship) >= 0.0 and Structure.missing_hp(ship) >= 0.0, "%s: structure %s" % [where, str(Structure.structure_fraction(ship))])
-	check(c.debt >= 0 and c.paid >= 0 and c.jumps >= 0, "%s: debt %d, paid %d, jumps %d" % [where, c.debt, c.paid, c.jumps])
+	check(c.jumps >= 0, "%s: jumps %d" % [where, c.jumps])
 	check(c.drift.has(c.current), where + ": the ship is at a node that does not exist: " + c.current)
 	for f in c.rep:
 		check(c.rep[f] >= -10 and c.rep[f] <= 10, "%s: %s reputation %d" % [where, f, c.rep[f]])

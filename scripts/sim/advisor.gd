@@ -1,6 +1,6 @@
 extends RefCounted
-## The Ledger's brain: the guidance program Ma Gantry Loans installs on every ship it finances (docs/LORE.md), because a ship that grows
-## pays its debt. Read-only: it measures the ship and the campaign and decides what to say; it never touches an rng or the game's state.
+## The Ledger's brain: the guidance program the Rusthold dock office installed on every hull from its yards (docs/LORE.md), because a ship that
+## grows outruns the tide. Read-only: it measures the ship and the campaign and decides what to say; it never touches an rng or the game's state.
 ## Three kinds of line, all from data/advisor.json (the words) and data/progression.json (the numbers, written by the balance track):
 ##   goals     the stage's checklist (the milestone ladder of docs/audit/progression.md section 7): each has a `check` over the vocabulary below;
 ##             the first one not met is the card's line, with its progress ("Guns 2/3"). A value is a number or "p:<key>" (that stage's

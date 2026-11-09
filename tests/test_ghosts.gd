@@ -75,7 +75,7 @@ func _edge_node(c: Campaign) -> String:
 
 
 ## A campaign with the ship in the place that is one step from falling, as if it had just arrived (the flag is quiet).
-func _on_the_edge(seed_value := 8) -> Dictionary:
+func _on_the_edge(seed_value := 9) -> Dictionary:
 	var ship := _ship()
 	var c := Campaign.new(seed_value)
 	var id := _edge_node(c)

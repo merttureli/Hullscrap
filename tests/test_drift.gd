@@ -1,6 +1,6 @@
 extends "res://tests/base_test.gd"
 ## The Drift campaign without a screen: the seeded map of a region (same seed, same map; connected; 2 to 4 lanes;
-## spacing; the fixed places of the regions), fog, jumping and fuel, the debt clock and Ma's Kettle, reputation, the
+## spacing; the fixed places of the regions), fog, jumping and fuel, Ma's Kettle, reputation, the
 ## danger tiers, the station trades, saving and loading, and the data files that feed it. The region graph itself is
 ## tests/test_regions.gd.
 
@@ -140,10 +140,11 @@ func test_fog_at_the_start_shows_only_rusthold_and_its_neighbours() -> void:
 				known.append(id)
 		known.sort()
 		var want: Array = ["rusthold"] + c.neighbours("rusthold")
-		if not want.has(c.drift.exit_id()):
-			want.append(c.drift.exit_id())
+		for beacon in [c.drift.exit_id(), Campaign.BARGE]:  # (the exit beacon and Ma's barge are always on the map)
+			if not want.has(beacon):
+				want.append(beacon)
 		want.sort()
-		eq(known, want, "seed %d: only Rusthold, its lanes and the exit beacon show a type" % seed_value)
+		eq(known, want, "seed %d: only Rusthold, its lanes, the exit beacon and Ma's barge show a type" % seed_value)
 		for id in c.drift.ids():
 			if not c.is_known(id) and not c.is_hidden(id):
 				eq(c.label(id), "?", "an unknown node shows ?")
@@ -238,77 +239,17 @@ func test_the_danger_tier_follows_the_jump_counter() -> void:
 		eq(c.tier(), want[j], "tier at jump %d" % j)
 
 
-func test_a_pirate_node_with_two_missed_payments_sends_the_rammer() -> void:
-	var cfg := Campaign.config().duplicate(true)
-	for t in ["1", "2", "3"]:
-		cfg["enemies"]["rammer"][t] = ["res://data/ships/starter_courier.json"]
-	var c := Campaign.new(1, cfg)
-	check(Shipgen.is_spec(c.fight_path("tier", "pirate")), "no payments missed: a generated raider")
-	c.jumps = 8
-	check(Shipgen.is_spec(c.fight_path("tier", "pirate")), "one missed: still a generated raider")
-	c.jumps = 16
-	eq(c.misses(), 2, "two payments in a row missed")
-	eq(c.fight_path("tier", "pirate"), "res://data/ships/starter_courier.json", "the next pirate fight is the rammer")
-	check(Shipgen.is_spec(c.fight_path("tier", "patrol")), "patrols do not")
-
-
-# --- the debt ------------------------------------------------------------------------------------------------------------
-
-func test_a_payment_is_due_every_8_jumps_and_a_miss_sets_the_flag() -> void:
+func test_no_debt_machinery_is_left() -> void:
 	var c := _camp(2)
 	var ship := _ship()
 	ship.inventory.add("fuel", 100)
-	eq([c.debt, c.next_due_in()], [1000, 8], "1000 owed, the first payment in 8 jumps")
-	_hop(c, ship, 7)
-	check(not c.flags.has("debt_missed") and c.behind() == 0, "nothing is due before jump 8")
-	eq(c.next_due_in(), 1, "one jump to go")
-	_hop(c, ship, 1)
-	check(c.flags.has("debt_missed"), "jump 8 passed with nothing paid: the repo flag is set")
-	eq([c.behind(), c.misses()], [100, 1], "100 behind, one miss")
-	_hop(c, ship, 8)
-	eq(c.misses(), 2, "another date missed: two in a row")
-
-
-func test_paying_in_time_avoids_the_flag_and_paying_late_clears_it() -> void:
-	var c := _camp(2)
-	var ship := _ship()
-	ship.inventory.add("fuel", 100)
-	ship.inventory.add("credits", 1000)
-	check(c.pay_debt(ship, 100)["ok"], "paid 100 early")
-	_hop(c, ship, 8)
-	check(not c.flags.has("debt_missed"), "paid up when the date came: no flag")
-	_hop(c, ship, 8)
-	check(c.flags.has("debt_missed"), "the second date was missed")
-	check(c.pay_debt(ship, 100)["ok"], "paid it")
-	check(not c.flags.has("debt_missed"), "caught up: the flag clears")
-	eq(c.debt, 800, "800 left")
-
-
-func test_paying_the_whole_debt_sets_debt_free_and_gives_the_kettle() -> void:
-	var c := _camp(2)
-	var ship := _ship()
-	ship.inventory.add("credits", 1000)
-	var credits := ship.inventory.count("credits")
-	var r := c.pay_debt(ship, 100000)
-	check(r["ok"], "paid: " + r["text"])
-	eq([c.debt, c.paid], [0, 1000], "nothing owed")
-	check(c.flags.has("debt_free"), "debt_free is set")
-	eq(ship.inventory.count("reactor_scrap_kettle"), 1, "Ma's Kettle is in the cargo")
-	eq(ship.inventory.count("credits"), credits - 1000, "for 1000 credits")
-	check(not c.pay_debt(ship, 10)["ok"], "nothing left to pay")
-	var again := Campaign.new(3)
-	again.flags["debt_free"] = true
-	again.debt = 0
-	again.add_debt(ship, -10)
-	eq(ship.inventory.count("reactor_scrap_kettle"), 1, "the Kettle comes once")
-
-
-func test_you_cannot_pay_more_than_you_have() -> void:
-	var c := _camp()
-	var ship := _ship()
-	var credits := ship.inventory.count("credits")
-	check(not c.pay_debt(ship, credits + 1)["ok"], "refused")
-	eq([c.debt, ship.inventory.count("credits")], [1000, credits], "nothing changed")
+	for k in ["debt", "paid", "reminded", "debt_stop"]:
+		check(not c.to_dict().has(k), "a new save has no " + k)
+	check(not Campaign.config().has("debt"), "the config has no debt")
+	_hop(c, ship, 17)
+	check(not c.flags.has("debt_missed"), "a jump never sets debt_missed")
+	for i in 3:
+		check(Shipgen.is_spec(c.fight_path("tier", "pirate")) and not c.fight_path("tier", "pirate").ends_with(":ram"), "no rammer is sent to a pirate node")
 
 
 func test_mas_kettle_is_a_unique_scrap_reactor_with_a_quirk() -> void:
@@ -448,14 +389,10 @@ func test_buy_from_the_stock_of_the_station() -> void:
 	check(not c.buy(ship, "rusthold", "radiator")["ok"], "no credits, no radiator")
 
 
-func test_pay_the_debt_at_a_station() -> void:
+func test_no_station_takes_debt_payments() -> void:
 	var c := _camp()
-	var ship := _ship()
-	var credits := ship.inventory.count("credits")
-	check(c.pay_debt(ship, 100)["ok"], "paid 100")
-	eq([c.debt, ship.inventory.count("credits")], [900, credits - 100], "900 owed")
-	check("debt" in c.station_cfg("rusthold")["services"], "Rusthold takes payments")
-	check(not ("debt" in c.station_cfg("meridian")["services"]), "Meridian does not")
+	for st in ["rusthold", "meridian"]:
+		check(not ("debt" in c.station_cfg(st)["services"]), st + " takes no payments")
 
 
 func test_repair_all_blocks_at_two_credits_an_hp() -> void:
@@ -513,7 +450,7 @@ func test_arriving_at_a_station_rolls_its_recruits() -> void:
 	eq(c.offers.get("rusthold", []).size(), 2, "two recruits at Rusthold on arrival")
 
 
-func test_a_clan_trader_node_takes_debt_payments_but_has_no_shipyard() -> void:
+func test_a_clan_trader_node_is_a_plain_trader_of_the_clans() -> void:
 	var c := _camp()
 	var found := false
 	for seed_value in 30:
@@ -531,7 +468,7 @@ func test_a_clan_trader_node_takes_debt_payments_but_has_no_shipyard() -> void:
 			break
 	if not node.is_empty():
 		var st := c.station_cfg(node["id"])
-		check("debt" in st["services"] and not ("repair" in st["services"]), "a clan trader takes payments, nothing more")
+		check(not ("debt" in st["services"]) and not ("repair" in st["services"]), "a clan trader takes no payments and has no shipyard")
 
 
 # --- save and load -----------------------------------------------------------------------------------------------------------------
@@ -544,14 +481,12 @@ func test_save_and_load_round_trip_and_the_rng_carries_on() -> void:
 	c.flags["met_ma"] = true
 	c.rep["lumen"] = 3
 	c.used["x"] = true
-	c.paid = 100
-	c.debt = 900
 	c.revealed["meridian"] = true
 	var d: Dictionary = JSON.parse_string(JSON.stringify(c.to_dict()))  # through real JSON
 	var back := _camp(1)
 	eq(back.load_dict(d), "", "loaded")
 	eq(JSON.stringify(back.to_dict()), JSON.stringify(c.to_dict()), "everything survived")
-	eq([back.current, back.jumps, back.debt, back.rep["lumen"]], [c.current, 4, 900, 3], "the numbers")
+	eq([back.current, back.jumps, back.rep["lumen"]], [c.current, 4, 3], "the numbers")
 	eq(back.drift.lanes, c.drift.lanes, "the lanes")
 	var roll_a := []
 	var roll_b := []
@@ -612,7 +547,7 @@ func test_drift_data_names_things_that_exist() -> void:
 		for sp in s["recruit"]:
 			check(Content.has("species", str(sp)), "%s recruits a known species: %s" % [st, sp])
 		for svc in s["services"]:
-			check(svc in ["fuel", "sell", "stock", "debt", "repair", "recruit"], "%s: known service %s" % [st, svc])
+			check(svc in ["fuel", "sell", "stock", "repair", "recruit"], "%s: known service %s" % [st, svc])
 	for kind in cfg["enemies"]:
 		for t in ["1", "2", "3"]:
 			check(cfg["enemies"][kind].has(t) and not cfg["enemies"][kind][t].is_empty(), "%s has designs for tier %s" % [kind, t])
@@ -628,7 +563,7 @@ func test_drift_data_names_things_that_exist() -> void:
 			check(cfg["types"].has(p["type"]), "the place %s of %s has a known type" % [p["id"], r["id"]])
 	for t in cfg["node_weights"]:
 		check(cfg["types"].has(t), "the type %s is drawn on the map" % t)
-	check(comps.has(cfg["debt"]["kettle"]), "the Kettle exists")
+	check(comps.has("reactor_scrap_kettle"), "the Kettle exists")
 
 
 func test_starters_carry_six_fuel_and_fuel_is_an_item() -> void:
@@ -723,9 +658,9 @@ func test_a_new_run_meets_ma_gantry_at_rustholds_beacon_then_the_station_menu() 
 	s.ship_pos = s.main_poi()["pos"]
 	map.open_poi(s.trigger(c, d["sim"].player_ship()), s)
 	check(map.visible and map.panel_only, "the panels open over the sector, with no map")
-	check(map.event_panel.visible and map.event_panel.event.get("id", "") == "station_debt_intro", "Ma Gantry's introduction is up")
+	check(map.event_panel.visible and map.event_panel.event.get("id", "") == "station_opening_hull", "the alarm night opening is up")
 	check(not map.station_panel.visible, "the menu waits")
-	eq(map.event_panel.choose(0), "", "'Sign me up'")
+	eq(map.event_panel.choose(0), "", "'Thanks, Ma'")
 	check(map.event_panel.page == "result" and map.event_panel.result["text"] != "", "the outcome is shown")
 	check(c.flags.has("met_ma"), "met_ma is set")
 	_press(map.event_panel, KEY_ENTER)
@@ -838,14 +773,13 @@ func test_goto_opens_the_next_page_in_the_panel() -> void:
 	var map: MapView = d["map"]
 	var panel: EventPanel = map.event_panel
 	panel.close()
-	panel.open_event(map.campaign.events.get_event("repo_collectors"))
-	map.campaign.flags["debt_missed"] = true
-	var talk := _find(panel, "Take it up with Ma")
+	panel.open_event(map.campaign.events.get_event("anomaly_singing_buoy"))
+	var talk := _find(panel, "Listen to the third note")
 	check(talk >= 0, "that choice is on offer")
 	panel.choose(talk)
-	check(panel.result["goto"] == "repo_fight", "it leads on")
+	check(panel.result["goto"] == "anomaly_buoy_answer", "it leads on")
 	panel.proceed()
-	eq(panel.event.get("id", ""), "repo_fight", "the next page is shown")
+	eq(panel.event.get("id", ""), "anomaly_buoy_answer", "the next page is shown")
 	check(panel.page == "choices", "with its own choices")
 	_free_screen(d)
 
@@ -857,7 +791,7 @@ func test_a_fight_from_an_event_starts_combat_and_calls_back_with_the_result() -
 	var fake: FakeCombat = d["fake"]
 	var panel: EventPanel = map.event_panel
 	panel.close()
-	panel.open_event(map.campaign.events.get_event("repo_fight"))
+	panel.open_event(map.campaign.events.get_event("pirate_ambush_wreck"))
 	panel.choose(0)
 	panel.proceed()
 	check(Shipgen.is_spec(fake.entered), "the combat view was asked to fight a generated raider: " + fake.entered)
@@ -866,8 +800,8 @@ func test_a_fight_from_an_event_starts_combat_and_calls_back_with_the_result() -
 	var foe: Ship = Ship.from_design("res://data/ships/pirate_raider.json")
 	fake.finished.emit({"state": "won", "enemy": foe})
 	check(map.visible and panel.visible, "back on the map with a page up")
-	check(panel.result["text"].contains("ledger") and panel.result["lines"].any(func(l): return l.begins_with("+")), "the after_win text and the loot are shown")
-	check(ship.inventory.count("credits") >= credits + 60, "the loot (and the 40 of the ledger) is in the cargo")
+	check(panel.result["text"].contains("sidearms") and panel.result["lines"].any(func(l): return l.begins_with("+")), "the after_win text and the loot are shown")
+	check(ship.inventory.count("credits") >= credits + 20, "the loot is in the cargo")
 	panel.proceed()
 	check(panel.visible and panel.event.get("id", "") == "salvage", "then the salvage pick of the enemy's surviving parts")
 	_free_screen(d)
@@ -879,12 +813,11 @@ func test_losing_a_fight_starts_a_new_run() -> void:
 	var fake: FakeCombat = d["fake"]
 	map.event_panel.close()
 	map.campaign.jumps = 12
-	map.campaign.debt = 400
-	map.event_panel.open_event(map.campaign.events.get_event("repo_fight"))
+	map.event_panel.open_event(map.campaign.events.get_event("pirate_ambush_wreck"))
 	map.event_panel.choose(0)
 	map.event_panel.proceed()
 	fake.finished.emit({"state": "lost"})
-	eq([map.campaign.jumps, map.campaign.debt], [0, 1000], "a fresh campaign")
+	eq(map.campaign.jumps, 0, "a fresh campaign")
 	check(not map.event_panel.visible, "with nothing open")
 	_free_screen(d)
 
@@ -955,9 +888,7 @@ func test_station_menu_trades_pays_repairs_and_recruits() -> void:
 				repair = i
 			"recruit":
 				recruit = i
-	credits = ship.inventory.count("credits")
-	st.act(2, pay)
-	eq([c.debt, ship.inventory.count("credits")], [900, credits - 100], "100 paid on the debt")
+	eq(pay, -1, "no debt row among the services")
 	credits = ship.inventory.count("credits")
 	st.act(2, repair)
 	eq([Structure.missing_hp(ship), ship.inventory.count("credits")], [0.0, credits - 80], "all 40 hp mended for 80 credits")
@@ -1061,7 +992,7 @@ func test_a_derelict_log_is_shown_in_the_result_page() -> void:
 	var lay := panel.layout()
 	check(lay["log"].size.y > 40.0 and lay["button"].position.y > lay["log"].end.y, "its box is laid out above the Continue button")
 	check(lay["panel"].encloses(lay["log"]) and lay["panel"].encloses(lay["button"]), "inside the panel")
-	check(EventPanel.tone_of("Log found: x") == 1 and EventPanel.tone_of("-20 credits") == -1 and EventPanel.tone_of("Debt -100 (900 left)") == 1 and EventPanel.tone_of("Debt +50") == -1 and EventPanel.tone_of("Hull integrity -10") == -1, "change lines are coloured by whether they help")
+	check(EventPanel.tone_of("Log found: x") == 1 and EventPanel.tone_of("-20 credits") == -1 and EventPanel.tone_of("Hull integrity -10") == -1, "change lines are coloured by whether they help")
 	_free_screen(d)
 
 
@@ -1069,16 +1000,40 @@ func test_a_ship_with_no_fuel_can_always_be_towed_home() -> void:
 	var c := Campaign.new(7)
 	var ship := _ship()
 	ship.inventory.add("fuel", -ship.inventory.count("fuel"))
-	var home := c.current
-	var away: String = c.neighbours(home)[0]
+	var away: String = c.neighbours(c.current)[0]
 	c.current = away
-	var debt := c.debt
+	var steps := c.tide.steps
 	var r := c.tow(ship)
 	check(r["ok"], "towed")
-	eq(c.current, home, "back at Gantry Rusthold")
-	eq(c.debt, debt + Campaign.TOW_DEBT, "the tow goes on the debt")
-	eq(ship.inventory.count("fuel"), Campaign.TOW_FUEL, "and Ma throws in some fuel")
+	eq(c.current, "gantry_barge", "Ma's barge hauls you in")
+	eq(c.tide.steps, steps + Campaign.TOW_STEPS, "the tow costs the tide two steps, not one")
+	eq(Campaign.TOW_STEPS, 2, "(two steps)")
+	eq(ship.inventory.count("fuel"), Campaign.TOW_FUEL, "and the hauler tops the tank up")
+	check(not r["notes"].any(func(n): return str(n).contains("ebt")), "the notes name no debt: " + str(r["notes"]))
 	check(not c.tow(ship)["ok"], "no tow while you have fuel")
+
+
+func test_an_old_save_with_a_debt_loads_and_the_debt_does_nothing() -> void:
+	var c := Campaign.new(9)
+	var d: Dictionary = JSON.parse_string(JSON.stringify(c.to_dict()))
+	d["version"] = 13
+	d["debt"] = 800
+	d["paid"] = 200
+	d["reminded"] = 1
+	d["debt_stop"] = 16
+	d["flags"] = ["met_ma", "debt_missed", "debt_free"]
+	var back := Campaign.new(1)
+	eq(back.load_dict(d), "", "a v13 save with debt keys loads")
+	check(back.flags.has("met_ma"), "its flags are kept")
+	check(not back.to_dict().has("debt") and not back.to_dict().has("paid"), "and the debt keys are not written again")
+	var d2: Dictionary = JSON.parse_string(JSON.stringify(c.to_dict()))
+	d2.erase("last_call")
+	eq(Campaign.new(2).load_dict(d2), "", "and a save without them loads too")
+	var ship := _ship()
+	ship.inventory.add("fuel", 100)
+	_hop(back, ship, 20)
+	check(not Shipgen.is_spec(back.fight_path("tier", "pirate")) or not back.fight_path("tier", "pirate").ends_with(":ram"), "no clock runs, no rammer")
+	eq(Campaign.VERSION, 14, "the version is 14")
 
 
 ## A jump along a lane the way the game makes one now (docs/CONTENT.md section 11): spool the drive and let it fire.

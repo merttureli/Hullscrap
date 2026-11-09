@@ -1,7 +1,7 @@
 extends "res://tests/base_test.gd"
 ## The events of the Drift without a screen: the loader and the validator that protects every pack in
 ## data/events, requires filtering (events and choices), blue and greyed choices, weighted outcome rolls,
-## every effect type, goto pages, once, fights calling back, the debt events and the pack conventions.
+## every effect type, goto pages, once, fights calling back, the calls and the pack conventions.
 
 const Structure = preload("res://scripts/ship/structure.gd")
 const Events = preload("res://scripts/space/events.gd")
@@ -65,7 +65,7 @@ func test_the_loader_reads_every_json_file_in_the_folder() -> void:
 		from[e.files[id]] = true
 	check(from.has("res://data/events/core.json"), "core.json is read")
 	check(from.has("res://data/events/drift_pack1.json") and from.has("res://data/events/drift_pack2.json") and from.has("res://data/events/stations.json"), "both packs and the station greetings are read")
-	check(e.has("station_debt_intro") and e.has("distress_hauler_fire") and e.has("asteroid_tumbling_rock"), "events of both files are there")
+	check(e.has("station_opening_hull") and e.has("distress_hauler_fire") and e.has("asteroid_tumbling_rock"), "events of both files are there")
 
 
 func test_every_outcome_of_every_event_applies_and_every_choice_can_be_taken() -> void:
@@ -122,7 +122,7 @@ func test_validator_reports_a_duplicate_id_in_two_files() -> void:
 func test_asteroid_field_is_a_valid_node_type_and_event_type() -> void:
 	check(Events.NODE_TYPES.has("asteroid_field") and Events.EVENT_TYPES.has("asteroid_field"), "known")
 	check(_events([_ev("rock", "asteroid_field")]).validate().is_empty(), "an asteroid_field event validates")
-	check(Events.EVENT_TYPES.has("debt") and not Events.NODE_TYPES.has("debt"), "debt is an event type that is not a node type")
+	check(Events.EVENT_TYPES.has("call") and not Events.NODE_TYPES.has("call") and not Events.EVENT_TYPES.has("debt"), "call is an event type that is not a node type, and debt is gone")
 
 
 # --- the core events ----------------------------------------------------------------------------------------
@@ -138,10 +138,10 @@ func test_core_events_cover_every_node_type_and_station() -> void:
 				seen[ev["requires"].get("node", "")] = true
 	for t in ["pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "empty", "asteroid_field", "rusthold", "meridian", "prism"]:
 		check(seen.has(t), "core.json has an event for " + t)
-	var intro: Dictionary = e.get_event("station_debt_intro")
+	var intro: Dictionary = e.get_event("station_opening_hull")
 	check(intro["once"] and intro["requires"]["node"] == "rusthold", "Ma's introduction is a once-event at Rusthold")
 	check(JSON.stringify(intro).contains("met_ma"), "it sets the flag met_ma")
-	check(e.get_event("repo_collectors")["requires"]["flag"] == "debt_missed", "the repo crew come when a payment is missed")
+	check(e.get_event("repo_collectors").is_empty() and e.get_event("repo_fight").is_empty(), "the repo crew are gone")
 
 
 func test_the_two_asteroid_events_offer_surface_mining_the_deep_vein_and_moving_on() -> void:
@@ -512,17 +512,23 @@ func test_effect_reveal_shows_a_node_or_a_station_on_the_map() -> void:
 	eq(_fx({"reveal": "no_such_place"}, c, ship)["lines"].size(), 0, "an unknown id does nothing")
 
 
-func test_effect_debt_changes_what_is_owed_and_counts_as_payments() -> void:
+func test_effect_tide_moves_the_hollow_tide() -> void:
 	var c := _camp()
 	var ship := _ship()
-	var r := _fx({"debt": 50}, c, ship)
-	eq(c.debt, 1050, "a penalty")
-	check(r["lines"].has("Debt +50"), "said: " + str(r["lines"]))
-	_fx({"debt": -250}, c, ship)
-	eq([c.debt, c.paid], [800, 250], "forgiven or paid: it counts towards the payments")
-	_fx({"debt": -100000}, c, ship)
-	eq(c.debt, 0, "never below zero")
-	check(c.flags.has("debt_free") and ship.inventory.count("reactor_scrap_kettle") == 1, "clearing it by event also pays out the Kettle")
+	var steps := c.tide.steps
+	_fx({"tide": 2}, c, ship)
+	eq(c.tide.steps, steps + 2, "tide N moves it N steps")
+	check(Events.new().validate().is_empty(), "and the data validates")
+	check(not Events.EFFECT_KEYS.has("debt"), "there is no debt effect")
+
+
+func test_no_event_data_names_the_debt_effect_or_type() -> void:
+	var e := Events.new()
+	for id in e.order:
+		var text := JSON.stringify(e.events[id])
+		check(not text.contains('"debt":'), id + " has no debt effect")
+		check(str(e.events[id].get("type", "")) != "debt", id + " is no debt event")
+		check(not text.contains("debt_missed") and not text.contains("debt_free"), id + " names no debt flag")
 
 
 func test_effect_log_shows_a_derelict_log_and_remembers_it() -> void:
@@ -541,7 +547,7 @@ func test_effect_log_shows_a_derelict_log_and_remembers_it() -> void:
 
 
 func test_every_effect_type_in_the_spec_is_known_to_the_validator() -> void:
-	var want := ["items", "rep", "crew_hp", "hull", "flag", "clear_flag", "recruit", "lose_crew", "blueprint", "fight", "goto", "reveal", "debt", "log", "unlock", "ending", "board",
+	var want := ["items", "rep", "crew_hp", "hull", "flag", "clear_flag", "recruit", "lose_crew", "blueprint", "fight", "goto", "reveal", "tide", "log", "unlock", "ending", "board",
 		"npc_trade", "npc_reveal", "npc_join", "npc_hostile", "npc_follow", "npc_leave", "site_fight", "hurt", "lose_member", "lose_gear", "rescue"]
 	for k in want:
 		check(Events.EFFECT_KEYS.has(k), k + " is an effect")
@@ -611,7 +617,7 @@ func test_a_lost_fight_ends_the_run_and_a_fled_one_gives_nothing() -> void:
 	eq(ship.inventory.count("credits"), credits, "no loot for running")
 
 
-# --- the debt events (type debt) -----------------------------------------------------------------------------------------------
+# --- the calls (type call) -----------------------------------------------------------------------------------------------
 
 func _hop(c: Campaign, ship: Ship, n: int) -> Dictionary:
 	var last := {}
@@ -626,34 +632,18 @@ func _hop(c: Campaign, ship: Ship, n: int) -> Dictionary:
 	return last
 
 
-func test_debt_events_come_from_the_clock_by_their_requires() -> void:
-	var first := _ev("debt_first", "debt", {"jumps_min": 2, "not_flag": "met_ma"}, {"flag": "met_ma"}, {"once": true})
-	var remind := _ev("debt_remind", "debt", {"jumps_min": 6, "flag": "met_ma", "not_flag": "debt_missed"})
-	var repo := _ev("debt_repo", "debt", {"flag": "debt_missed"})
-	var c := _camp([first, remind, repo, _ev("plain", "empty"), _ev("plain_pirate", "pirate"), _ev("plain_wreck", "wreck_field"), _ev("plain_asteroid", "asteroid_field"),
+func test_calls_come_on_arrival_at_most_every_few_jumps() -> void:
+	var call := _ev("call_a", "call", {"jumps_min": 2}, {}, {"weight": 1000})
+	var c := _camp([call, _ev("plain", "empty"), _ev("plain_pirate", "pirate"), _ev("plain_wreck", "wreck_field"), _ev("plain_asteroid", "asteroid_field"),
 		_ev("plain_distress", "distress"), _ev("plain_trader", "trader"), _ev("plain_anomaly", "anomaly"), _ev("plain_patrol", "patrol")])
 	var ship := _ship()
 	ship.inventory.add("fuel", 100)
-	eq(Events.debt_kind(first), "first", "not_flag met_ma: Ma's first call")
-	eq(Events.debt_kind(remind), "reminder", "otherwise a reminder")
-	eq(Events.debt_kind(repo), "miss", "flag debt_missed: the collectors' talk")
-	_hop(c, ship, 1)
-	check(c.arrive(ship)["event"].get("id", "") != "debt_first", "too early for Ma's first call (jumps_min 2)")
-	_hop(c, ship, 1)
-	eq(c.arrive(ship)["event"].get("id", ""), "debt_first", "at jump 2 Ma calls, before the node's own event")
-	c.flags["met_ma"] = true
-	_hop(c, ship, 3)  # jump 5: the payment is 3 jumps away
-	check(c.arrive(ship)["event"].get("type", "") != "debt", "no reminder when the payment is more than 2 jumps off")
-	_hop(c, ship, 1)  # jump 6: due within 2
-	eq(c.arrive(ship)["event"].get("id", ""), "debt_remind", "a reminder when a payment is due within 2 jumps")
-	_hop(c, ship, 1)  # jump 7
-	check(c.arrive(ship)["event"].get("type", "") != "debt", "once per payment cycle")
-	_hop(c, ship, 1)  # jump 8: the payment falls due and is missed
-	check(c.flags.has("debt_missed"), "the campaign sets debt_missed when a payment is missed")
-	_hop(c, ship, 1)  # jump 9: the jump after
-	eq(c.arrive(ship)["event"].get("id", ""), "debt_repo", "the collectors talk on the jump after a missed payment")
-	_hop(c, ship, 1)
-	check(c.arrive(ship)["event"].get("type", "") != "debt", "only that jump")
+	var got := []
+	for i in 9:
+		_hop(c, ship, 1)
+		got.append(c.arrive(ship)["event"].get("id", "") == "call_a")
+	var every := int(c.cfg["calls"]["every"])
+	eq(got, [false, true, false, false, false, true, false, false, false], "a call on arrival from jump 2, then not for %d jumps" % every)
 
 
 func test_fuel_max_requires_checks_the_hold() -> void:
@@ -679,17 +669,19 @@ func test_waiting_with_an_empty_tank_brings_a_trader() -> void:
 	eq(c.jumps, 1, "and time passed")
 
 
-func test_station_events_greet_each_station_and_the_debt_intro_opens_the_run() -> void:
+func test_station_events_greet_each_station_and_the_opening_opens_the_run() -> void:
 	var c := Campaign.new(5)
 	var ship := _ship()
 	var a := c.arrive(ship)
-	eq(a["event"].get("id", ""), "station_debt_intro", "a new run opens with Ma Gantry at Rusthold")
+	eq(a["event"].get("id", ""), "station_opening_hull", "a new run opens with the alarm night at Rusthold")
 	var r := c.events.choose(a["event"], 0, c, ship, a["node"])
-	check(r["ok"] and c.flags.has("met_ma"), "signing sets met_ma")
+	check(r["ok"] and c.flags.has("met_ma"), "the opening sets met_ma")
+	c.current = "gantry_barge"
+	c.flags.erase("at_rusthold")  # (travelling without a jump here)
 	var greeting: Dictionary = c.arrive(ship)["event"]
-	eq(greeting.get("type", ""), "station", "afterwards Rusthold greets you with a station event")
-	check(greeting.get("id", "") == "station_rusthold_greeting" or Events._list(greeting["requires"].get("flag")).has("at_rusthold"), "one of Rusthold's: " + str(greeting.get("id", "")))
-	c.flags.erase("at_rusthold")  # (picking at other stations without travelling there)
+	eq(greeting.get("type", ""), "station", "afterwards Ma's barge greets you with a station event")
+	check(greeting.get("id", "") == "station_barge_greeting" or Events._list(greeting["requires"].get("flag")).has("at_gantry_barge"), "one of the barge's: " + str(greeting.get("id", "")))
+	c.flags.erase("at_gantry_barge")  # (picking at other stations without travelling there)
 	for place in ["meridian", "prism"]:
 		var ev := c.events.pick(c, {"id": place, "type": "station", "place": place}, ship)
 		eq(ev.get("id", ""), "station_%s_greeting" % place, place + " has its greeting")

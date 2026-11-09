@@ -408,7 +408,7 @@ func test_a_long_burn_ship_spends_one_fuel_every_two_jumps() -> void:
 	eq(c.jump_cost(ship), 50, "a Long-Burn costs half a fuel")
 	eq(Campaign.fuel_text(c.jump_cost(ship)), "0.5 fuel", "the map says 0.5 fuel")
 	eq(_hops(c, ship, 6), [6, 5, 5, 4, 4, 3], "the first jump is free, the second pays, and so on")
-	eq(c.jumps, 6, "every jump counts on the debt clock")
+	eq(c.jumps, 6, "every jump counts")
 	eq(c.fuel_part, 0, "an even number of jumps leaves no remainder")
 	_hops(c, ship, 1)
 	eq(c.fuel_part, 50, "an odd one leaves half a fuel")

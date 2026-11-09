@@ -362,7 +362,7 @@ func test_hostile_near() -> void:
 # --- triggers --------------------------------------------------------------------------------------------------
 
 func test_a_poi_within_800_px_fires_once_and_stays_done_through_a_save() -> void:
-	var c := _camp(1)
+	var c := _camp(2)
 	var ship := _ship()
 	var id := _of_type(c, "wreck_field")
 	_go(c, id, ship)

@@ -129,7 +129,7 @@ func test_about_seven_runs_in_ten_meet_ada_by_the_end_of_stage_two() -> void:
 		var r := walk.run(i, COURIER, 2)
 		eq(r["start"], 1, "the run starts with the soldier alone")
 		met += int(r["met_ada"])
-		gained += int(r["crew"].get(2, 1)) - 1
+		gained += int(r["crew"].get(2, 1)) - 1 - int(r["opening_crew"])  # (the opening's survivors are a gift of the story, not a crew find)
 	var rate := float(met) / RUNS
 	check(rate >= 0.55 and rate <= 0.85, "%.0f%% of %d runs met Ada by the end of stage 2 (about 70%% wanted)" % [100.0 * rate, RUNS])
-	check(float(gained) / RUNS <= 2.0, "and the soldier has at most two crewmates on average after stage 2 (%.2f)" % (float(gained) / RUNS))
+	check(float(gained) / RUNS <= 2.0, "and the soldier has at most two crewmates on average after stage 2, not counting the opening's survivors (%.2f)" % (float(gained) / RUNS))

@@ -2,7 +2,7 @@ extends "res://tests/base_test.gd"
 ## The region graph (docs/CONTENT.md section 15; scripts/space/regions.gd, the region parts of campaign.gd, the region
 ## choice screen): stage 1 is Clan space; the offers at an exit are deterministic per seed, valid for the next stage and
 ## never a region already visited; the last stage leads to the ending region; every region's map has an exit beacon;
-## crossing keeps the campaign; Ma's debt clock stops from stage 3; saves mid-run and old saves; the region data and
+## crossing keeps the campaign; saves mid-run and old saves; the region data and
 ## its validator; events tied to a region or a stage; the map footer and the choice screen.
 
 const Campaign = preload("res://scripts/space/campaign.gd")
@@ -156,8 +156,8 @@ func test_a_homeland_has_its_race_station_as_a_beacon_selling_and_recruiting_its
 		c.enter_region(id)
 		var r: Dictionary = c.region_data
 		eq(r["home_species"], HOMELANDS[id], id + ": its home race")
-		var places: Array = c.drift.nodes.filter(func(n): return n["type"] == "station")
-		eq(places.size(), 1, id + ": one station")
+		var places: Array = c.drift.nodes.filter(func(n): return n["type"] == "station" and n["id"] != Campaign.BARGE)  # (Ma's barge is in every region)
+		eq(places.size(), 1, id + ": one station besides Ma's barge")
 		var st: String = places[0]["id"]
 		check(c.is_known(st), id + ": the station is on the map from the start (a beacon)")
 		var menu := c.station_cfg(st)
@@ -189,7 +189,7 @@ func test_faction_regions_keep_their_stations() -> void:
 	for g in ["gate_1", "gate_2", "gate_3"]:
 		check(c.drift.has(g), g + " is in the Gate approaches")
 	c.enter_region("boneyard")
-	check(c.drift.has("dredgers_rest") and c.drift.nodes.filter(func(n): return n["type"] == "station").size() == 1, "the Boneyard has one station, Dredgers' Rest (the fuel stop it lacked)")
+	check(c.drift.has("dredgers_rest") and c.drift.nodes.filter(func(n): return n["type"] == "station" and n["id"] != Campaign.BARGE).size() == 1, "the Boneyard has one station besides Ma's barge, Dredgers' Rest (the fuel stop it lacked)")
 
 
 # --- crossing ---------------------------------------------------------------------------------------------------
@@ -205,7 +205,6 @@ func test_crossing_keeps_the_campaign_and_starts_the_new_region_afresh() -> void
 	check(_jump(c, to, ship)["ok"], "a jump in Clan space")
 	c.flags["met_ma"] = true
 	c.rep["concord"] = 4
-	c.debt = 700
 	c.used["some_event"] = true
 	c.logs_found["some_log"] = true
 	c.arrive(ship)
@@ -220,7 +219,7 @@ func test_crossing_keeps_the_campaign_and_starts_the_new_region_afresh() -> void
 	var r := c.cross(next, ship)
 	check(r["ok"], "crossed: " + str(r["why"]))
 	eq([c.stage, c.region_id, c.route], [2, next, ["clan_space", next]], "stage 2 in the chosen region")
-	eq([c.debt, c.rep["concord"], c.jumps], [700, 4, jumps], "debt, reputation and jumps carry across (the crossing is no jump)")
+	eq([c.rep["concord"], c.jumps], [4, jumps], "reputation and jumps carry across (the crossing is no jump)")
 	check(c.flags.has("met_ma") and c.used.has("some_event") and c.logs_found.has("some_log"), "flags, spent events and logs too")
 	eq([ship.inventory.count("fuel"), ship.crew.size()], [fuel, crew], "the fuel and the crew are the ship's")
 	check(c.flags.has("in_" + next) and not c.flags.has("in_clan_space"), "the region flag follows")
@@ -232,38 +231,18 @@ func test_crossing_keeps_the_campaign_and_starts_the_new_region_afresh() -> void
 	eq(c.region_seed, Regions.seed_for(11, 2, next), "the region's own seed")
 
 
-func test_mas_debt_clock_runs_in_stages_1_and_2_and_stops_from_stage_3() -> void:
+func test_crossing_says_nothing_of_a_debt_clock() -> void:
 	var c := Campaign.new(5)
 	var ship := _ship()
-	check(c.debt_running(), "it runs in Clan space")
 	_to_exit(c)
 	c.cross(c.region_offers()[0], ship)
-	check(c.debt_running(), "and in stage 2")
-	c.jumps = 8
-	eq(c.behind(), 100, "a payment falls due in stage 2")
-	c.paid = 100
 	c.jumps = 13
 	_to_exit(c)
 	var r := c.cross(c.region_offers()[0], ship)
 	eq(c.stage, 3, "stage 3")
-	check(not c.debt_running() and c.debt_stop == 13, "the clock stopped at jump 13")
-	check(" ".join(r["notes"]).contains("debt clock stops"), "and the player is told: " + str(r["notes"]))
-	c.jumps = 40
-	eq([c.behind(), c.misses()], [0, 0], "no payment falls due after that")
-	eq(c.next_due_in(), 3, "the date stays where it was")
-	check(c._advance(8).all(func(n): return not str(n).contains("payment")), "jumps bring no payment news")
-	c.paid = 0
-	c.debt_stop = 16
-	c.flags["debt_missed"] = true
-	eq(c.misses(), 2, "(two payments behind from before the clock stopped)")
+	check(not " ".join(r["notes"]).contains("debt"), "and the player is told nothing of a debt clock: " + str(r["notes"]))
 	c.tide.steps = 0  # (the Hollow tide of the region would send ghosts here: not what this is about)
-	check(not c.fight_path("tier", "pirate").ends_with(":ram"), "but no rammer is sent out here")
-	c.flags.erase("debt_missed")
-	c.current = c.drift.start_id()
-	c.flags.erase("met_ma")
-	var a := c.arrive(ship)
-	check(a["event"].is_empty() or str(a["event"].get("type", "")) != "debt", "no debt event out here")
-	check(c.pay_debt(ship, 50)["ok"], "the debt can still be paid")
+	check(not c.fight_path("tier", "pirate").ends_with(":ram"), "no rammer is sent out here")
 
 
 func test_arriving_at_the_exit_beacon_says_so() -> void:
@@ -289,7 +268,7 @@ func test_a_save_mid_run_keeps_the_stage_the_route_and_the_region() -> void:
 	eq([int(d["version"]), int(d["stage"]), d["region"]], [Campaign.VERSION, 4, c.region_id], "saved at the current version with the stage and the region")
 	var back := Campaign.new(1)
 	eq(back.load_dict(d), "", "loads")
-	eq([back.stage, back.region_id, back.route, back.region_seed, back.debt_stop], [c.stage, c.region_id, c.route, c.region_seed, c.debt_stop], "the run's place")
+	eq([back.stage, back.region_id, back.route, back.region_seed, back.last_call], [c.stage, c.region_id, c.route, c.region_seed, c.last_call], "the run's place")
 	eq(back.region_data.get("name"), c.region_data.get("name"), "the region's data")
 	eq(back.drift.lanes, c.drift.lanes, "the map")
 	eq(back.region_offers(), c.region_offers(), "the same offers at the exit")
@@ -329,9 +308,8 @@ func test_an_old_save_loads_as_stage_1_in_clan_space() -> void:
 	eq([back.stage, back.region_id, back.route], [1, "clan_space", ["clan_space"]], "as stage 1 in Clan space")
 	check(back.drift.exit_id() != "" and back.drift.has("rusthold"), "its map is made again as Clan space's, with an exit")
 	eq(back.current, "rusthold", "the ship is at Gantry Rusthold")
-	eq([back.jumps, back.debt, back.flags.has("met_ma")], [6, 800, true], "the rest of the run is kept")
+	eq([back.jumps, back.flags.has("met_ma")], [6, true], "the rest of the run is kept")
 	eq(back.drift.lanes, Campaign.new(9).drift.lanes, "the same map a new run of its seed has")
-	check(back.debt_running(), "Ma's clock runs")
 
 
 # --- data -------------------------------------------------------------------------------------------------------

@@ -495,7 +495,7 @@ func test_a_net_mouth_on_the_upstream_side_collects_some_scrap_a_minute() -> voi
 
 # --- the data ----------------------------------------------------------------------------------------------
 
-func test_the_intakes_the_recipes_and_ma_gantrys_net_are_in_the_data() -> void:
+func test_the_intakes_and_the_recipes_are_in_the_data() -> void:
 	var ship := Ship.new_starter()
 	var net: Dictionary = ship.components.def("net_mouth_scrap")
 	var mk1: Dictionary = ship.components.def("intake_mk1")
@@ -510,15 +510,15 @@ func test_the_intakes_the_recipes_and_ma_gantrys_net_are_in_the_data() -> void:
 	check(not ship.crafting.is_known("intake_mk1"), "the Intake Mk1 is not")
 	var stock: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/drift.json"))["stations"]["meridian"]["stock"]
 	eq(stock.get("intake_mk1"), 120, "Meridian sells the Mk1 for 120")
-	var intro := {}
-	for e in Content.events():
-		if e["id"] == "station_debt_intro":
-			intro = e
-	check(not intro.is_empty(), "Ma's intro event exists")
-	for c in intro.get("choices", []):
-		for o in c["outcomes"]:
-			eq(_ints(o["effects"].get("items", {})), {"net_mouth_scrap": 1}, "every outcome of the intro hands over the net: " + str(o["text"]).left(30))
-			check(str(o["text"]).contains("net"), "and Ma says so")
+	for id in ["station_opening_blank", "station_opening_hull"]:  # every starter carries a net already: the opening gives no second one
+		var opening := {}
+		for e in Content.events():
+			if e["id"] == id:
+				opening = e
+		check(not opening.is_empty(), id + " exists")
+		for c in opening.get("choices", []):
+			for o in c["outcomes"]:
+				check(not o["effects"].get("items", {}).has("net_mouth_scrap"), "no outcome of %s hands over a net: %s" % [id, str(o["text"]).left(30)])
 
 
 func test_every_debris_type_gives_something_the_hold_knows() -> void:

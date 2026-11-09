@@ -7,7 +7,7 @@ extends RefCounted
 ## The player's policy, the same before and after a change to the economy:
 ## - Every jump pays the real jump cost. With no fuel it waits for a passing trader (up to `waits` times, the trader's event played),
 ##   then makes a drift jump (no fuel, 15 hull integrity; hull is repaired at the next station while credits last), and only with too
-##   little hull for that calls Ma's tow (back to the region's start, debt +150, 2 fuel).
+##   little hull for that calls the tow (back to the region start, 2 fuel, 2 tide steps).
 ## - At a station with fuel on sale it buys up to `buy_to` fuel while credits last (the stock a visit has, where there is one). With
 ##   less fuel than the way to the exit needs (and MARGIN to spare) it heads for the region's fuel station if it can reach it on what it
 ##   has (the map shows a station's beacon).
