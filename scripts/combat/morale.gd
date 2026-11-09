@@ -6,7 +6,7 @@ extends RefCounted
 ## that fights on and then loses every weapon for `unarmed_s` breaks once more, the same way.
 ## - surrender ("offering"): the pilot holds fire and cuts throttle, and the offer (credits, an extra, now and
 ##   then a part) stands for `offer_s`. accept() ("spared") takes it; damage dealt to the enemy, or the time
-##   running out, makes it "fighting_on": it fights to the end and morale never triggers again. The player's
+##   running out, makes it "fighting_on": it fights on, and breaks again only if it then loses every weapon (above). The player's
 ##   turrets hold fire while it stands (a turret hit would refuse it) and go back to how they were after.
 ## - flee ("fleeing"): the pilot burns away stern to the player (pilot_ai.gd) while the jump drive charges for
 ##   `spool_s` (a style may set its own); the charge holds by spool_hold(): every engine out, the helm down or every crew
