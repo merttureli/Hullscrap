@@ -483,10 +483,10 @@ func test_the_outside_half_takes_the_hits_and_is_only_ever_disabled() -> void:
 	var co = a.ships[0]
 	var obj := Damage.solid_at(co, barrel)
 	eq([obj["kind"], obj["half"], obj["uid"]], ["component", "out", d["uid"]], "a shot meets the outside half first")
-	Damage.apply(a, 0, barrel, obj, 9.0, "energy")
+	Damage.apply(a, 0, barrel, obj, 22.5, "energy")  # (a gun takes mount_plating 0.4 of a hit since fights-end C: 22.5 is the 9 this test dealt before)
 	eq([float(inst["out_hp"]), inst["hp"], inst["status"]], [1.0, 5, "ok"], "it took the damage, the inside half did not")
 	check(co.powered.get(d["uid"], false), "still powered and working")
-	Damage.apply(a, 0, barrel, obj, 9.0, "energy")
+	Damage.apply(a, 0, barrel, obj, 22.5, "energy")
 	eq(inst["out_hp"], 0, "at 0 it is disabled")
 	check(a.events.any(func(e): return e["type"] == "disable" and e.get("half", "") == "out" and e["uid"] == d["uid"]), "and the event says so")
 	a.sync(0)
@@ -499,6 +499,27 @@ func test_the_outside_half_takes_the_hits_and_is_only_ever_disabled() -> void:
 	Damage.apply(a, 0, barrel, {"kind": "component", "uid": d["uid"], "half": "out"}, 99.0, "kinetic")
 	check(ship.components.instances.has(d["uid"]) and ship.components.wrecks.is_empty(), "no hit ever wrecks an outside half")
 	eq(inst["out_hp"], 0, "it stays at 0")
+
+
+func test_a_gun_takes_its_plating_share_of_a_hit_and_other_parts_all_of_it() -> void:  # (fights-end C: guns lasted 10-20 s under fire)
+	var d := _rig(2)
+	var a := _arena(d)
+	var ship: Ship = d["ship"]
+	var co = a.ships[0]
+	eq(a.weapons.mount_plating, 0.4, "weapons.json mount_plating")
+	var gun: Dictionary = ship.components.instances[d["uid"]]
+	var barrel: Vector2i = gun["out_cells"][0]
+	var hit := Damage.apply(a, 0, barrel, Damage.solid_at(co, barrel), 5.0, "kinetic")
+	near(float(hit["dealt"]), 2.0, "the barrel takes 0.4 of a 5 hit", 1e-6)
+	near(float(gun["out_hp"]), 8.0, "10 - 2", 1e-6)
+	var breech: Vector2i = gun["cells"][0]
+	Damage.apply(a, 0, breech, {"kind": "component", "uid": d["uid"]}, 5.0, "kinetic")
+	near(float(gun["hp"]), 3.0, "the breech inside too: 5 - 2", 1e-6)
+	var reactor: Dictionary = ship.components.instances[d["reactor"]]
+	Damage.apply(a, 0, reactor["cells"][0], Damage.solid_at(co, reactor["cells"][0]), 5.0, "kinetic")
+	near(float(reactor["hp"]), 3.0, "a reactor (8 hp) takes the whole hit", 1e-6)
+	var big := Damage.apply(a, 0, barrel, Damage.solid_at(co, barrel), 30.0, "kinetic")
+	near(float(big["left"]), 10.0, "a hit that breaks the barrel carries on with what its plating did not need: 30 - 8 / 0.4", 1e-6)
 
 
 func test_a_shot_at_a_disabled_barrel_hits_the_wall_behind_it() -> void:

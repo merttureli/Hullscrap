@@ -4,7 +4,7 @@ extends RefCounted
 ## theta is the angle between its reversed path and the outward normal of the face it enters (0 is
 ## straight on). Order on each wall or door: deflect roll, kinetic ricochet roll, then damage times
 ## the material's resist (and, for kinetic and explosive, clamp(cos theta, 0.5, 1): sloped armour),
-## applied to the cell's hp (a part's hp for a component). A wall or door at 0 hp is breached (the
+## applied to the cell's hp (a part's hp for a component; a gun, part or outside half, takes weapons.json mount_plating of it). A wall or door at 0 hp is breached (the
 ## cell becomes empty); a component at 0 hp is disabled, and a direct hit on one that is already at
 ## 0 wrecks it: it is gone, with debris on its cells (ion and fire never do; see wreck_part). The
 ## outside half of a hull mount (docs/CONTENT.md 4f) has its own hp, is only ever disabled, and a
@@ -172,6 +172,8 @@ static func apply(arena, idx: int, cell: Vector2i, obj: Dictionary, dmg: float, 
 	if is_part:
 		inst = comps.instances[obj["uid"]]
 		cur = float(inst["out_hp"]) if outside else float(inst.get("hp", comps.def(inst["id"]).get("hp", DEFAULT_COMPONENT_HP)))
+		if str(comps.def(inst["id"]).get("family", "")) == "weapon":
+			resist = float(arena.weapons.mount_plating)  # a gun's plating: it takes that share of the hit (weapons.json mount_plating)
 	else:
 		resist = float(obj["def"].get("resist", {}).get(type, 1.0)) / corrode_mult(arena, idx, cell)  # a corroded wall takes more
 		cur = grid.hp_of(cell)

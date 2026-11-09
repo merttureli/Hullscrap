@@ -56,6 +56,7 @@ var defs := {}  ## weapon id -> entry as written in the data file
 var turret_damage := 0.6  ## the share of its entry's damage that a turret deals (aim_share["turret"])
 var aim_share := {"fixed": 1.0, "swivel": 0.8, "turret": 0.6}  ## aim class -> the share of its entry's damage a weapon of that class deals
 var pd_speed := 500.0  ## point defence also shoots down any shot flying at or below this speed (px/s)
+var mount_plating := 1.0  ## the share of a hit's damage a gun (its part and its mount's outside half) takes: its plating (data mount_plating, damage.gd)
 var shapes := {}  ## gun shape name -> {name, outside [w, h], breech [w, h], aim, gimbal?}: docs/GUNS.md 3 (the data's `shapes`)
 var aim_classes := {}  ## aim class -> its bands {gimbal_max?, arc [min, max]?, track}: what tests/test_gun_shapes.gd holds every gun to
 
@@ -76,6 +77,7 @@ func load_defs(path: String) -> void:
 			aim_share[str(k)] = float(data["aim_share"][k])
 	turret_damage = float(aim_share["turret"])
 	pd_speed = float(data.get("pd_speed", pd_speed))
+	mount_plating = float(data.get("mount_plating", mount_plating))
 	shapes = {}
 	for s in data.get("shapes", {}):
 		var e: Dictionary = data["shapes"][s].duplicate()
