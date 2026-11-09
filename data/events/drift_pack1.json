@@ -33,7 +33,7 @@
           {"weight": 100, "text": "He counts it out in small notes and smaller apologies.", "effects": {"items": {"credits": 40}}}
         ]},
         {"text": "Take the word to his cousin.", "outcomes": [
-          {"weight": 100, "text": "The cousin owes Dunnock and Dunnock owes you. By the time it reaches Ma Gantry's desk it sounds like a legend, and the number on your hull gets a little lighter.", "effects": {"rep": {"clans": 3}, "debt": -25}}
+          {"weight": 100, "text": "The cousin owes Dunnock and Dunnock owes you. By the time it reaches Ma Gantry's desk it sounds like a legend, and the Clans start saving you a berth.", "effects": {"rep": {"clans": 3}}}
         ]},
         {"text": "[Fast repair] Fix his fire suppressors on the way out and take a bit of both.", "requires": {"trait": "fast_repair"}, "outcomes": [
           {"weight": 100, "text": "Your engineer has the suppressors humming before the coffee cools. Dunnock pays in cash and in word, then looks like he regrets doing the maths.", "effects": {"items": {"credits": 20, "scrap": 25}, "rep": {"clans": 1}}}
@@ -635,11 +635,11 @@
     },
     {
       "id": "empty_radio_rusthold", "type": "empty", "weight": 10, "once": false, "requires": {},
-      "text": "Radio Rusthold fades in through the static, a pirate station run out of someone's laundry room. The presenter reads requests, dedications and the day's debts, in that order. A song goes out to 'the ship that owes Ma Gantry'. You think it might be you.",
+      "text": "Radio Rusthold fades in through the static, a pirate station run out of someone's laundry room. The presenter reads requests, dedications and the day's lost-and-found, in that order. A song goes out to 'the ship with the bad paint'. You think it might be you.",
       "choices": [
         {"text": "Call in a request.", "outcomes": [
           {"weight": 70, "text": "You ask for something slow and sad, and the presenter plays something fast and rude. You sing along anyway.", "effects": {"crew_hp": 10, "rep": {"clans": 1}}},
-          {"weight": 30, "text": "The presenter reads your name and balance on air to a round of applause from three hundred strangers. Ma Gantry rings in to say hello, which is worse.", "effects": {"rep": {"clans": 1}, "debt": 20}}
+          {"weight": 30, "text": "The presenter reads your name and your cargo on air to a round of applause from three hundred strangers. Ma Gantry rings in to say hello, which is worse.", "effects": {"rep": {"clans": 1}}}
         ]},
         {"text": "[Suit] Take a walk on the hull while it plays.", "requires": {"trait": "suit"}, "outcomes": [
           {"weight": 100, "text": "You stand on the skin of the ship with the stars on one side and a dying radio on the other. It's the closest thing to a holiday you've had. You also find a loose bolt, and keep it.", "effects": {"crew_hp": 10, "items": {"scrap": 20}}}
@@ -649,66 +649,5 @@
           {"weight": 50, "text": "A Lumen channel that is only one held note, rising. Your whole bridge goes quiet to hear the end of it.", "effects": {"rep": {"lumen": 1}}}
         ]}
       ]
-    },
-    {
-      "id": "debt_ma_first_call", "type": "debt", "weight": 40, "once": true, "requires": {"jumps_min": 2, "not_flag": "met_ma"},
-      "text": "The comm lights up with a face like a closed door. 'Ma Gantry,' says the face, in a voice like a kettle coming to the boil. 'Just checking on my hull, the one you're sitting in. Heard the number a thousand?'",
-      "choices": [
-        {"text": "Promise to pay on time.", "outcomes": [
-          {"weight": 100, "text": "'That's what they all say,' says Ma, writing it down. 'A hundred every eight jumps, at a Rusthold or a clan trader. I don't chase, I send people.'", "effects": {"flag": "met_ma", "rep": {"clans": 1}}}
-        ]},
-        {"text": "Pay 100 now, up front.", "requires": {"credits": 100}, "outcomes": [
-          {"weight": 100, "text": "Ma Gantry's eyebrow does something. 'Well, someone raised you,' she says, and takes the hundred, and shaves ten off the number for manners.", "effects": {"items": {"credits": -100}, "debt": -110, "rep": {"clans": 2}, "flag": "met_ma"}}
-        ]},
-        {"text": "Ask for an extension.", "outcomes": [
-          {"weight": 40, "text": "'An extension,' says Ma, as if tasting it. 'Fifty on the number, for the privilege.' She hangs up before you can thank her.", "effects": {"flag": "met_ma", "debt": 50}},
-          {"weight": 60, "text": "'No,' says Ma, but in a warm way. 'But I'll remember you asked.'", "effects": {"flag": "met_ma", "rep": {"clans": 1}}}
-        ]},
-        {"text": "Hang up.", "outcomes": [
-          {"weight": 100, "text": "The line goes dead. Somewhere in the Rusthold, a ledger opens a fresh page.", "effects": {"flag": "met_ma", "rep": {"clans": -2}}}
-        ]}
-      ]
-    },
-    {
-      "id": "debt_ma_reminder", "type": "debt", "weight": 20, "once": false, "requires": {"jumps_min": 6, "flag": "met_ma", "not_flag": "debt_missed"},
-      "text": "A message from the Gantry Rusthold, forwarded by a Fenn clerk who clearly hates being the messenger: 'Ma says the next payment is due soon. She says it with love.' The clerk has added, in smaller print, 'It is worse with love.'",
-      "choices": [
-        {"text": "Pay 100 now, early.", "requires": {"credits": 100}, "outcomes": [
-          {"weight": 100, "text": "The clerk notarises it with a stamp that sounds like a small door closing. 'Ma will be pleased,' they say, and sound afraid of it.", "effects": {"items": {"credits": -100}, "debt": -100, "rep": {"clans": 1}}}
-        ]},
-        {"text": "[Fabricator] Offer Ma a part from your own fabricator, in lieu.", "requires": {"component": "fabricator", "items": {"scrap": 40}}, "outcomes": [
-          {"weight": 70, "text": "A hand-built part arrives at the Rusthold wrapped in last week's news. Ma takes it, weighs it, and knocks sixty off the number. 'Make it twice,' she says, and does not say please.", "effects": {"items": {"scrap": -40}, "debt": -60, "rep": {"clans": 1}}},
-          {"weight": 30, "text": "The part comes back with a note: 'Rattles.' Ma knocks thirty off anyway.", "effects": {"items": {"scrap": -40}, "debt": -30}}
-        ]},
-        {"text": "Do Ma a favour: haul her crate to the next trader.", "outcomes": [
-          {"weight": 60, "text": "Easy money, if you ignore what the crate is humming. Ma knocks fifty off the number and never says what was in it.", "effects": {"debt": -50}},
-          {"weight": 40, "text": "Rustfangs love a clan crate. They find you quickly and lovingly.", "effects": {"fight": "pirate_raider"}}
-        ]},
-        {"text": "Ignore it.", "outcomes": [
-          {"weight": 100, "text": "The message sits in your inbox like a held breath. The Fenn clerk sends a second one, just a small sad face.", "effects": {}}
-        ]}
-      ],
-      "after_win": {"text": "The crate survives, dented but humming. Ma will be told, and she will not say thank you.", "effects": {"debt": -50}}
-    },
-    {
-      "id": "debt_repo_crew_talk", "type": "debt", "weight": 30, "once": false, "requires": {"flag": "debt_missed"},
-      "text": "A collection boat hauls alongside, GANTRY CLAN RECOVERY SERVICES hand-painted over its old Rustfang logo. 'Missed payment,' says the collector, in the voice of a man reading from a card. 'Ma sends her love and this charming invoice.'",
-      "choices": [
-        {"text": "Pay the missed 100 credits.", "requires": {"credits": 100}, "outcomes": [
-          {"weight": 100, "text": "The collector counts it twice, then tears the invoice in half with real regret. 'Pleasure,' he says. 'Keep it quick next time.'", "effects": {"items": {"credits": -100}, "debt": -100, "clear_flag": "debt_missed", "rep": {"clans": 1}}}
-        ]},
-        {"text": "Pay half and promise the rest.", "requires": {"credits": 50}, "outcomes": [
-          {"weight": 70, "text": "'Half,' says the collector, thoughtfully. 'Half is a start, half is a talking point.' He writes down 'half' and underlines it twice.", "effects": {"items": {"credits": -50}, "debt": -40, "clear_flag": "debt_missed"}},
-          {"weight": 30, "text": "'Half,' says the collector, 'is an insult, and insults carry a convenience fee.' He types the fee with visible pleasure.", "effects": {"items": {"credits": -50}, "debt": -20}}
-        ]},
-        {"text": "Fight the collection boat.", "outcomes": [
-          {"weight": 100, "text": "You don't recall signing a clause about this. The collector does, and recites it fondly as the guns warm.", "effects": {"fight": "pirate_raider"}}
-        ]},
-        {"text": "[Afterburner] Outrun them.", "requires": {"component": "afterburner"}, "outcomes": [
-          {"weight": 70, "text": "The collection boat is built for hailing, not chasing. You leave it behind with a slow, angry clock.", "effects": {"rep": {"clans": -1}}},
-          {"weight": 30, "text": "They shout a few parting shots across the dark. You feel each one.", "effects": {"hull": -10, "rep": {"clans": -1}}}
-        ]}
-      ],
-      "after_win": {"text": "The boat comes apart. Ma will send a bigger one, with a bigger invoice.", "effects": {"rep": {"clans": -2}, "debt": 50}}
     }
 ]}

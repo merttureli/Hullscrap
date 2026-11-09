@@ -487,7 +487,7 @@ func contains(p: Vector2, slack := 0.0) -> bool:
 
 ## The nearest `new` POI within the trigger distance (800 px) runs its event, once. Returns {} when there is none, else
 ## {poi, node, refused, event, dock}: what Campaign.arrive() returns for the node's old arrival event (the main POI
-## runs exactly that: a dock master's refusal, a debt call, the greeting or the node's event), `event` for any other
+## runs exactly that: a dock master's refusal, a call, the greeting or the node's event), `event` for any other
 ## POI one picked from its event type by events.gd ({} when nothing fits), and `dock`: the station menu opens
 ## (a station or store with a menu, and no refusal), and `shop`: the id of the small shop (campaign.gd shop_id) the menu is when the POI is a
 ## Trader or Store (data/sectors.json poi_types `shop`), else "". A POI stays engaged until resolve(): it does not fire again. A
@@ -611,7 +611,7 @@ func fight_design(c, id: String, value := "tier") -> String:
 
 ## A `fight` effect at POI `id` (`value`: "tier" or a design id, as in events.gd): {design (a res:// path), pos (where
 ## the enemy appears, 250 to 600 px from the POI), poi (its id)}. The design is the POI's own `enemy` when it has one
-## and the effect says "tier", else Campaign.fight_path()'s (the tier tables; a rammer for a pirate after two missed
+## and the effect says "tier", else Campaign.fight_path()'s (the tier tables;
 ## payments). {} for an unknown POI. Combat stays the arena for now.
 func fight_spawn(c, id: String, value := "tier") -> Dictionary:
 	var poi := find(id)

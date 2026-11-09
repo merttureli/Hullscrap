@@ -107,9 +107,9 @@ func test_fight_path_tier_returns_the_rated_foe() -> void:
 	eq(c.fight_path("pirate_raider", "pirate"), RAIDER, "a named design stays what it is")
 	eq(c.rng.state, rng_before, "no fight_path moved the campaign rng")
 	c.jumps = 16
-	var rammer := c.fight_path("tier", "pirate")
-	check(rammer.ends_with(":ram"), "two missed payments send a rammer: " + rammer)
-	eq(c.fight_path("tier", "pirate"), rammer, "and it is kept")
+	var later := c.fight_path("tier", "pirate")
+	check(not later.ends_with(":ram"), "no missed payments send a rammer any more: " + later)
+	eq(c.fight_path("tier", "pirate"), later, "and the foe is kept")
 
 
 # --- the bands and tags -------------------------------------------------------------------------------
@@ -328,7 +328,7 @@ func test_the_numbers_come_from_the_data() -> void:
 func test_a_five_skull_win_on_the_map_offers_five_parts() -> void:
 	var d := _screen()
 	var map: MapView = d["map"]
-	map.event_panel.open_event(map.campaign.events.get_event("repo_fight"))
+	map.event_panel.open_event(map.campaign.events.get_event("pirate_ambush_wreck"))
 	map.event_panel.choose(0)
 	map.event_panel.proceed()
 	d["fake"].finished.emit({"state": "won", "enemy": _wreck(), "threat": 5})

@@ -654,8 +654,6 @@ func chain(ev: Dictionary) -> bool:
 		for rid in ship.crafting.known:
 			if not known0.has(rid):
 				st["bp_list"].append("%s@%s" % [rid, str(e.get("id", ""))])
-		if str(e.get("type", "")) == "debt" and ship.inventory.count("credits") > 400 and c.debt > 0:
-			c.pay_debt(ship, mini(100, c.debt))
 		if str(r["fight"]) != "":
 			var next := fight(str(r["fight"]), r["after_win"], str(e.get("id", "")))
 			if next.get("dead", false):
@@ -698,7 +696,7 @@ func effects_value(eff: Dictionary, ev: Dictionary) -> float:
 	v += 4.0 * float(eff.get("hull", 0)) + 0.6 * float(eff.get("crew_hp", 0))
 	v += 220.0 * (eff["recruit"].size() if eff.get("recruit") is Array else 0)
 	v -= 260.0 * float(eff.get("lose_crew", 0) if not eff.get("lose_crew") is bool else (1 if eff["lose_crew"] else 0))
-	v -= 0.15 * float(eff.get("debt", 0))
+	v -= 40.0 * float(eff.get("tide", 0))
 	if eff.has("rep") and eff["rep"] is Dictionary:
 		for f in eff["rep"]:
 			v += 3.0 * float(eff["rep"][f])
@@ -874,8 +872,6 @@ func dock() -> void:
 			c.recruit(ship, id, 0)
 	flow("shop", before)
 	build_phase()
-	if c.debt > 0 and c.debt_running() and ship.inventory.count("credits") > 500:
-		c.pay_debt(ship, mini(100, c.debt))
 
 
 ## A Trader's or Store's small shop: the player buys the blueprints it lacks, best first, while the credits stay over the toll and a cushion of 40
@@ -1572,7 +1568,7 @@ func snapshot() -> Dictionary:
 		fabs.append({"level": int(Workshop.level_of(ship.components, {"room_of": room_of}, fuid, powered)["level"]), "room_cells": cells, "mods": mods})
 	return {"fabs": fabs, "census": census, "power": t["power"], "dps": t["dps"], "ehp": t["ehp"], "accel": t["accel"], "guns": s["guns"], "layers": s["layers"], "engines": s["engines"], "intakes": s["intakes"],
 		"margin": int(s["produce"]) - int(s["consume"]), "fab": s["fab"], "arms": s["arms"], "rigs": s["rigs"], "cutters": s["cutters"], "armour": s["armour"], "medbays": s["medbays"], "known": ship.crafting.known.size(), "crew": ship.crew.size(),
-		"hull_left": roundi(100.0 * Structure.wreck_margin(ship)), "hull_max": 100, "held": held, "spare_parts": part_count, "jumps": c.jumps, "debt": c.debt, "tier": c.tier()}
+		"hull_left": roundi(100.0 * Structure.wreck_margin(ship)), "hull_max": 100, "held": held, "spare_parts": part_count, "jumps": c.jumps, "tier": c.tier()}
 
 
 # --- the report ------------------------------------------------------------------------------------

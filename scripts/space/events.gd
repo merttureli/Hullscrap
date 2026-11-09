@@ -9,7 +9,7 @@ extends RefCounted
 ## Rules in short:
 ## - An event's `type` is the node type it can happen at. A follow-up page (type `page`, weight 0, or any
 ##   event named by a `goto`) is never rolled at a node. `requires.node` matches a node type or a place id.
-##   Type `debt` is no node: the debt clock (campaign.gd) picks those, by what their `requires` say.
+##   Type `call` is no node: the campaign offers those on arrival (campaign.gd), by what their `requires` say.
 ##   Type `station` events are the greetings on docking: they ask for the flag at_<place> (set while docked
 ##   there) or for `node` a place id.
 ## - A `once` event is spent only when the outcome of the choice taken has non-empty effects, so a
@@ -68,14 +68,14 @@ const Expedition = preload("res://scripts/space/expedition.gd")
 const DIR := "res://data/events"
 const LOGS_DIR := "res://data/logs"
 const NODE_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty"]
-const EVENT_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty", "page", "debt", "quest", "hollow", "boarding_npc", "boarding_site", "exp_planet", "exp_base", "exp_ruin", "exp_platform"]
+const EVENT_TYPES: Array = ["station", "gate", "pirate", "wreck_field", "distress", "trader", "anomaly", "patrol", "asteroid_field", "empty", "page", "call", "quest", "hollow", "boarding_npc", "boarding_site", "exp_planet", "exp_base", "exp_ruin", "exp_platform"]
 const EVENT_KEYS: Array = ["id", "type", "weight", "once", "requires", "title", "text", "choices", "after_win", "landmark", "fallback"]
 const EVENT_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max", "crew_min", "crew_max", "site", "role", "theme", "mark"]
 const CHOICE_KEYS: Array = ["text", "requires", "outcomes", "pay", "blue", "needs_suit"]
 const CHOICE_REQ_KEYS: Array = ["jumps_min", "jumps_max", "flag", "not_flag", "rep_min", "rep_max", "node", "fuel_max", "region", "stage_min", "stage_max", "crew_min", "crew_max", "species", "species_any", "trait", "items", "pay", "component", "component_any", "credits", "site", "role", "theme", "mark", "gear", "skill", "suits"]
 const OUTCOME_KEYS: Array = ["weight", "text", "effects", "after_win", "boost"]
 const AFTER_KEYS: Array = ["text", "effects"]
-const EFFECT_KEYS: Array = ["items", "rep", "crew_hp", "hull", "flag", "clear_flag", "recruit", "lose_crew", "blueprint", "fight", "goto", "reveal", "debt", "log", "unlock", "ending", "board", "npc_trade", "npc_reveal", "npc_join", "npc_hostile", "npc_follow", "npc_leave", "site_fight", "hurt", "lose_member", "lose_gear", "rescue"]
+const EFFECT_KEYS: Array = ["items", "rep", "crew_hp", "hull", "flag", "clear_flag", "recruit", "lose_crew", "blueprint", "fight", "goto", "reveal", "tide", "log", "unlock", "ending", "board", "npc_trade", "npc_reveal", "npc_join", "npc_hostile", "npc_follow", "npc_leave", "site_fight", "hurt", "lose_member", "lose_gear", "rescue"]
 const NPC_REVEALS: Array = ["container", "blueprint", "key", "locked"]  ## what npc_reveal can mark
 const SITE_MARKS: Array = ["terminal", "body", "room"]  ## what a discovery (requires.mark) is about
 const BOOST_KEYS: Array = ["gear", "species", "trait", "skill"]
@@ -370,15 +370,6 @@ static func offers_fuel(ev: Dictionary) -> bool:
 			if items is Dictionary and float(items.get("fuel", 0)) > 0.0:
 				return true
 	return false
-
-
-## What a debt event is for, judged by its requires: "miss" (it asks for the flag debt_missed: the
-## collectors' talk), "first" (it asks for not_flag met_ma: Ma's first call), else "reminder".
-static func debt_kind(ev: Dictionary) -> String:
-	var req := _dict(ev.get("requires"))
-	if _list(req.get("flag")).has("debt_missed"):
-		return "miss"
-	return "first" if _list(req.get("not_flag")).has("met_ma") else "reminder"
 
 
 static func _weight(v) -> float:
@@ -690,8 +681,8 @@ func apply(effects: Dictionary, c, ship, node: Dictionary = {}, actor = null) ->
 		var d: int = c.change_blocks(ship, int(effects["hull"]))  # hull -N: N hp of damage on outer blocks; +N: N hp mended
 		if d != 0:
 			lines.append("Hull blocks %s %d hp" % ["damaged" if d < 0 else "repaired", absi(d)])
-	if effects.has("debt"):
-		lines.append_array(c.add_debt(ship, int(effects["debt"])))
+	if effects.has("tide"):
+		lines.append_array(c.push_tide(int(effects["tide"])))  # tide N: the Hollow tide moves N steps
 	for f in _list(effects.get("flag")):
 		c.flags[str(f)] = true
 	for f in _list(effects.get("clear_flag")):
@@ -1030,7 +1021,7 @@ func _check_effects(eff, where: String, known: Dictionary, bad: Callable) -> voi
 					bad.call("%s: rep names unknown faction '%s' (known: %s)" % [where, f, ", ".join(known["factions"].keys())])
 				elif not _is_int(eff["rep"][f]):
 					bad.call("%s: rep for %s must be a whole number" % [where, f])
-	for k in ["crew_hp", "hull", "debt"]:
+	for k in ["crew_hp", "hull", "tide"]:
 		if eff.has(k) and not _is_int(eff[k]):
 			bad.call("%s: %s must be a whole number" % [where, k])
 	for k in ["flag", "clear_flag"]:

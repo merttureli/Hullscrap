@@ -25,7 +25,7 @@ const VERSION_PATH := "res://version.txt"  ## the short git hash, written when t
 
 var path := PATH
 var hints := {}  ## hint id -> true once shown
-var runs: Array = []  ## finished runs, oldest first: {ship, jumps, credits, debt, crew, events, fights, date}; a win adds {won, ending, ending_title, score}
+var runs: Array = []  ## finished runs, oldest first: {ship, jumps, credits, crew, events, fights, date}; a win adds {won, ending, ending_title, score}
 var unlocks := {}  ## unlock id -> the date it was earned
 var landmarks := {}  ## landmark (event) id -> {title, date}
 var hall: Array = []  ## the hall of ships, oldest first: {file, ship, ending, score, date}
@@ -183,11 +183,11 @@ static func _count(n: int, word: String) -> String:
 	return "%d %s" % [n, word if n == 1 else word + "s"]
 
 
-## One line for a record: "Courier: 14 jumps, 230 cr, debt 480, 3 crew, 9 events, 4 fights won"; a win adds
+## One line for a record: "Courier: 14 jumps, 230 cr, 3 crew, 9 events, 4 fights won"; a win adds
 ## " - The Haven, score 1250".
 static func run_line(r: Dictionary) -> String:
-	var line := "%s: %s, %d cr, debt %d, %d crew, %s, %s won" % [
-		str(r.get("ship", "?")), _count(int(r.get("jumps", 0)), "jump"), int(r.get("credits", 0)), int(r.get("debt", 0)),
+	var line := "%s: %s, %d cr, %d crew, %s, %s won" % [
+		str(r.get("ship", "?")), _count(int(r.get("jumps", 0)), "jump"), int(r.get("credits", 0)),
 		int(r.get("crew", 0)), _count(int(r.get("events", 0)), "event"), _count(int(r.get("fights", 0)), "fight")]
 	if bool(r.get("won", false)):
 		line += " - %s, score %d" % [str(r.get("ending_title", "The End")), int(r.get("score", 0))]

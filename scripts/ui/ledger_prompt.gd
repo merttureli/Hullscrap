@@ -14,7 +14,7 @@ const Audio = preload("res://scripts/audio/audio.gd")
 const CHOICES: Array = [
 	{"mode": "warn", "label": "Warnings only", "note": "It speaks up only when something is about to go wrong."},
 	{"mode": "full", "label": "Full", "note": "The goal card, the first-time tips and the warnings."},
-	{"mode": "off", "label": "Off", "note": "Ma will take your word for it."},
+	{"mode": "off", "label": "Off", "note": "The dock office will take your word for it."},
 ]
 const SIZE := Vector2(640.0, 330.0)
 const BTN_H := 52.0
@@ -112,7 +112,7 @@ func _draw() -> void:
 	UiKit.panel(self, p)
 	UiKit.text(self, "THE LEDGER", p.position + Vector2(24.0, 38.0), 12, UiKit.AMBER, HORIZONTAL_ALIGNMENT_LEFT, -1.0, UiKit.bold())
 	UiKit.text(self, "Keep it on?", p.position + Vector2(24.0, 74.0), 26, UiKit.TEXT, HORIZONTAL_ALIGNMENT_LEFT, -1.0, UiKit.bold())
-	UiKit.text(self, "Ma Gantry Loans put it on your ship to help it grow. It can stay out of the way.", p.position + Vector2(24.0, 100.0), 14, UiKit.DIM_TEXT)
+	UiKit.text(self, "The Rusthold dock office put it in your hull to help it grow. It can stay out of the way.", p.position + Vector2(24.0, 100.0), 14, UiKit.DIM_TEXT)
 	for i in CHOICES.size():
 		var b := button_rect(i)
 		UiKit.button(self, b, i == selected, i == selected)

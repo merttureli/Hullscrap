@@ -454,7 +454,7 @@ func _draw_result(lay: Dictionary) -> void:
 	_text("To battle (Enter)" if fighting else ("The end (Enter)" if ended else ("Go aboard (Enter)" if boards else "Continue (Enter)")), b.position + Vector2(24.0, 28.0), 17, BAD if fighting else (AMBER if ended or boards else TEXT))
 
 
-## How a change line reads: 1 good (a gain, a debt paid), -1 bad (a loss, a debt grown), 0 neither.
+## How a change line reads: 1 good (a gain), -1 bad (a loss), 0 neither.
 static func tone_of(line: String) -> int:
 	if line.contains("is lost"):
 		return -1
@@ -466,7 +466,7 @@ static func tone_of(line: String) -> int:
 	if m == null:
 		return 0
 	var sign := 1 if m.get_string().begins_with("+") else -1
-	return -sign if line.begins_with("Debt") else sign
+	return sign
 
 
 func _text(text: String, at: Vector2, font_size: int, col: Color) -> void:

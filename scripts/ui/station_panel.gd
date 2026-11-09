@@ -1,7 +1,7 @@
 extends Control
 ## The station menu of the Drift: a trading screen over the map, opened when you dock at Rusthold,
 ## Meridian, the Prism or a Scrapper trader. Three columns. BUY: fuel and the station's stock. SELL: your
-## cargo at half its value. SERVICES: pay Ma Gantry's debt (Scrapper docks), repair every damaged block,
+## cargo at half its value. SERVICES: repair every damaged block,
 ## hire one of the recruits on offer. Click a row (left: one, right: five fuel or all of an item); Esc,
 ## Enter or M leaves. While open it takes every key and click. The rules and prices are in campaign.gd
 ## (data/drift.json); this node only reads input and draws, in the UI colours of docs/ART_STYLE.md.
@@ -119,14 +119,6 @@ func rows(col: int) -> Array:
 				var each: int = c.sell_price(s, id)
 				out.append({"kind": "sell", "id": id, "label": "%s  x%d" % [s.crafting.name_of(id, s.components), s.inventory.count(id)], "right": "%d cr" % each if each > 0 else "-", "cost": 0})
 	else:
-		if "debt" in cfg["services"]:
-			var pay := mini(int(c.cfg["debt"]["payment"]), c.debt)
-			out.append({"kind": "header", "label": "MA GANTRY'S DEBT: %d" % c.debt, "right": "behind %d" % c.behind() if c.behind() > 0 else ""})
-			if c.debt > 0:
-				out.append({"kind": "pay", "id": "pay", "label": "Pay %d" % pay, "right": "%d cr" % pay, "cost": pay})
-				out.append({"kind": "pay_all", "id": "pay_all", "label": "Pay it all", "right": "%d cr" % c.debt, "cost": c.debt})
-			else:
-				out.append({"kind": "note", "label": "Paid off. Ma has nothing more to say to you."})
 		if "repair" in cfg["services"]:
 			var each: int = c.price(int(c.cfg["prices"]["repair"]), _faction(), s)
 			var cost: int = c.repair_cost(s, station)
@@ -168,10 +160,6 @@ func act(col: int, i: int, button := MOUSE_BUTTON_LEFT) -> String:
 			r = c.buy(s, station, row["id"], 1)
 		"sell":
 			r = c.sell(s, row["id"], 99999 if more else 1)
-		"pay":
-			r = c.pay_debt(s, int(c.cfg["debt"]["payment"]))
-		"pay_all":
-			r = c.pay_debt(s, c.debt)
 		"repair_all":
 			r = c.repair(s, station)
 		"recruit":
@@ -279,7 +267,6 @@ func _draw() -> void:
 	var credits: int = s.inventory.count("credits")
 	_text("Credits %d" % credits, Vector2(p.end.x - 620.0, p.position.y + 38.0), 20, AMBER)
 	_text("Fuel %d" % s.inventory.count("fuel"), Vector2(p.end.x - 470.0, p.position.y + 38.0), 20, GOOD if s.inventory.count("fuel") > 0 else BAD)
-	_text("Debt %d" % c.debt, Vector2(p.end.x - 190.0, p.position.y + 38.0), 20, BAD if c.behind() > 0 else TEXT)
 	if message != "":
 		_text(message, p.position + Vector2(PAD, 88.0), 16, BAD if message_bad else GOOD)
 	for col in 3:

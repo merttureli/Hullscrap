@@ -4,15 +4,14 @@
 		{
 			"id": "station_debt_intro", "type": "station", "weight": 100, "once": true,
 			"requires": {"node": "rusthold", "not_flag": "met_ma"},
-			"text": "Ma Gantry meets you on the dock herself, which is never good. She is small, loud and holding a clipboard made from what used to be a door. \"That hull is mine,\" she says, \"until you've paid me a thousand credits. A hundred every eight jumps. I'm not a monster. I'm a lender.\"",
+			"text": "Ma Gantry meets you on the dock herself. She is small, loud and holding a clipboard made from what used to be a door. \"That hull came out of my yards,\" she says. \"The dock office put a guidance program in every one, so it will talk at you. Mind it. It means well.\"",
 			"choices": [
-				{"text": "\"Sign me up, Ma.\"", "outcomes": [
-					{"weight": 100, "text": "She has you thumbprint the clipboard. Something wet is already on it. \"Meridian's the Concord yard, a few lanes out. Don't tell them I sent you.\" She thumps a hoop of wire and cable onto the clipboard. \"And take this net. Scrap floats by for free out here, and I'm not paying for your laziness. Bolt it to an outer wall.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "rep": {"clans": 1}, "items": {"net_mouth_scrap": 1}}}]},
-				{"text": "\"A thousand? For this?\"", "outcomes": [
-					{"weight": 70, "text": "\"For that,\" Ma agrees, tapping your hull with the clipboard. It rings like a dropped pan. She slides the paper over anyway, then a hoop of wire and cable. \"Take the net, too. Scrap floats by for free out here, and I'm not paying for your laziness.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "items": {"net_mouth_scrap": 1}}},
-					{"weight": 30, "text": "\"Fifty more for the attitude,\" says Ma, and writes it in. The pen is chained to her wrist. You never saw her draw it. \"And take this net. Scrap floats by for free out here, I'm not paying for your laziness.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "debt": 50, "items": {"net_mouth_scrap": 1}}}]},
+				{"text": "\"Thanks, Ma.\"", "outcomes": [
+					{"weight": 100, "text": "\"Meridian's the Concord yard, a few lanes out. Don't tell them I sent you.\" She thumps a hoop of wire and cable onto the clipboard. \"And take this net. Scrap floats by for free out here. Bolt it to an outer wall.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "rep": {"clans": 1}, "items": {"net_mouth_scrap": 1}}}]},
+				{"text": "\"What's the catch?\"", "outcomes": [
+					{"weight": 100, "text": "\"For that,\" Ma agrees, tapping your hull with the clipboard. It rings like a dropped pan. She slides a hoop of wire and cable over anyway. \"Take the net, too. Scrap floats by for free out here.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "items": {"net_mouth_scrap": 1}}}]},
 				{"text": "[Fenn] Read the fine print aloud, slowly.", "requires": {"species": "fenn"}, "outcomes": [
-					{"weight": 100, "text": "Your Fenn finds a clause about \"reasonable wear\" and reads it out twice. Ma stares, then laughs like a bolt coming loose. \"Hundred off. Never do that again. And take this net. Scrap floats by for free out here, I'm not paying for your laziness.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "debt": -100, "rep": {"clans": 1}, "items": {"net_mouth_scrap": 1}}}]}
+					{"weight": 100, "text": "Your Fenn finds a clause about \"reasonable wear\" and reads it out twice. Ma stares, then laughs like a bolt coming loose. \"Never do that again. Take the net. Scrap floats by for free out here.\"", "effects": {"flag": "met_ma", "reveal": "meridian", "rep": {"clans": 1}, "items": {"net_mouth_scrap": 1}}}]}
 			]
 		},
 		{
@@ -75,29 +74,6 @@
 					{"weight": 50, "text": "They circle once and kick your hull to see if it rings. It rings the way a dead hull rings, and they move on to somebody with a pulse.", "effects": {}},
 					{"weight": 50, "text": "The Rustfangs have seen this one before. A boarding sled bumps your hull, gently, and then not gently.", "effects": {"fight": "tier"}}]}
 			]
-		},
-		{
-			"id": "repo_collectors", "type": "pirate", "weight": 60,
-			"requires": {"flag": "debt_missed"},
-			"text": "Rustfang colours, but the ship is too clean, and the man on the comm has a ledger voice. \"Ma Gantry sends her regards,\" he says. \"And her invoice. You missed a payment. We're here to collect, one way or the other.\"",
-			"choices": [
-				{"text": "Pay the hundred.", "requires": {"credits": 100, "pay": true}, "outcomes": [
-					{"weight": 100, "text": "The collector ticks a box with real tenderness. \"Pleasure doing business. Ma will be thrilled. She'll hide it.\"", "effects": {"debt": -100, "rep": {"clans": 1}}}]},
-				{"text": "\"Take it up with Ma.\"", "outcomes": [
-					{"weight": 100, "text": "\"Oh, we will,\" he says. \"After.\"", "effects": {"goto": "repo_fight"}}]},
-				{"text": "[Fenn] Argue the interest, clause by clause.", "requires": {"species": "fenn"}, "outcomes": [
-					{"weight": 70, "text": "Your Fenn finds a rounding error in the collector's favour, then one in yours. By the third, the man is sweating. \"Next time. Next time, understand?\"", "effects": {}},
-					{"weight": 30, "text": "The collector has a Fenn of his own, and the two of them smile at each other in a way that ends badly.", "effects": {"goto": "repo_fight"}}]}
-			]
-		},
-		{
-			"id": "repo_fight", "type": "page", "weight": 0,
-			"text": "The collector's ship swings broadside. It has a ram on the bow that someone has lovingly painted with the word MA. Their crew stops pretending to be pirates.",
-			"choices": [
-				{"text": "Man the guns.", "outcomes": [
-					{"weight": 100, "text": "You man the guns. The collectors finish pretending.", "effects": {"fight": "tier"}}]}
-			],
-			"after_win": {"text": "Their ledger tumbles out of the wreck, still open. The last line reads: Gantry, one hull, 4 jumps overdue. You tear that page out and pocket the petty cash.", "effects": {"items": {"credits": 40}, "rep": {"clans": -1}}}
 		},
 		{
 			"id": "wreck_dead_freighter", "type": "wreck_field", "weight": 12, "requires": {"stage_min": 4},

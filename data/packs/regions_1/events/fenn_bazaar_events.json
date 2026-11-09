@@ -78,7 +78,7 @@
           {"weight": 20, "text": "One of the stalls goes off like a joke shop.", "effects": {"items": {"scrap": 25}, "hull": -5, "log": "log_bazaar_closing_sale"}}
         ]},
         {"text": "[Fenn] Read the barge's last sale ledger.", "requires": {"species": "fenn"}, "outcomes": [
-          {"weight": 100, "text": "Your Fenn reads the ledger like a thriller. The last sale was the barge to herself, at a loss, and the buyer's name belongs to a Fenn trader who now owns a debt on you. The ledger is full of tips, and one of them is a market.", "effects": {"items": {"credits": 60}, "reveal": "trader"}}
+          {"weight": 100, "text": "Your Fenn reads the ledger like a thriller. The last sale was the barge to herself, at a loss, and the buyer's name belongs to a Fenn trader who now has your name on a ledger. The ledger is full of tips, and one of them is a market.", "effects": {"items": {"credits": 60}, "reveal": "trader"}}
         ]},
         {"text": "[Quick hands] Open the till without setting off the alarm.", "requires": {"trait": "fast_repair"}, "outcomes": [
           {"weight": 100, "text": "Your engineer finds the alarm wire in nine seconds and disables it in four. The till opens with a very small, very disappointed beep. A hundred credits, as promised, and a pad.", "effects": {"items": {"credits": 100}, "log": "log_bazaar_closing_sale"}}

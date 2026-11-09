@@ -1,7 +1,7 @@
 {"events": [
     {
-      "id": "station_retire_ma_berth", "type": "station", "weight": 100, "once": false, "requires": {"flag": ["at_rusthold", "debt_free"], "region": "clan_space"},
-      "text": "Ma Gantry is waiting at the end of your dock with her clipboard under one arm, and for the first time ever she has put the pen behind her ear instead of chaining it to her wrist. 'Debt's clear,' she says. 'You know what that makes you? Unemployed, if you're sensible. There's a berth on the Rusthold's inner ring, third spiral, the one with the window. Five thousand. It comes with a hook for your helmet and a chair that doesn't fold. Nobody has ever retired out here. I'd like to see how it's done.'",
+      "id": "station_retire_ma_berth", "type": "station", "weight": 100, "once": false, "requires": {"flag": ["at_rusthold", "met_ma"], "region": "clan_space"},
+      "text": "Ma Gantry is waiting at the end of your dock with her clipboard under one arm, and for the first time ever she has put the pen behind her ear instead of chaining it to her wrist. 'Still flying,' she says. 'You know what that makes you? Unemployed, if you're sensible. There's a berth on the Rusthold's inner ring, third spiral, the one with the window. Five thousand. It comes with a hook for your helmet and a chair that doesn't fold. Nobody has ever retired out here. I'd like to see how it's done.'",
       "choices": [
         {"text": "Buy the berth. (5,000 credits)", "requires": {"credits": 5000, "pay": true}, "outcomes": [
           {"weight": 100, "text": "Ma counts it in front of you, twice, out loud, then slides the key across the table and, quite quietly, turns the clipboard over. On the back, in her own hand, it says PAID. 'First one,' she says. 'Don't make it weird.'", "effects": {"unlock": "ship_kettle_tug", "ending": "retire"}}

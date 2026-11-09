@@ -1,10 +1,10 @@
 {
- "_doc": "The words of the Ledger (scripts/sim/advisor.gd builds the card from them; scripts/ui/ledger_card.gd draws it). The Ledger is the guidance program Ma Gantry Loans installs on every ship it finances (docs/LORE.md): dry, polite, financial, faintly threatening and sometimes accidentally kind, and it says one short line at a time. stages: the checklist of each stage in order (the milestone ladder of docs/audit/progression.md section 7): id, title, why and check. A check is {key: number} (every key must be met; a number is a literal or \"p:<key>\", read from that stage's row of data/progression.json) or a list of such objects (any one will do); a key is one of advisor.gd VOCAB, met at or above its number (damaged_blocks: at or below). A clause whose p: number is missing is left out, a goal with nothing left is dropped (so the stage 1 and 2 goals work before the balance track's file lands). {=key} in a title or why is filled with that check's number. {id} or {id:words} marks a mechanic keyword (keywords below: a colour and a hover line). tips: the first-time notes, one per profile each, listed in the journal (advisor.gd TIPS says what each waits for). warnings: one line each (advisor.gd WARNINGS); each fires at most once a stage unless it gets worse by rules.worse. rules: worse = how much worse (x) a warning must get to fire again in the same stage; toll_jumps, toll_scrap: the toll warning's range and scrap; scrap_credits: the unspent scrap warning's credits; hull_stations: jumps to the next station for the hull warning; warn_s: seconds a warning stays on the card; pace_s: seconds between two looks (at least 1); low_fuel: the fuel of the low fuel tip. labels: how a check is named in the progress (Guns 2/3). keywords: the colours differ from each other and from describe.json's (tests/test_advisor.gd measures it).",
+ "_doc": "The words of the Ledger (scripts/sim/advisor.gd builds the card from them; scripts/ui/ledger_card.gd draws it). The Ledger is the guidance program the Rusthold dock office installed on every hull that left Rusthold's yards (docs/LORE.md): dry, practical, faintly threatening and sometimes accidentally kind, and it says one short line at a time. stages: the checklist of each stage in order (the milestone ladder of docs/audit/progression.md section 7): id, title, why and check. A check is {key: number} (every key must be met; a number is a literal or \"p:<key>\", read from that stage's row of data/progression.json) or a list of such objects (any one will do); a key is one of advisor.gd VOCAB, met at or above its number (damaged_blocks: at or below). A clause whose p: number is missing is left out, a goal with nothing left is dropped (so the stage 1 and 2 goals work before the balance track's file lands). {=key} in a title or why is filled with that check's number. {id} or {id:words} marks a mechanic keyword (keywords below: a colour and a hover line). tips: the first-time notes, one per profile each, listed in the journal (advisor.gd TIPS says what each waits for). warnings: one line each (advisor.gd WARNINGS); each fires at most once a stage unless it gets worse by rules.worse. rules: worse = how much worse (x) a warning must get to fire again in the same stage; toll_jumps, toll_scrap: the toll warning's range and scrap; scrap_credits: the unspent scrap warning's credits; hull_stations: jumps to the next station for the hull warning; warn_s: seconds a warning stays on the card; pace_s: seconds between two looks (at least 1); low_fuel: the fuel of the low fuel tip. labels: how a check is named in the progress (Guns 2/3). keywords: the colours differ from each other and from describe.json's (tests/test_advisor.gd measures it).",
  "version": 1,
  "card": {
   "title": "THE LEDGER",
-  "by": "Ma Gantry Loans",
-  "done": "Everything on the list is done. Ma has nothing to add, which is rare."
+  "by": "Rusthold Dock Office",
+  "done": "Everything on the list is done. The dock office has nothing to add, which is rare."
  },
  "rules": {
   "worse": 1.5,
@@ -93,7 +93,7 @@
    {
     "id": "s1_intake",
     "title": "Mount your {intake}.",
-    "why": "A third of your scrap drifts past, unpaid. Mount the net mouth Ma gave you on an outer wall. The fabricator makes more.",
+    "why": "A third of your scrap drifts past, uncollected. Mount the net mouth on an outer wall. The fabricator makes more.",
     "check": {
      "intakes": 1
     }
@@ -101,7 +101,7 @@
    {
     "id": "s1_guns",
     "title": "Fit three {gun:guns}.",
-    "why": "Your collateral would like a third gun, cabled and powered. Unpowered, it is decor.",
+    "why": "The hull would like a third gun, cabled and powered. Unpowered, it is decor.",
     "check": {
      "guns": 3
     }
@@ -109,7 +109,7 @@
    {
     "id": "s1_cover",
     "title": "Add a {shield} or a {medbay}.",
-    "why": "Ma would like the collateral to survive its first fight. One layer or one medbay will do.",
+    "why": "The dock office would like the hull to survive its first fight. One layer or one medbay will do.",
     "check": [
      {
       "layers": 1
@@ -122,7 +122,7 @@
    {
     "id": "s1_fuel",
     "title": "Hold enough {fuel} for the road to the beacon.",
-    "why": "A stranded ship repays nobody. Ma has checked.",
+    "why": "A stranded ship outruns nothing. The tide has checked.",
     "check": {
      "fuel_margin": 0
     }
@@ -130,7 +130,7 @@
    {
     "id": "s1_toll",
     "title": "Keep the {warden}'s {toll} in your pocket.",
-    "why": "The exit lane is not free, and the warden does not take scrap. Ma recommends solvency.",
+    "why": "The exit lane is not free, and the warden does not take scrap. The office recommends spare credits.",
     "check": {
      "credits_over_toll": 0
     }
@@ -148,7 +148,7 @@
    {
     "id": "s2_arms",
     "title": "Arm to {=guns} guns and {=layers} layers.",
-    "why": "The collateral is growing. Ma finds this encouraging, in writing.",
+    "why": "The hull is growing. The office finds this encouraging, in writing.",
     "check": {
      "guns": 4,
      "layers": 2,
@@ -246,7 +246,7 @@
    {
     "id": "s4_plates",
     "title": "Plate up to {=plates}.",
-    "why": "Ma notes that hulls are the only collateral that fights back.",
+    "why": "The office notes that hulls are the only cargo that fights back.",
     "check": {
      "plates": "p:plates"
     }
@@ -262,7 +262,7 @@
    {
     "id": "s4_toll",
     "title": "Credits for the {toll}.",
-    "why": "The lane costs more each stage. So does everything Ma sells.",
+    "why": "The lane costs more each stage. So does everything the stations sell.",
     "check": {
      "credits_over_toll": "p:credits_over_toll"
     }
@@ -316,7 +316,7 @@
    {
     "id": "s6_arms",
     "title": "Field {=guns} guns behind {=layers} layers.",
-    "why": "The doors are open, and so are the enemy's. Ma recommends being larger.",
+    "why": "The doors are open, and so are the enemy's. The office recommends being larger.",
     "check": {
      "guns": "p:guns",
      "layers": "p:layers",
@@ -326,7 +326,7 @@
    {
     "id": "s6_margin",
     "title": "Keep the lights on.",
-    "why": "Every gun draws power, and a ship in the red does not shoot. Ma does the sums.",
+    "why": "Every gun draws power, and a ship in the red does not shoot. The office does the sums.",
     "check": {
      "margin": 0
     }
@@ -360,7 +360,7 @@
    {
     "id": "s7_arms",
     "title": "Field {=guns} guns behind {=layers} layers.",
-    "why": "The enemy has stopped being polite. Ma suggests you stop being small.",
+    "why": "The enemy has stopped being polite. The office suggests you stop being small.",
     "check": {
      "guns": "p:guns",
      "layers": "p:layers",
@@ -370,7 +370,7 @@
    {
     "id": "s7_plates",
     "title": "Plate up to {=plates}.",
-    "why": "The heavier the ship, the longer the debt can be discussed.",
+    "why": "The heavier the ship, the longer the tide can be discussed.",
     "check": {
      "plates": "p:plates"
     }
@@ -386,7 +386,7 @@
    {
     "id": "s7_toll",
     "title": "Credits for the {toll}.",
-    "why": "Ma has been told the lane is expensive. She finds this relatable.",
+    "why": "The office has been told the lane is expensive. It finds this relatable.",
     "check": {
      "credits_over_toll": "p:credits_over_toll"
     }
@@ -396,7 +396,7 @@
    {
     "id": "s8_arms",
     "title": "Field {=guns} guns behind {=layers} layers.",
-    "why": "The last stage. Ma would like the collateral to finish what it started.",
+    "why": "The last stage. The office would like the hull to finish what it started.",
     "check": {
      "guns": "p:guns",
      "layers": "p:layers",
@@ -414,7 +414,7 @@
    {
     "id": "s8_repair",
     "title": "Mend the damage before the beacon.",
-    "why": "The Ledger would like the collateral intact at the end. It would like many things.",
+    "why": "The Ledger would like the hull intact at the end. It would like many things.",
     "check": {
      "damaged_blocks": 0
     }
@@ -422,7 +422,7 @@
    {
     "id": "s8_toll",
     "title": "Credits for the {toll}.",
-    "why": "One last lane. Ma will want to hear about it.",
+    "why": "One last lane. The office will want to hear about it.",
     "check": {
      "credits_over_toll": "p:credits_over_toll"
     }
@@ -443,7 +443,7 @@
   {
    "id": "first_breach",
    "title": "A breach",
-   "text": "A room is losing air. Repair seals it, Evacuate abandons it. Ma values the crew above the carpet."
+   "text": "A room is losing air. Repair seals it, Evacuate abandons it. The office values the crew above the carpet."
   },
   {
    "id": "first_station",
@@ -468,12 +468,12 @@
   {
    "id": "first_warden",
    "title": "A warden",
-   "text": "It holds the exit lane. Pay the toll, break through or turn back. Ma suggests whichever leaves you solvent."
+   "text": "It holds the exit lane. Pay the toll, break through or turn back. The office suggests whichever leaves you flying."
   },
   {
    "id": "first_drift_jump",
    "title": "A drift jump",
-   "text": "It burns no fuel and dents the ship instead. Ma will not be reimbursing the dents."
+   "text": "It burns no fuel and dents the ship instead. The office will not be reimbursing the dents."
   },
   {
    "id": "low_fuel",
@@ -493,7 +493,7 @@
   {
    "id": "first_rig_bonus",
    "title": "The Salvage Rig",
-   "text": "It added to what you opened. Higher marks add more. Ma has noted the percentage."
+   "text": "It added to what you opened. Higher marks add more. The office has noted the percentage."
   },
   {
    "id": "first_crew",
@@ -508,22 +508,22 @@
  ],
  "warnings": {
   "outgunned": {
-   "text": "The warden outguns you and the lane is out of reach. Ma recommends not dying; it complicates repayment."
+   "text": "The warden outguns you and the lane is out of reach. The office recommends not dying; it complicates the evacuation."
   },
   "fuel": {
-   "text": "Fuel will not reach the beacon. A stranded ship repays nobody, and Ma has checked."
+   "text": "Fuel will not reach the beacon. A stranded ship outruns nothing, and the tide has checked."
   },
   "skulls": {
-   "text": "She carries more than you do. Ma suggests leaving; she values your continued interest."
+   "text": "She carries more than you do. The office suggests leaving; it values your continued interest."
   },
   "toll": {
-   "text": "The toll is near and the purse is thin. Sell scrap at a station: Ma's cousin buys everything."
+   "text": "The toll is near and the purse is thin. Sell scrap at a station: a cousin of the dock office buys everything."
   },
   "hull": {
-   "text": "The structure is thin and the next station is far. Mend it before the collateral becomes a rumour."
+   "text": "The structure is thin and the next station is far. Mend it before the hull becomes a rumour."
   },
   "cliff": {
-   "text": "The next region outguns you. Ma has noted it in your file, in red."
+   "text": "The next region outguns you. The office has noted it in your file, in red."
   },
   "power": {
    "text": "Demand exceeds supply, and parts go dark. Add a reactor, or take a gun off the books."
@@ -535,7 +535,7 @@
    "text": "The ship is heavy and slow, and slow ships get caught. Add engines."
   },
   "scrap": {
-   "text": "Scrap in the hold, arrears on the account. Sell the surplus at a station; Ma prefers coin."
+   "text": "Scrap in the hold, nothing in the purse. Sell the surplus at a station; the office prefers coin."
   },
   "blueprints": {
    "text": "No new blueprints in a long while. Take the Scan rows and read the stores; progress is a recurring cost."

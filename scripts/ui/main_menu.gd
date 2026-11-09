@@ -337,7 +337,7 @@ func _draw_ledger() -> void:
 	var x0 := (size.x - BTN.x) / 2.0
 	var top := _sound_top()
 	_text("THE LEDGER", Vector2(x0, top + 62.0), 13, AMBER)
-	var hint := "Ma Gantry's goals, tips and warnings"
+	var hint := "The dock office's goals, tips and warnings"
 	_text(hint, Vector2(x0 + BTN.x - ThemeDB.fallback_font.get_string_size(hint, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x, top + 62.0), 13, DIM_TEXT)
 	for i in Profile.LEDGER_MODES.size():
 		var r := ledger_rect(i)

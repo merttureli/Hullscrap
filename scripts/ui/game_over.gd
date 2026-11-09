@@ -1,6 +1,6 @@
 extends Control
 ## The end of a run: "YOUR SHIP IS SCRAP" with the ship's name and what the run came to (jumps made,
-## credits, debt left, crew alive, events seen, fights won), then New run (the ship picker) or Main menu.
+## credits, crew alive, events seen, fights won), then New run (the ship picker) or Main menu.
 ## front_door.gd opens it when the map reports a lost campaign fight, writes the run record to the profile
 ## and wipes the saves; this node only shows the numbers and reads input (N, M, Up/Down, Enter, click).
 ## stats_of() is the logic: the numbers from a campaign and the ship. In the UI colours of station_panel.gd.
@@ -11,7 +11,7 @@ signal chosen(id: String)
 const UiKit = preload("res://scripts/ui/ui_kit.gd")
 
 const BUTTONS: Array = [{"id": "new", "label": "New run", "key": KEY_N}, {"id": "menu", "label": "Main menu", "key": KEY_M}]
-const ROWS: Array = [["Jumps made", "jumps"], ["Credits", "credits"], ["Debt left", "debt"], ["Crew alive", "crew"], ["Events seen", "events"], ["Fights won", "fights"]]
+const ROWS: Array = [["Jumps made", "jumps"], ["Credits", "credits"], ["Crew alive", "crew"], ["Events seen", "events"], ["Fights won", "fights"]]
 const PANEL := Vector2(560.0, 520.0)
 const BTN := Vector2(240.0, 48.0)
 const DIM := Color(0.0, 0.0, 0.0, 0.8)
@@ -38,7 +38,7 @@ func _process(_dt: float) -> void:
 		queue_redraw()
 
 
-## The numbers of a run: {ship, jumps, credits, debt, crew, events, fights}. `ship` is the player's Ship;
+## The numbers of a run: {ship, jumps, credits, crew, events, fights}. `ship` is the player's Ship;
 ## crew alive is everyone aboard above 0 hp.
 static func stats_of(campaign, ship) -> Dictionary:
 	var alive := 0
@@ -47,7 +47,7 @@ static func stats_of(campaign, ship) -> Dictionary:
 			if m.hp > 0.0 and not m.is_drone():  # (a repair drone is no crew)
 				alive += 1
 	return {"ship": ship.name if ship != null else "?", "jumps": campaign.jumps,
-		"credits": ship.inventory.count("credits") if ship != null else 0, "debt": campaign.debt,
+		"credits": ship.inventory.count("credits") if ship != null else 0,
 		"crew": alive, "events": campaign.events_seen, "fights": campaign.fights_won}
 
 

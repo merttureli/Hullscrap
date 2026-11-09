@@ -708,8 +708,8 @@
           {"weight": 55, "text": "Your Fenn and Fourpence argue in clicks for six minutes, ending in a handshake and a loud, shared laugh. Two fuel, forty credits, and a promise never to speak of it.", "effects": {"items": {"credits": -40, "fuel": 2}}},
           {"weight": 45, "text": "It goes the other way. Your Fenn is outhaggled, and spends the rest of the day not speaking.", "effects": {"items": {"credits": -40, "fuel": 1}}}
         ]},
-        {"text": "Call the Gantry Clan for a tow. Ma will put it on the hull.", "outcomes": [
-          {"weight": 100, "text": "Ma picks up on the first ring, which is how you know it is bad. A clan tug drags you to a depot, tops you up, and hands you a bill in Ma's own handwriting.", "effects": {"items": {"fuel": 2}, "debt": 50}}
+        {"text": "Call the Gantry Clan for a tow. It takes its time.", "outcomes": [
+          {"weight": 100, "text": "A clan tug answers, slowly, and drags you to a depot. It tops you up and tells you the price: the afternoon, and everything the tide does with it.", "effects": {"items": {"fuel": 2}, "tide": 1}}
         ]},
         {"text": "Refuse and drift.", "outcomes": [
           {"weight": 100, "text": "'Your funeral,' says Fourpence, hurt. 'I'll be at the next one, with a better price.'", "effects": {}}

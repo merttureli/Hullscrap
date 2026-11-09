@@ -317,7 +317,7 @@ func test_flying_to_rusthold_brings_ma_gantry_then_the_station_menu() -> void:
 		t += 0.25
 	check(map.visible and map.panel_only, "the POI's event opens over the sector after %.1f s" % t)
 	check(s.ship_pos.distance_to(s.main_poi()["pos"]) <= float(s.cfg["poi"]["trigger"]) + 1.0, "within 800 px of the station")
-	eq(map.event_panel.event.get("id", ""), "station_debt_intro", "Ma Gantry's introduction")
+	eq(map.event_panel.event.get("id", ""), "station_debt_intro", "the opening event at Rusthold")
 	var pos: Vector2 = s.ship_pos
 	view.frame(1.0)
 	eq(s.ship_pos, pos, "the sector holds while the event is up")

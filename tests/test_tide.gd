@@ -194,14 +194,13 @@ func test_clock_text() -> void:
 
 # --- the campaign ------------------------------------------------------------------------------------------
 
-func test_lingering_never_moves_the_jump_counter_or_the_debt() -> void:
+func test_lingering_never_moves_the_jump_counter() -> void:
 	var c := Campaign.new(5)
-	var debt := c.debt
 	var lines := []
 	for i in 481:
 		lines.append_array(c.linger(1.0))
 	eq(c.tide.steps, 2, "two steps in 481 s")
-	eq([c.jumps, c.debt, c.paid, c.behind()], [0, debt, 0, 0], "no jump, no debt, nothing owed")
+	eq(c.jumps, 0, "no jump")
 	check(lines.has(Tide.RISES_TEXT), "the HUD gets the line")
 
 
@@ -219,7 +218,7 @@ func test_a_jump_a_wait_and_a_tow_each_advance_the_tide() -> void:
 	check(c.wait(ship)["ok"], "a wait")
 	eq([c.tide.steps, c.jumps], [2, 2], "pushed it again")
 	check(c.tow(ship)["ok"], "a tow")
-	eq([c.tide.steps, c.jumps], [3, 3], "and again")
+	eq([c.tide.steps, c.jumps], [4, 3], "and a tow pushes it two steps (one jump)")
 	eq(c.current, "rusthold", "home")
 
 

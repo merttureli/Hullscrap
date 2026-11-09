@@ -328,7 +328,7 @@ func _screen() -> Dictionary:
 
 func _fight(d: Dictionary, result: Dictionary) -> void:
 	var map: MapView = d["map"]
-	map.event_panel.open_event(map.campaign.events.get_event("repo_fight"))
+	map.event_panel.open_event(map.campaign.events.get_event("pirate_ambush_wreck"))
 	map.event_panel.choose(0)
 	map.event_panel.proceed()
 	d["fake"].finished.emit(result)

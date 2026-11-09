@@ -382,7 +382,7 @@ By family, line and tier:
 | asteroid_field | 42 |
 | boarding_npc | 28 |
 | boarding_site | 18 |
-| debt | 4 |
+| call | 1 |
 | distress | 77 |
 | empty | 51 |
 | gate | 10 |

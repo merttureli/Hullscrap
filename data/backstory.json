@@ -6,7 +6,7 @@
 	"fixed": {
 		"drone": "Repair drone. Does not talk about it."
 	},
-	"player": "You inherited a barely-working hull and the debts that come with it. Ma Gantry has the paperwork.",
+	"player": "You got out of Rusthold the night it went quiet, in a hull that was only half built. Ma Gantry loaded the rest.",
 	"home": {
 		"human": ["in the Haldane Ring", "on the lower decks of Meridian", "at Gantry Rusthold"],
 		"basalt": ["on the old gate-builders' labour decks", "on a quarry rock off the Boneyard"],

@@ -73,7 +73,7 @@ const COLUMNS: Array = [
 			["Click a lit neighbour", "Spool the jump drive there (8 s, fuel when it fires; the same node again cancels)"],
 			["Shift+click", "Drift jump with no fuel (costs hull)"],
 			["T", "Wait for a passing trader (no fuel)"],
-			["Y", "No fuel: Ma tows you to the region start (debt +150)."],
+			["Y", "No fuel: a hauler tows you to the region start (+2 fuel, the tide moves 2 steps)."],
 			["Enter", "Close to a station's beacon its menu opens; at the exit beacon, choose the next region (1 - 3) once its warden is dealt with"],
 			["Exit warden", "A warden holds each exit: pay, show standing, or break through."],
 			["Esc", "Close the map"],
@@ -146,14 +146,13 @@ func _ready() -> void:
 	visible = false
 
 
-## The first-run steps. The debt figures come from data/drift.json.
+## The first-run steps.
 static func first_run() -> Array[String]:
-	var d: Dictionary = Campaign.config()["debt"]
 	return [
 		"Click a marker to fly there; M opens the map to jump on.",
 		"Read the event and pick a choice.",
 		"Keep fuel up: buy it at stations.",
-		"Pay %s %d credits every %d jumps." % [str(d["creditor"]).get_slice(" ", 0), int(d["payment"]), int(d["every"])],
+		"The Hollow tide follows you: keep moving toward the exit.",
 		"Win fights for credits and scrap.",
 		"Build better guns with C.",
 	]
@@ -264,7 +263,7 @@ func _draw() -> void:
 	var p := panel_rect()
 	UiKit.frame(self, p)
 	_text("HOW TO PLAY", p.position + Vector2(PAD, 38.0), 26, TEXT)
-	_text("Everything flies on salvage. Keep the ship alive, keep Ma paid.", p.position + Vector2(PAD + 220.0, 36.0), 15, DIM_TEXT)
+	_text("Everything flies on salvage. Keep the ship alive, stay ahead of the tide.", p.position + Vector2(PAD + 220.0, 36.0), 15, DIM_TEXT)
 	var cw := column_width()
 	for c in COLUMNS.size():
 		var x := p.position.x + PAD + c * (cw + COL_GAP)

@@ -16,7 +16,7 @@
       "id": "ship_kettle_tug",
       "kind": "starter_ship",
       "name": "Ma's Kettle-class Tug",
-      "how": "Pay off Ma Gantry, then buy a berth at Gantry Rusthold (the Retire ending).",
+      "how": "Buy a berth at Gantry Rusthold (the Retire ending).",
       "payload": {
         "ship": "kettle_tug",
         "group": "clans",

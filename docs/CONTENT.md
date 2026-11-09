@@ -362,7 +362,7 @@ Tiers and lines follow the tables. Unique items (★) have no recipe.
 9. The Drift: map, jumps, events, reputation, the debt and stations (8), with the first event pack.
 10. Species in play (9): species data, rigs in the game, starting crews, hand weapons data.
 
-## 8. The Drift: the map, jumps, events and the debt (lead, 2026-10-30)
+## 8. The Drift: the map, jumps and events (lead, 2026-10-30; the debt went with save version 14)
 This is the campaign loop that gives fights, salvage and trade a reason, FTL-style but with a home.
 - **The map** (`scripts/space/drift.gd`, logic; `data/drift.json`, tuning):
   - It is generated from the campaign seed: **28 nodes** scattered in a 1600×1000 region with a minimum spacing. Lanes join each node to its 2–4 nearest neighbours, and the graph is always connected.
@@ -376,7 +376,7 @@ This is the campaign loop that gives fights, salvage and trade a reason, FTL-sty
 - **Jumping**:
   - Click a node linked to yours. A jump costs **1 `fuel`**, a new item (start with 6, buy at stations for 8 credits).
   - With no fuel, you can only wait for a passing trader (an event that sells fuel at triple price) or drift: a jump that tears 15 hp off random outer blocks.
-  - Each jump advances the **jump counter**, which drives the debt clock and the danger.
+  - Each jump advances the **jump counter**, which drives the danger tier and the tide.
   - **Danger**: pirate and patrol fights scale with the jump counter. Enemy designs pick from tables by tier (tier 1 at jumps 0–9, tier 2 from 10, tier 3 from 25).
 - **Arriving**: the node's type runs an **event** picked by weight from `data/events/*.json` (a seeded roll). A pirate node may skip the talk and start a fight.
 - **Events (FTL-style text with choices)**, one JSON object per event:
@@ -411,16 +411,17 @@ This is the campaign loop that gives fights, salvage and trade a reason, FTL-sty
   - Below −5, that faction's stations refuse you and its patrols attack.
   - At +5 and above, prices are 20% off and its event options open up.
   - `data/factions.json` holds id, name, line, colours, the ship name style and these thresholds. Rustfangs, Wardens and the Hollow are listed as hostile, with no reputation bar.
-- **The debt (the pressure clock)**: you owe **Ma Gantry** of the Gantry Clan for your hull.
-  - **1000 credits**, with a payment of **100 due every 8 jumps**, paid at any Scrapper station (Gantry Rusthold, or a `trader` node flagged clan).
-  - Miss a payment and a "repo crew" event chain starts: Rustfang collectors (a pirate fight that also demands credits). Two misses in a row and the next pirate fight is a rammer that wants your ship back.
-  - Pay it all off and Ma gives you a unique ("Ma's Kettle", a Scrap reactor with a quirk) and the flag `debt_free`. The debt is a cargo-independent number on the campaign.
+- **No debt**: there is no creditor, no payment clock and no repo crew (save version 14). The pressure is the Hollow tide (`tide.gd`).
+  - An old save loads and ignores the debt keys (`debt`, `paid`, `reminded`, `debt_stop`) and the flags `debt_missed` / `debt_free`.
+  - Ma's Kettle (a unique Scrap reactor with a quirk, `reactor_scrap_kettle`) is a reward of Ma's dinner (the landmark `station_ma_in_person`), once.
+  - **The tow (Y)**: with no fuel a hauler tows you to the region start and gives 2 fuel. It costs time: the tide moves 2 steps (`Campaign.TOW_STEPS`), not 1. It always works, so a run can't soft-lock.
+  - **Calls** (event type `call`): Ma on the comm. The campaign offers one on arrival (`Campaign._call_event`), at most one every `calls.every` jumps (`data/drift.json`), and it pre-empts the node's own event.
 - **Stations** (for now a menu; walkable stations come with on-foot play):
-  - trade (buy fuel, sell items at half value, buy listed items from the station's stock in `data/drift.json`), pay the debt, repair all blocks (2 credits per hp of damage missing), and recruit (2 recruits on offer, 150 credits each, species weighted by the station).
+  - trade (buy fuel, sell items at half value, buy listed items from the station's stock in `data/drift.json`), repair all blocks (2 credits per hp of damage missing), and recruit (2 recruits on offer, 150 credits each, species weighted by the station).
   - Gantry Rusthold sells Scrap-line parts, Meridian Standard-line parts, and the Prism Neon-line parts.
 - **After a won fight**: loot is credits 20–60 × tier, scrap 30–80 × tier, and a 25% chance of one of the enemy's components. Then a `wreck_field`-style salvage event runs (boarding the wreck on foot comes later).
 - **Conventions the content uses** (as built):
-  - **Event types** are the node types plus `debt` (picked by the debt clock from `requires`: the first call after jump 2, reminders when a payment is due within 2 jumps, repo talk after a miss) and `station` (one weighted greeting per docking, gated by the `at_rusthold` / `at_meridian` / `at_prism` flags that are set while docked).
+  - **Event types** are the node types plus `call` (a call on arrival, picked by `requires`: see above) and `station` (one weighted greeting per docking, gated by the `at_rusthold` / `at_meridian` / `at_prism` flags that are set while docked).
   - **Follow-up pages** have `weight: 0` and are reached only by `goto`. `after_win` is an event-level `{text, effects}`.
   - **`once` events** are spent only when the chosen outcome has non-empty effects, so walking away doesn't burn a quest step.
   - **`fallback: true` events** are only rolled when no other event is eligible at the pick (the repeatable filler quests of `story_1`: a quest beacon with no quest left used to resolve with nothing; now it hands out a derelict log).
@@ -429,7 +430,7 @@ This is the campaign loop that gives fights, salvage and trade a reason, FTL-sty
   - **Damage is on the blocks**, nothing else is carried between fights: crew, the drone and the soldier repair them, or a station does ("Repair all blocks"). The top bar shows a wrench and "N damaged" while any block is damaged; clicking it centres the camera on the nearest one. Events and drift jumps never take the structure under the wreck line.
   - **Losing a fight ends the run** (a new campaign starts).
 - **Controls**: **M** opens the map from play mode. Click a linked node to jump; the event panel opens on arrival. Esc closes the map.
-- **Saves**: the campaign (seed, node positions, lanes and types, the current node, visited nodes, flags, reputation, debt, jump counter, and `once` events used) is saved with the ship. Bump the save version.
+- **Saves**: the campaign (seed, node positions, lanes and types, the current node, visited nodes, flags, reputation, jump counter, and `once` events used) is saved with the ship. Bump the save version.
 
 ## 9. Species in play (lead, 2026-10-30)
 `data/species.json`. A crew member's `species` sets their body, their traits and their art rig (`art/crew/<species>/`).
@@ -632,7 +633,7 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
 
 ### What changes in sections 8 and 10
 - A Drift **node's type is now its sector's theme**: it sets the POI mix and the debris density. Its events run at the matching POIs, not on arrival.
-- The debt clock, reputation, stations, loot and saves stay the same.
+- Reputation, stations, loot and saves stay the same.
 - **Mining** happens at mining-field POIs and on the ore rocks drifting by, with the same cutting rules, in the same space.
 
 ### Order (each step is a brief)
@@ -704,7 +705,7 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
 
 - **A run is 4–8 hours.** It has an ending, a score, and **unlocks** that change how the next run starts. The 200 hours come from replaying with different ships, crews and paths (FTL / Multiverse-style).
 - **Pacing in acts and pressure clocks**:
-  - **Act 1, Clan space**: Ma's debt clock (section 8) is the early pressure.
+  - **Act 1, Clan space**: the Hollow tide (section 8) is the early pressure.
   - **Act 2, the Boneyard and Concord space**: the money is good, and the first fragments of **the Haven broadcast** turn up.
   - **Act 3, the Gate approaches**: **the Hollow tide** is the late pressure. From about jump 30, the Hollow spreads from the Dead Gates one node every few jumps. Hollow nodes have ghost ships, no stores and dead beacons, so you can't stall forever.
 - **The endings** (each is a quest chain of events, flags and special POIs, and you can run into more than one in a run; the first one you **complete** ends the run):
@@ -788,7 +789,7 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
 
 - **The run is a journey through regions**, FTL/Multiverse-style:
   - A run crosses **8 stages**. Each stage is one **region**: a Drift-style node map of 16–20 places (section 8, each place a sector of section 11).
-  - Stage 1 is always **Clan space** (Gantry Rusthold, Ma's debt).
+  - Stage 1 is always **Clan space** (Gantry Rusthold).
   - At a region's **exit beacon**, a region map offers **2–3 next regions** to choose from. It shows each one's theme, danger and (once scanned) its rarity.
 - **The region roster**:
   - **30 race homelands**, one per species: their stations sell their tech, recruit their people and run their events. Their enemies, hazards and debris fit their world.
@@ -797,13 +798,13 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
   - **The rare faction regions** (section 18).
   - So a run sees 8 of 40+, and every run differs.
 - **A region's data** (`data/regions/<id>.json`, one per pack): home race, faction, palette and backdrop tint, the debris table (section 11), the POI mix, stores, recruit table, the enemy table (section 14), hazards (ion storms, gas clouds, debris surges, radiation, a star's heat) and its event pool. Stage bands keep the difficulty curve: a region lists which stages it may appear in.
-- **Code**: the current single Drift map becomes **one region's map**. A region graph picks the stages and choices from the run seed. The debt, reputation and saves carry across regions.
+- **Code**: the current single Drift map becomes **one region's map**. A region graph picks the stages and choices from the run seed. Reputation and saves carry across regions.
 - **As built** (`scripts/space/regions.gd`, `campaign.gd`, `region_choice.gd`; the rules are `run` in `data/drift.json`):
   - **A region file** is one object: `id` (the file name), `name`, `home_species` ("" for none), `faction` ("" for none), `stages` [first, last], `weight`, `rarity` (common, uncommon, rare, very_rare, legendary), `danger` (the section 14 budget factor, shown as 1–5 skulls), `palette` {tint, nebula (an `art/space/nebula_<id>.png`)}, `map` (any `data/drift.json` map key, e.g. `nodes` or `clan_trader`), `node_weights` (replace the default), `places` (fixed nodes; `beacon: true` keeps one on the map, as a homeland's race station), `debris` and `pois` (multipliers over the node theme and mix), `ambient` (passing ships: trader, patrol, pirate), `stock` and `recruit` (the region's station menu; laid over a `data/drift.json` station's own), `enemies` (an enemy table id: a faction id), `hazards` (the ids a node may roll, README "Hazards", `data/hazards.json`), `events` (its event tag) and `blurb`. A homeland must have its station. The validator is `Regions.problems()`.
   - **The graph**: stage 1 is `run.start` (Clan space). Each exit offers 2–3 regions valid for the next stage, rolled by weight × the rarity factor, never one already visited; the same seed and the same choices give the same offers. Every stage must have enough regions that a run can always be offered two (the validator checks it). The last stage's exit leads to `run.ending` (for now the Gate approaches), the ending region, which has no exit.
   - **A region's map** is 16–20 places: its own places, an **Arrival point** at the left edge (unless a place is the start, as Rusthold) and the **exit beacon** on the far side, always on the map. Arriving there asks to confirm, then shows the cards (name, home race, faction, danger, rarity once scanned with an identifying radar or known through the flag `known_<region id>`, blurb). Crossing costs no fuel and no jump.
   - **Events**: `requires.region` (a region id or its `events` tag, or a list) and `stage_min` / `stage_max`, on an event or a choice. The flag `in_<region id>` is also set while in a region.
-  - **Ma's debt clock** runs in stages 1–2 only: from stage 3 no payment falls due, no debt event comes and no rammer is sent (the debt can still be paid). Ma's tow takes you to the current region's start.
+  - **The tow** takes you to the current region's start and moves the tide 2 steps.
   - **Saves** are version 4 (stage, region, route, region seed); older saves load as stage 1 in Clan space.
   - **Exit wardens** (`scripts/space/wardens.gd`, `data/wardens.json`): every region's exit beacon is held by a strong generated ship that the region card names ("Exit warden: Concord Bulwark (Threat 4/5)" and a hint at what beats it). At the beacon you pay its toll (credits x the stage), are waved through when your standing with its faction is high enough, or break through (a win, a capture, a surrender or an escape clears the lane); the region choice stays shut until then. The ending region has no warden. Saves gained `warden` (version 6).
 
@@ -955,7 +956,7 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
 ## 20. The Ledger: a guidance program that teaches once (owner, 2026-11-02)
 > "have a tutorial or an assistant to tell you how to progress: when to keep expanding the scrap guns on your ship, when to start upgrading your crafting, when to start looking for better items and parts... something to teach once and then be turned off later."
 
-The **Ledger** is the program Ma Gantry Loans installs on every ship it finances, because a ship that grows pays its debt. Its voice is dry, polite, financial, faintly threatening and sometimes accidentally kind; it says one short line at a time.
+The **Ledger** is the guidance program the Rusthold dock office installed on every hull that left Rusthold's yards, because a ship that grows outruns the tide. Its voice is dry, practical, faintly threatening and sometimes accidentally kind; it says one short line at a time.
 
 - **The logic** is `scripts/sim/advisor.gd`: read-only (no rng, no state of the game; `tests/test_advisor.gd` runs a seeded sector with it on and off and compares everything), looking at the ship and the campaign at most once a second. **The words** are `data/advisor.json`; **the numbers** are `data/progression.json` (measured by the progression bot, `tests/tool_progress.gd`; `docs/audit/progression.md` section 12 says how, and re-run the tool to change them; `tests/fixtures/progression.json` stands in for it in the advisor's tests, and a goal clause whose number is missing is left out).
 - **Goals** (`stages`, 3 to 5 a stage, in order, the milestone ladder of `docs/audit/progression.md` section 7). A goal's `check` is `{key: number}` (all of them) or a list of such objects (any one); `number` is a literal or `"p:<key>"`, that stage's value in `progression.json`. The keys are the vocabulary in `Advisor.VOCAB`: `intakes guns layers fab power margin accel_ratio plates medbays known fuel_margin credits_over_toll damaged_blocks` (the last is met at or below its number, the rest at or above). `{=key}` in a title fills the number; `{id}` or `{id:words}` marks a mechanic keyword (`keywords`: colour and a hover line, in the style of `describe.json`). The first goal not met is the card's line; one met ticks with a soft sound.

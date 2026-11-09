@@ -134,7 +134,7 @@ func test_help_has_the_sections_and_the_first_run_box() -> void:
 		check(text.contains(title), "section " + title)
 	var steps := HelpPanel.first_run()
 	eq(steps.size(), 6, "six first-run steps")
-	eq(steps[3], "Pay Ma 100 credits every 8 jumps.", "the debt figures come from data/drift.json")
+	eq(steps[3], "The Hollow tide follows you: keep moving toward the exit.", "step 4 is the tide line")
 	check(steps[0].contains("M") and steps[5].contains("C"), "the first and last steps name their keys")
 	for col in HelpPanel.COLUMNS:
 		for sec in col:
@@ -177,7 +177,7 @@ func test_profile_keeps_runs_and_shows_the_last_five_newest_first() -> void:
 	var p := Profile.new(TMP)
 	eq(p.runs.size(), 0, "no file, no runs")
 	for i in 7:
-		p.add_run({"ship": "Ship %d" % i, "jumps": i, "credits": 10 * i, "debt": 900, "crew": 2, "events": i, "fights": 1, "date": "2026-10-30"})
+		p.add_run({"ship": "Ship %d" % i, "jumps": i, "credits": 10 * i, "crew": 2, "events": i, "fights": 1, "date": "2026-10-30"})
 	eq(p.last_runs().size(), 5, "five shown")
 	eq(p.last_runs()[0]["ship"], "Ship 6", "newest first")
 	eq(p.last_runs()[4]["ship"], "Ship 2", "and the fifth is the fifth newest")
@@ -208,11 +208,12 @@ func test_profile_survives_a_broken_file() -> void:
 
 
 func test_run_line_is_one_line_with_the_numbers() -> void:
-	var line := Profile.run_line({"ship": "Courier", "jumps": 14, "credits": 230, "debt": 480, "crew": 3, "events": 9, "fights": 4, "date": "2026-10-30"})
-	eq(line, "2026-10-30  Courier: 14 jumps, 230 cr, debt 480, 3 crew, 9 events, 4 fights won", "the line")
+	var line := Profile.run_line({"ship": "Courier", "jumps": 14, "credits": 230, "crew": 3, "events": 9, "fights": 4, "date": "2026-10-30"})
+	eq(line, "2026-10-30  Courier: 14 jumps, 230 cr, 3 crew, 9 events, 4 fights won", "the line")
 	check(not line.contains("\n"), "one line")
-	eq(Profile.run_line({}), "?: 0 jumps, 0 cr, debt 0, 0 crew, 0 events, 0 fights won", "an empty record still reads")
-	eq(Profile.run_line({"ship": "X", "jumps": 1, "events": 1, "fights": 1}), "X: 1 jump, 0 cr, debt 0, 0 crew, 1 event, 1 fight won", "one of each is singular")
+	eq(Profile.run_line({"ship": "Courier", "jumps": 14, "credits": 230, "debt": 480, "crew": 3, "events": 9, "fights": 4, "date": "2026-10-30"}), line, "an old record with a debt key reads the same, without it")
+	eq(Profile.run_line({}), "?: 0 jumps, 0 cr, 0 crew, 0 events, 0 fights won", "an empty record still reads")
+	eq(Profile.run_line({"ship": "X", "jumps": 1, "events": 1, "fights": 1}), "X: 1 jump, 0 cr, 0 crew, 1 event, 1 fight won", "one of each is singular")
 
 
 func test_first_run_hints_are_shown_once_and_only_in_the_first_run() -> void:
@@ -270,7 +271,6 @@ func test_game_over_numbers_come_from_the_campaign_and_the_ship() -> void:
 	var s := _starter()
 	var c := Campaign.new(11)
 	c.jumps = 14
-	c.debt = 480
 	c.events_seen = 9
 	c.fights_won = 4
 	s.inventory.add("credits", 230 - s.inventory.count("credits"))
@@ -279,7 +279,8 @@ func test_game_over_numbers_come_from_the_campaign_and_the_ship() -> void:
 	s.crew[0].hp = 0.0
 	var st := GameOver.stats_of(c, s)
 	eq(st["ship"], s.name, "the ship's name")
-	eq([st["jumps"], st["credits"], st["debt"], st["events"], st["fights"]], [14, 230, 480, 9, 4], "jumps, credits, debt, events, fights")
+	eq([st["jumps"], st["credits"], st["events"], st["fights"]], [14, 230, 9, 4], "jumps, credits, events, fights")
+	check(not st.has("debt"), "and no debt")
 	eq(st["crew"], crew - 1, "crew alive: those above 0 hp")
 	eq(GameOver.stats_of(c, null)["crew"], 0, "no ship, no crew")
 

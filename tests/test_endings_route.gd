@@ -219,7 +219,7 @@ func _hollow_truth() -> String:
 
 func _retire() -> String:
 	_begin()
-	c.flags["debt_free"] = true
+	c.flags["met_ma"] = true
 	return _end(_meet("station_retire_ma_berth", [0]), "retire")
 
 
@@ -285,9 +285,7 @@ func test_a_run_can_retire_at_rusthold() -> void:
 	eq(_retire(), "retire", "walked")
 	check(c.unlocks_earned.has("ship_kettle_tug"), "with Ma's tug earned")
 	_begin()
-	check(_closed("station_retire_ma_berth"), "not before the debt is paid")
 	_go(2, "boneyard")
-	c.flags["debt_free"] = true
 	check(_closed("station_retire_ma_berth"), "and not once the run has left Clan space: Rusthold is behind")
 
 

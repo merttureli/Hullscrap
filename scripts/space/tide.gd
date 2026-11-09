@@ -154,7 +154,7 @@ func advance(n := 1) -> int:
 
 ## `dt` seconds of play pass in the same place (the map is shut, no build mode, no fight). At linger_s the tide
 ## advances one step (RISES_TEXT), the count starts again, and the lines for the HUD and the chronicle come back:
-## "The tide rises in 60 s" once at each of the warn seconds, then the rise. Never touches the jump counter or the debt.
+## "The tide rises in 60 s" once at each of the warn seconds, then the rise. Never touches the jump counter.
 func linger(dt: float) -> Array:
 	var lines := []
 	if dt <= 0.0 or spent():
