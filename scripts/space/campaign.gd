@@ -74,6 +74,7 @@ const HOSTILES_TEXT := "hostiles too close to jump"
 const SPOOL_TEXT := "spool the jump drive first"
 const NOT_AT_EXIT := "not at the exit beacon"
 const RUSTHOLD := "rusthold"
+const JUST_CROSSED := "just_crossed"  ## flag from a crossing until the next arrival: the stage calls of Ma ask for it
 const BARGE := Regions.BARGE  ## Ma's barge: a station in every region (data/drift.json run.barge), where the tow takes you
 const RUSTHOLD_TEXT := "Rusthold's lights stay on. Its radio goes quiet."
 const TOW_STEPS := 2  ## the Hollow tide steps a tow home costs (the jump's own step and one more)
@@ -560,12 +561,13 @@ func arrive(ship) -> Dictionary:
 	return out
 
 
-## The call due now, {} if none: an event of type call (Ma on the comm), at most one every cfg calls.every jumps. It
-## pre-empts the node's own event.
+## The call due now, {} if none: an event of type call (Ma on the comm), at most one every cfg calls.every jumps; on the first
+## arrival after a crossing one may come at once (the stage calls ask for the flag just_crossed). It pre-empts the node's own event.
 func _call_event(ship) -> Dictionary:
-	if jumps - last_call < int(cfg["calls"]["every"]):
-		return {}
-	var ev := events.pick(self, {"id": current, "type": "call", "place": ""}, ship)
+	var ev := {}
+	if flags.has(JUST_CROSSED) or jumps - last_call >= int(cfg["calls"]["every"]):
+		ev = events.pick(self, {"id": current, "type": "call", "place": ""}, ship)
+	flags.erase(JUST_CROSSED)
 	if not ev.is_empty():
 		last_call = jumps
 	return ev
@@ -764,6 +766,7 @@ func cross(id: String, ship) -> Dictionary:
 	var notes := []
 	stage += 1
 	enter_region(id, ship)
+	flags[JUST_CROSSED] = true  # the first arrival here may bring Ma's call for the stage (_call_event)
 	notes.append("You jump into %s." % region_name())
 	return {"ok": true, "why": "", "notes": notes}
 

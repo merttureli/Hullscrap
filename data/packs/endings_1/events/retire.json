@@ -1,28 +1,28 @@
 {"events": [
     {
-      "id": "station_retire_ma_berth", "type": "station", "weight": 100, "once": false, "requires": {"flag": ["at_rusthold", "met_ma"], "region": "clan_space"},
-      "text": "Ma Gantry is waiting at the end of your dock with her clipboard under one arm, and for the first time ever she has put the pen behind her ear instead of chaining it to her wrist. 'Still flying,' she says. 'You know what that makes you? Unemployed, if you're sensible. There's a berth on the Rusthold's inner ring, third spiral, the one with the window. Five thousand. It comes with a hook for your helmet and a chair that doesn't fold. Nobody has ever retired out here. I'd like to see how it's done.'",
+      "id": "station_meridian_hold_line", "type": "station", "weight": 60, "once": false, "requires": {"flag": "at_meridian", "stage_min": 3},
+      "text": "The Concord is trying to hold Meridian. There are evacuation lists on every wall, a docking queue that does not move, and a Director who has stopped sleeping. 'We have the guns and the berths,' she says, 'and we do not have the fuel to keep the lanes open or the plate to keep the walls up. Five thousand credits would buy both. The Authority will not fund it. The Authority will be late.' She looks at your ship, and at the queue behind you. 'Nobody has ever held a station against the tide. I would like to see how it is done.'",
       "choices": [
-        {"text": "Buy the berth. (5,000 credits)", "requires": {"credits": 5000, "pay": true}, "outcomes": [
-          {"weight": 100, "text": "Ma counts it in front of you, twice, out loud, then slides the key across the table and, quite quietly, turns the clipboard over. On the back, in her own hand, it says PAID. 'First one,' she says. 'Don't make it weird.'", "effects": {"unlock": "ship_kettle_tug", "ending": "retire"}}
+        {"text": "Fund the defence. (5,000 credits)", "requires": {"credits": 5000, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You sign the defence order. The Director stamps it twice, once for each of you, and for the first time in weeks the queue starts to move. By the end of the week the walls have your name chalked on the inside.", "effects": {"unlock": "ship_kettle_tug", "ending": "retire"}}
         ]},
-        {"text": "Ask to see the berth first.", "outcomes": [
-          {"weight": 100, "text": "She walks you up through three decks of the Rusthold and one deck of somebody's laundry, and opens a round door onto a round room with a round window.", "effects": {"goto": "retire_berth_page"}}
+        {"text": "Ask to see the lines first.", "outcomes": [
+          {"weight": 100, "text": "She walks you up through the evacuation decks and out onto the long wall, where volunteers in borrowed suits are bolting plate over plate. Beyond the wall the dark has a faint green edge.", "effects": {"goto": "meridian_hold_page"}}
         ]},
-        {"text": "Not yet. There are still wrecks.", "outcomes": [
-          {"weight": 100, "text": "'Wrecks aren't going anywhere,' says Ma. 'That's the whole problem with them.'", "effects": {}}
+        {"text": "Not yet. The tide is still coming.", "outcomes": [
+          {"weight": 100, "text": "'It always is,' says the Director, and stamps something that has nothing to do with you.", "effects": {}}
         ]}
       ]
     },
     {
-      "id": "retire_berth_page", "type": "page", "weight": 0, "requires": {},
-      "text": "The berth is a round room the size of a good argument, with a window onto the whole slow turning of the Rusthold: the cargo bay, the welders, the long dim spiral of every wreck that anyone ever bolted to anyone else. There is a hook by the door at helmet height. There is a chair that doesn't fold. On the shelf sit a kettle, a spare mug, and a note in Ma's chalk: DON'T GET USED TO IT. Out of the window a dock hand sees you looking, and waves, with her welding mask pushed up.",
+      "id": "meridian_hold_page", "type": "page", "weight": 0, "requires": {},
+      "text": "The wall is a hundred metres of mismatched plate with a catwalk along the top. There is a hook by the hatch at helmet height, and a kettle on a ledge, and a note chalked beside it: DON'T GET USED TO IT. A volunteer sees you looking and waves a welding mask. Down the length of the wall, one by one, the lamps come on.",
       "choices": [
-        {"text": "Take it. (5,000 credits)", "requires": {"credits": 5000, "pay": true}, "outcomes": [
-          {"weight": 100, "text": "You hang your helmet on the hook. It fits. Behind you Ma says nothing, loudly, for a long time, and then 'Tea?'", "effects": {"unlock": "ship_kettle_tug", "ending": "retire"}}
+        {"text": "Stay and fund the line. (5,000 credits)", "requires": {"credits": 5000, "pay": true}, "outcomes": [
+          {"weight": 100, "text": "You hang your helmet on the hook. It fits. Behind you the Director says nothing, loudly, for a long time, and then 'Tea?'", "effects": {"unlock": "ship_kettle_tug", "ending": "retire"}}
         ]},
         {"text": "Think about it.", "outcomes": [
-          {"weight": 100, "text": "'Take your time,' says Ma. 'It's not going anywhere. Nor am I. Nor is the number five thousand.'", "effects": {}}
+          {"weight": 100, "text": "'Take your time,' says the Director. 'The wall is not going anywhere. Neither is the number five thousand.'", "effects": {}}
         ]}
       ]
     }

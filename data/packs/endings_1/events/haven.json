@@ -218,7 +218,7 @@
     },
     {
       "id": "haven_exodus_clans", "type": "page", "weight": 0, "requires": {},
-      "text": "It takes the Gantry Clan four days to agree to go, nine hours to pack and one afternoon to fight about who goes first, which Ma ends by sitting on the Good Wrench. Then the Rusthold lights up like a spilled toolbox and the longest convoy the Drift has ever seen forms up behind you: barges, tugs, a floating laundry, a cousin on a raft. At the edge of the Reach the lamps swing, and a child on the nearest terrace shrieks the news to the whole ship. 'They're LOUD!' 'They're family,' you say, which is as close as anyone has come to explaining the Clans.",
+      "text": "It takes the Gantry Clan four days to agree to go, nine hours to pack and one afternoon to fight about who goes first, which Ma ends by sitting on the Good Wrench. Then Ma's barge lights up like a spilled toolbox and the longest convoy the Drift has ever seen forms up behind you: barges, tugs, a floating laundry, a cousin on a raft. At the edge of the Reach the lamps swing, and a child on the nearest terrace shrieks the news to the whole ship. 'They're LOUD!' 'They're family,' you say, which is as close as anyone has come to explaining the Clans.",
       "choices": [
         {"text": "Lead them in.", "outcomes": [
           {"weight": 100, "text": "You lead them in. Behind you, three hundred hulls hold their breath, and then, one by one, switch off their guns without being asked.", "effects": {"unlock": "ship_halcyon_tender", "ending": "haven_exodus"}}

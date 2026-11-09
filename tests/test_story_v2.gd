@@ -3,6 +3,7 @@ extends "res://tests/base_test.gd"
 ## jump, Ma's barge, Ma's calls and the endings.
 
 const Campaign = preload("res://scripts/space/campaign.gd")
+const Events = preload("res://scripts/space/events.gd")
 const Regions = preload("res://scripts/space/regions.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
@@ -155,3 +156,48 @@ func test_rusthold_events_that_needed_ma_now_happen_on_the_barge() -> void:
 	check(r["ok"], "the dinner is eaten")
 	eq(ship.inventory.count("reactor_scrap_kettle"), 1, "Ma's Kettle is the dinner's gift")
 	check(not c.events.eligible(dinner, c, {"id": "gantry_barge", "type": "station", "place": "gantry_barge"}, ship), "once")
+
+
+# --- Ma's calls ----------------------------------------------------------------------------------------------------
+
+func test_each_stage_from_2_to_8_has_one_short_call_on_the_first_arrival_after_a_crossing() -> void:
+	var ship := _ship()
+	for stage in range(2, 9):
+		var id := "ma_call_stage_%d" % stage
+		var ev: Dictionary = Events.shared().get_event(id)
+		check(not ev.is_empty(), id + " exists")
+		eq(str(ev.get("type", "")), "call", id + " is a call")
+		var words := str(ev["text"]).split(" ").size()
+		check(words >= 60 and words <= 120, "%s is 60-120 words (%d)" % [id, words])
+		check(ev["choices"].size() >= 1 and ev["choices"].size() <= 2, id + " has one or two choices")
+		for ch in ev["choices"]:
+			check(not ch["outcomes"][0]["effects"].is_empty(), id + ": every choice has an effect, so the call is spent")
+		for at in range(1, 10):
+			var c := Campaign.new(3)
+			c.flags["met_ma"] = true
+			c.stage = at
+			c.jumps = 5
+			c.flags[Campaign.JUST_CROSSED] = true
+			var got: Dictionary = c._call_event(ship)
+			if at == stage:
+				eq(str(got.get("id", "")), id, "stage %d's call is the one offered on the first arrival" % stage)
+				check(not c.flags.has(Campaign.JUST_CROSSED), "and the flag is used up")
+				eq(str(c._call_event(ship).get("id", "")), "", "no second call at once")
+			else:
+				check(str(got.get("id", "")) != id, "%s stays quiet at stage %d" % [id, at])
+
+
+func test_a_crossing_sets_the_flag_and_the_next_arrival_brings_the_call() -> void:
+	var ship := _ship()
+	var c := Campaign.new(5)
+	c.flags["met_ma"] = true
+	c.jumps = 3
+	c.stage = 1
+	c.current = c.drift.exit_id()
+	var next: String = c.region_offers()[0]
+	var r := c.cross(next, ship)
+	check(r["ok"], "crossed")
+	check(c.flags.has(Campaign.JUST_CROSSED), "the crossing sets just_crossed")
+	var a := c.arrive(ship)
+	eq(str(a["event"].get("id", "")), "ma_call_stage_2", "the first arrival in stage 2 is Ma's call")
+	check(not c.flags.has(Campaign.JUST_CROSSED), "once")

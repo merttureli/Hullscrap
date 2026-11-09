@@ -417,6 +417,7 @@ This is the campaign loop that gives fights, salvage and trade a reason, FTL-sty
   - **Ma's barge** (`gantry_barge`, `run.barge` in `data/drift.json`): a station in every region, toward the exit, that keeps ahead of the tide. It has Rusthold's menu (fuel, repairs, the scrap market, recruits) and the Rusthold events that need Ma or the Clan (the `met_ma` group and Ma's dinner). Rusthold itself goes Hollow on the first jump (`Tide.fallen`), a ghost station with no trade.
   - **The opening**: `station_opening_blank` / `station_opening_hull` (event key `opening`: the survivors are never gated as rare crew) set `met_ma`; helping load the barge sets `helped_barge`.
   - **The tow (Y)**: with no fuel Ma's barge tows you in and gives 2 fuel. It costs time: the tide moves 2 steps (`Campaign.TOW_STEPS`), not 1. It always works, so a run can't soft-lock.
+  - **Stage calls**: `ma_call_stage_2` to `ma_call_stage_8` (pack `story_1`) are Ma's calls on the first arrival after a crossing (flag `just_crossed`), one per stage, once each: who fell, where the tide is heading, where the next safe harbour is (her barge, by the exit).
   - **Calls** (event type `call`): Ma on the comm. The campaign offers one on arrival (`Campaign._call_event`), at most one every `calls.every` jumps (`data/drift.json`), and it pre-empts the node's own event.
 - **Stations** (for now a menu; walkable stations come with on-foot play):
   - trade (buy fuel, sell items at half value, buy listed items from the station's stock in `data/drift.json`), repair all blocks (2 credits per hp of damage missing), and recruit (2 recruits on offer, 150 credits each, species weighted by the station).
@@ -711,7 +712,7 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
   - **Act 2, the Boneyard and Concord space**: the money is good, and the first fragments of **the Haven broadcast** turn up.
   - **Act 3, the Gate approaches**: **the Hollow tide** is the late pressure. From about jump 30, the Hollow spreads from the Dead Gates one node every few jumps. Hollow nodes have ghost ships, no stores and dead beacons, so you can't stall forever.
 - **The endings** (each is a quest chain of events, flags and special POIs, and you can run into more than one in a run; the first one you **complete** ends the run):
-  1. **The Haven** (the owner's idea, *I Am Legend*): a looping broadcast, "If you can hear this, we're alive. Come to the Lantern Reach", is heard in fragments (logs, radar ghosts, distress beacons).
+  1. **Halcyon** (the main ending, id `haven_settle`; its epilogue names the crew who came and, with `helped_barge`, Ma's barge: the `coda` key of an ending) / **The Haven** (the owner's idea, *I Am Legend*): a looping broadcast, "If you can hear this, we're alive. Come to the Lantern Reach", is heard in fragments (logs, radar ghosts, distress beacons).
      - Triangulate it with the radar across regions. Most fragments are real, and some are **Hollow lures**.
      - At the end of the trail is **Halcyon**, a generation ship that was mid-jump at the Snap. For forty years it has quietly **thrived** in a hidden pocket of the Drift: gardens, children, working gates of its own design.
      - You choose:
@@ -723,7 +724,7 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
      - **Clans** (a free gate: chaos and freedom);
      - **Lumen** (the gate opens somewhere new).
   3. **The Hollow**: follow the hidden Hollow thread (the derelict logs) into the Scrapper Gate and learn what came out at the Snap. It is the hardest ending, the true-lore one, and changes the next run's map (Hollow nodes from the start, plus a Hollow-touched starter).
-  4. **Retire** (the short ending): pay off Ma, then buy a berth at Gantry Rusthold (5,000 credits) and hang up your helmet. It has a low score but it counts, and it's good for short sessions.
+  4. **Hold the Line** (the short ending, id `retire`): from stage 3, fund the defence of Meridian (5,000 credits) and stay. It has a low score but it counts, and it's good for short sessions. Meridian is in Concord space only, so only runs that route through it can end this way.
 - **Landmark events don't end the run (owner, 2026-10-30)**. Only endings end a run. Big story moments along the way are **landmarks**: one-off events (`"landmark": true`) that pay out **in the run** (a unique part, a named recruit, a blueprint, a key material, a reputation jump) **and unlock something for future runs**. Then you keep going.
   - Examples:
     - catching the first clean Haven fragment;
@@ -745,7 +746,7 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
   - **The Haven**: the trail is stages 2 to 7. The first fragment is 2 to 5, each link opens a stage after the one before and stays open to stage 6 or 7, the bearings across the chart are 6 to 8 and the Lantern Reach (true or wrong) is on offer from stage 6, in the ending region too. A lure is the same carrier type as the real link it replaces.
   - **The Way Out**: backed at a faction's station, finished at its Dead Gate. The Concord's Restoration Desk is at Meridian (Concord space, stages 3 to 6), the Clan Moot at the station of any Clans-faction homeland (the Basalt Quarries, the Gauntling Scrapyards, the Kett Hives; stages 3 to 7) and the Lumen's consent at the Prism (Lumen space, stages 4 to 8). The cores and the restarts are at the Dead Gates of **the ending region** (stage 9): a gate is dark everywhere else, and in the ending region its shell can be approached (`campaign.gd gate_dark`); the Hollow tide never takes a gate.
   - **The Hollow**: the green ship from stage 3, Hallett's roll call from 4, the listening post and the Knucklehead from 5, the Basalt camp from 6 (these last can happen in the ending region), then the approach and the table at the Scrapper Gate (stage 9).
-  - **Retire** and Ma's dinner are at Rusthold, which is Clan space (stage 1) only.
+  - **Hold the Line** is at Meridian (Concord space, stage 3 and later). Ma's dinner is on her barge, in any region.
   - **The story spine** (pack `story_1`, `tests/test_story.gd`; the owner: "as the content goes higher in the game, there's actually a story of what's going on"): one beat in every stage, so a run that follows no thread still learns the story. 1 Ma's Snap call (a `debt` reminder: the Snap, the three theories, the gates are stopped, not dead) and Ada's pod; 2 the Hollow's welcome (a tide event) and Ada's loop (a quest); 3 the green ship; 4 the roll call and the signals desk; 5 the listening post, the table laid for twelve and Ada's confession (a quest); 6 the Basalt camp and Hallett's three doors (a quest: core, alloy and a backer, and a fourth door); 7 the kettle, the Moot and the porch light; 8 the ledger at Last Orders (a quest: which doors you hold); 9 the gates, and `gate_scrapper_rights`, the fallback ending of a run with no thread (a hullscrapper files a salvage claim on the Scrapper Gate; low score, no flags). The spine's quests have no `requires.region`, so every region has quest beacons (`Sector.has_quest`), and `quest_*` fillers (repeatable, `fallback: true`: only rolled when no other quest is eligible, so they never dilute a homeland's tech quest) mean a beacon with no beat left still hands out a derelict log: before, such a beacon resolved with nothing. Every derelict log is handed out by some event (a test checks it). The chain carriers weigh 120 to 250 and the first Haven fragment recruits nobody (the crew gate kept the chain out of the pool 93% of the time). **Ada** is a Halcyon kid who left in a pod; her beats ask for the flag `ada_aboard` and play her recorder (the item `ada_recorder`), so they work if she has died; she has the trait `tinkerer` (data/crew.json). The warden's hail gets a line per stage from data/wardens.json `story`.
 
 ## 14. Difficulty and balance: FTL-hard, on purpose (owner, 2026-10-30)
@@ -924,7 +925,7 @@ Fights, raids and quests pay well but unreliably. **Mining is the steady job**: 
   - **CS-001 Patience**'s little sister (a Concord landmark);
   - a **Baron's Yacht** (the Salvage Barons);
   - an **Architect Seed** (relic hull; very rare);
-  - **Ma's Kettle-class tug** (Retire ending).
+  - **Ma's Kettle-class tug** (Hold the Line ending).
 - **The target is about 80 starters**: 30 races × 2 on average, plus about 20 from events. Each one is real:
   - a silhouette in its race's or faction's style (4c, never a rectangle);
   - working power, rooms and crew paths;

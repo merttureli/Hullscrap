@@ -224,8 +224,9 @@ func _hollow_truth() -> String:
 
 func _retire() -> String:
 	_begin()
-	c.flags["met_ma"] = true
-	return _end(_meet("station_retire_ma_berth", [0]), "retire")
+	_go(2, "boneyard")
+	_go(3, "concord_space")
+	return _end(_meet("station_meridian_hold_line", [0]), "retire")
 
 
 # --- the walks ------------------------------------------------------------------------------------------------------
@@ -286,12 +287,40 @@ func test_the_hollow_thread_leads_into_the_scrapper_gate() -> void:
 	eq(_hollow_truth(), "hollow_truth", "walked")
 
 
-func test_a_run_can_retire_at_rusthold() -> void:
+func test_a_run_can_hold_the_line_at_meridian_from_stage_3() -> void:
 	eq(_retire(), "retire", "walked")
 	check(c.unlocks_earned.has("ship_kettle_tug"), "with Ma's tug earned")
+	eq(Endings.title_of("retire"), "Hold the Line", "the old Retire ending is Hold the Line")
+	_begin()
+	_go(2, "concord_space")
+	check(_closed("station_meridian_hold_line"), "not at stage 2: the Concord has not started to lose yet")
+	_go(3, "boneyard")
+	c.flags.erase("at_meridian")
+	check(_closed("station_meridian_hold_line"), "and not where Meridian is not")
 	_begin()
 	_go(2, "boneyard")
-	check(_closed("station_retire_ma_berth"), "and not once the run has left Clan space: Rusthold is behind")
+	_go(3, "concord_space")
+	ship.inventory.counts["credits"] = 4999
+	var e: Dictionary = c.events.get_event("station_meridian_hold_line")
+	var r: Dictionary = c.events.choose(e, 0, c, ship, _node_for(e))
+	check(not r["ok"], "5,000 credits are needed to fund the defence")
+	check(c.ending == "", "and the run goes on")
+
+
+func test_the_old_rusthold_berth_is_gone() -> void:
+	check(Events.shared().get_event("station_retire_ma_berth").is_empty() and Events.shared().get_event("retire_berth_page").is_empty(), "no berth at Rusthold any more")
+
+
+func test_halcyon_names_who_came_with_you() -> void:
+	_begin()
+	eq(Endings.title_of("haven_settle"), "Halcyon", "the Haven ending is Halcyon")
+	var alone: String = Endings.report(c, ship, "haven_settle")["ending"]["epilogue"]
+	check(alone.contains("Rook") and alone.contains("Soldier"), "it names the crew that came: " + alone.substr(alone.find("You did not"), 80))
+	check(not alone.contains("Ma Gantry's barge"), "and no barge when the barge was not helped")
+	c.flags["helped_barge"] = true
+	var with_barge: String = Endings.report(c, ship, "haven_settle")["ending"]["epilogue"]
+	check(with_barge.contains("Ma Gantry's barge") and with_barge.begins_with(alone.substr(0, 60)), "with helped_barge Ma's barge comes in too")
+	check(Endings.validate().is_empty(), "the endings validate: " + str(Endings.validate()))
 
 
 func test_every_ending_of_the_pack_is_reached_by_a_walk() -> void:
