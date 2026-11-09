@@ -233,6 +233,11 @@ func fight_place(enemy_pos = null) -> Dictionary:
 ## event is open), then the ship's place on screen.
 func frame(dt: float) -> void:
 	_clock += dt
+	if combat != null and combat.get("testing"):  # the test-fight page or a test fight is up: the sector, the tide and the run hold still
+		_unpose()
+		visible = false
+		_layer.visible = false
+		return
 	_flash = maxf(_flash - dt, 0.0)
 	var map = _map()
 	var ship = _ship()
