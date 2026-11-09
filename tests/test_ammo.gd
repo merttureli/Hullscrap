@@ -254,13 +254,13 @@ func test_a_wrecked_rack_of_missiles_blows_up_its_room_and_a_rack_of_scrap_does_
 	var d := Fx.with_rack()
 	var ship: Ship = d["ship"]
 	var a := Fx.arena(ship)
-	Fx.stock(ship, d["rack"], "missile", 5)  # 10 damage
+	Fx.stock(ship, d["rack"], "missile", 7)  # 14 damage (5 missiles, 10, did it before guns were plated: a gun takes 0.4 of it since fights-end C, 5.6 of its 5 hp)
 	var before: float = ship.components.instances[d["reactor"]]["hp"]
 	Damage.wreck_part(a, 0, d["rack"])
 	check(not ship.components.instances.has(d["rack"]), "the rack is gone")
 	eq(a.events.filter(func(e): return e["type"] == "rack_blast").size(), 1, "a rack_blast event")
 	var gun: Dictionary = ship.components.instances[d["gun"]]
-	eq(gun["status"], "disabled", "10 damage disables the gun in the room (hp %d)" % gun["hp"])
+	eq(gun["status"], "disabled", "14 damage disables the gun in the room (hp %d)" % gun["hp"])
 	eq(ship.components.instances[d["reactor"]]["status"], "disabled", "and the reactor")
 	check(float(ship.components.instances[d["reactor"]]["hp"]) < before, "which lost hp")
 	# scrap does not explode
