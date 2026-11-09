@@ -9,6 +9,7 @@ extends "res://tests/base_test.gd"
 const Campaign = preload("res://scripts/space/campaign.gd")
 const Content = preload("res://scripts/data/content.gd")
 const Endings = preload("res://scripts/space/endings.gd")
+const Events = preload("res://scripts/space/events.gd")
 const Regions = preload("res://scripts/space/regions.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
@@ -66,6 +67,10 @@ func _node_for(e: Dictionary) -> Dictionary:
 			if n["type"] == "gate":
 				return n
 	if type == "station":
+		for f in Events._list(e.get("requires", {}).get("flag")):  # a station named by its dock flag (at_gantry_barge)
+			if str(f).begins_with("at_") and c.drift.has(str(f).substr(3)):
+				c.flags[str(f)] = true
+				return c.node(str(f).substr(3))
 		for n in c.drift.nodes:
 			if n["type"] == "station":
 				c.flags["at_" + str(n["place"])] = true

@@ -23,13 +23,14 @@
 	"run": {
 		"stages": 8, "start": "clan_space", "ending": "gate_approaches", "offers": [2, 3],
 		"rarity": {"common": 1.0, "uncommon": 0.6, "rare": 0.3, "very_rare": 0.1, "legendary": 0.03},
+		"barge": {"id": "gantry_barge", "name": "Ma's barge", "type": "station", "faction": "clans", "pos": [1280, 330], "jitter": 50, "beacon": true},
 		"entry": {"id": "entry", "name": "Arrival point", "type": "empty", "pos": [90, 500], "jitter": 50},
 		"exit": {"id": "exit", "name": "Exit beacon", "type": "exit", "pos": [1500, 500], "jitter": 70}
 	},
 	"region_weight": 20,
 	"instant_jump": false,
 	"jump": {"spool": 8.0, "hostile_range": 2000.0},
-	"fuel": {"start": 10, "price": 14, "drift_hull": 15, "stock": [6, 10], "stations": ["rusthold", "meridian", "prism", "vesper_field", "long_bazaar", "haldane", "tinsel_row", "haulers_moor", "tether_knot", "coil_row", "burrowgate", "gossamer", "earthing_post", "kiln", "fenwater", "folding_room", "listening_gallery", "mother_grove", "singing_lattice", "deepcut", "ninefold", "spare_parts", "dredgers_rest", "barnacle_row", "heat_sink"]},
+	"fuel": {"start": 10, "price": 14, "drift_hull": 15, "stock": [6, 10], "stations": ["rusthold", "gantry_barge", "meridian", "prism", "vesper_field", "long_bazaar", "haldane", "tinsel_row", "haulers_moor", "tether_knot", "coil_row", "burrowgate", "gossamer", "earthing_post", "kiln", "fenwater", "folding_room", "listening_gallery", "mother_grove", "singing_lattice", "deepcut", "ninefold", "spare_parts", "dredgers_rest", "barnacle_row", "heat_sink"]},
 	"calls": {"every": 4},
 	"danger": {"tier2_from": 10, "tier3_from": 25},
 	"enemies": {
@@ -65,6 +66,11 @@
 	},
 	"stations": {
 		"rusthold": {
+			"faction": "clans", "services": ["sell", "stock", "repair", "recruit"],
+			"stock": {"engine_scrap_mk1": 90, "engine_scrap_mk2": 200, "engine_scrap_mk3": 360, "reactor_scrap_mk1": 140, "oxygen_scrap_mk1": 80, "shield_scrap_mk1": 110, "rattle_burst_scrap": 130, "bolt_thrower_scrap": 150, "shrapnel_cannon_scrap": 160, "radiator": 40, "bed": 30, "missile": 12, "piercing_rounds": 4, "ammo_rack": 60, "belt_drive_scrap": 220},
+			"recruit": {"human": 5, "basalt": 3, "fenn": 1, "kett": 2, "gauntling": 1, "drakkin": 2, "rattler": 2, "quillback": 1}
+		},
+		"gantry_barge": {
 			"faction": "clans", "services": ["sell", "stock", "repair", "recruit"],
 			"stock": {"engine_scrap_mk1": 90, "engine_scrap_mk2": 200, "engine_scrap_mk3": 360, "reactor_scrap_mk1": 140, "oxygen_scrap_mk1": 80, "shield_scrap_mk1": 110, "rattle_burst_scrap": 130, "bolt_thrower_scrap": 150, "shrapnel_cannon_scrap": 160, "radiator": 40, "bed": 30, "missile": 12, "piercing_rounds": 4, "ammo_rack": 60, "belt_drive_scrap": 220},
 			"recruit": {"human": 5, "basalt": 3, "fenn": 1, "kett": 2, "gauntling": 1, "drakkin": 2, "rattler": 2, "quillback": 1}

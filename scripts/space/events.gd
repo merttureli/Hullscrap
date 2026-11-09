@@ -803,6 +803,7 @@ static func _known() -> Dictionary:
 	items["credits"] = true
 	items["fuel"] = true
 	var places := Regions.place_ids()  # the fixed places of every region
+	places[Regions.BARGE] = ""  # and Ma's barge, which every region has
 	var regions := {}  # region ids and event tags
 	for r in Regions.all():
 		regions[str(r["id"])] = true

@@ -44,12 +44,12 @@
 			]
 		},
 		{
-			"id": "station_rusthold_greeting", "type": "station", "weight": 10,
-			"requires": {"node": "rusthold", "flag": "met_ma"},
-			"text": "Gantry Rusthold turns slowly on its borrowed bearings. The dock lights flicker in a pattern that might be a welcome or might be a fault. Either way, a hand in a welding mask waves you toward bay six.",
+			"id": "station_barge_greeting", "type": "station", "weight": 10,
+			"requires": {"node": "gantry_barge", "flag": "met_ma"},
+			"text": "Ma's barge turns slowly on its borrowed bearings, a long, low hull of welded wrecks with every lamp lit. The dock lights flicker in a pattern that might be a welcome or might be a fault. Either way, a hand in a welding mask waves you toward bay six.",
 			"choices": [
 				{"text": "Dock.", "outcomes": [
-					{"weight": 100, "text": "Bay six takes you in with a clang that could be a welcome. The dock hand points a welding torch at where to park.", "effects": {}}]},
+					{"weight": 100, "text": "Bay six, which used to be Rusthold's, takes you in with a clang that could be a welcome. The dock hand points a welding torch at where to park.", "effects": {}}]},
 				{"text": "Ask the dock hands about work.", "outcomes": [
 					{"weight": 50, "text": "\"Concord's paying double for Rustfang scalps,\" says one. \"Don't tell them we told you. Don't tell Ma either.\"", "effects": {}},
 					{"weight": 50, "text": "\"Wrecks are thick near the dead gates,\" says another. \"Thick as flies. Same smell, too.\"", "effects": {}}]}

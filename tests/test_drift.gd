@@ -999,13 +999,12 @@ func test_a_ship_with_no_fuel_can_always_be_towed_home() -> void:
 	var c := Campaign.new(7)
 	var ship := _ship()
 	ship.inventory.add("fuel", -ship.inventory.count("fuel"))
-	var home := c.current
-	var away: String = c.neighbours(home)[0]
+	var away: String = c.neighbours(c.current)[0]
 	c.current = away
 	var steps := c.tide.steps
 	var r := c.tow(ship)
 	check(r["ok"], "towed")
-	eq(c.current, home, "back at Gantry Rusthold")
+	eq(c.current, "gantry_barge", "Ma's barge hauls you in")
 	eq(c.tide.steps, steps + Campaign.TOW_STEPS, "the tow costs the tide two steps, not one")
 	eq(Campaign.TOW_STEPS, 2, "(two steps)")
 	eq(ship.inventory.count("fuel"), Campaign.TOW_FUEL, "and the hauler tops the tank up")

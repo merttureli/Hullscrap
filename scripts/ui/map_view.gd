@@ -350,7 +350,7 @@ func wait() -> String:
 	return ""
 
 
-## Y with no fuel: a hauler tows you to the region's start (Gantry Rusthold in Clan space; 2 fuel, the tide moves 2 steps), then you arrive there.
+## Y with no fuel: Ma's barge tows you home (2 fuel, the tide moves 2 steps), then you arrive there.
 func tow() -> String:
 	var r := campaign.tow(ship())
 	if not r["ok"]:
@@ -359,7 +359,7 @@ func tow() -> String:
 	refresh()
 	_say(" ".join(r["notes"]))
 	if sector_flow():
-		visible = false  # the sector view takes the ship in at Rusthold's arrival point
+		visible = false  # the sector view takes the ship in at the barge's arrival point
 	else:
 		_arrive()
 	return ""
@@ -991,7 +991,7 @@ func _draw_foot(p: Rect2) -> void:
 	if message != "":
 		_text(message, Vector2(p.position.x + PAD, y), 16, BAD if message_bad else GOOD)
 	var how := "spool the jump drive there, 8 s" if sector_flow() else "jump"
-	_text("Click a node: %s (%s)   Enter: dock   T: wait for a trader   Y: tow home (the tide moves 2 steps)   Shift+click: drift jump (hull -%d)   J: journal   M/Esc: close" % [how, jump_cost_text(), int(campaign.cfg["fuel"]["drift_hull"])],
+	_text("Click a node: %s (%s)   Enter: dock   T: wait for a trader   Y: tow to Ma's barge (the tide moves 2 steps)   Shift+click: drift jump (hull -%d)   J: journal   M/Esc: close" % [how, jump_cost_text(), int(campaign.cfg["fuel"]["drift_hull"])],
 		Vector2(p.position.x + PAD, p.end.y - 22.0), 13, DIM_TEXT)
 	var s = ship()
 	if s != null and campaign.fuel_short(s):

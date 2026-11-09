@@ -19,7 +19,7 @@ const Workshop = preload("res://scripts/craft/workshop.gd")
 const STARTER := "res://data/ships/starter_courier.json"
 ## The recipes the fabricator ladder needs (docs/audit/progression.md section 12) and the events that now teach them: event id -> recipe.
 const BLUEPRINT_EVENTS := {
-	"station_rusthold_scrap_market": "assembly_rig", "station_meridian_shipyard_queue": "assembly_rig", "scrapyard_graft_row_dock": "assembly_rig",
+	"station_barge_scrap_market": "assembly_rig", "station_meridian_shipyard_queue": "assembly_rig", "scrapyard_graft_row_dock": "assembly_rig",
 	"trader_pawnbarge": "laser_mk2", "trader_concord_requisitions": "pulse_mk2", "anomaly_frozen_flare": "laser_mk2",
 	"lumen_listening_array": "shield_mk2", "concord_survey_buoy": "shield_mk2", "bsite_terminal_still_logged_in": "laser_mk2",
 	"bsite_terminal_last_message": "assembly_rig",
@@ -216,7 +216,7 @@ func test_a_gated_blueprint_choice_closes_once_it_is_taken_and_the_other_rig_off
 	ship.inventory.add("scrap", 200)
 	ship.inventory.add("copper", 30)
 	var e: Dictionary = c.events.get_event("station_meridian_shipyard_queue")
-	var market: Dictionary = c.events.get_event("station_rusthold_scrap_market")
+	var market: Dictionary = c.events.get_event("station_barge_scrap_market")
 	var graft: Dictionary = c.events.get_event("scrapyard_graft_row_dock")
 	var row := _row_of(c, e, ship, "Ask about the folder")
 	check(row >= 0, "the folder choice is on the page, open with 160 credits")

@@ -673,13 +673,15 @@ func test_station_events_greet_each_station_and_the_opening_opens_the_run() -> v
 	var c := Campaign.new(5)
 	var ship := _ship()
 	var a := c.arrive(ship)
-	eq(a["event"].get("id", ""), "station_opening_hull", "a new run opens with Ma Gantry at Rusthold")
+	eq(a["event"].get("id", ""), "station_opening_hull", "a new run opens with the alarm night at Rusthold")
 	var r := c.events.choose(a["event"], 0, c, ship, a["node"])
 	check(r["ok"] and c.flags.has("met_ma"), "the opening sets met_ma")
+	c.current = "gantry_barge"
+	c.flags.erase("at_rusthold")  # (travelling without a jump here)
 	var greeting: Dictionary = c.arrive(ship)["event"]
-	eq(greeting.get("type", ""), "station", "afterwards Rusthold greets you with a station event")
-	check(greeting.get("id", "") == "station_rusthold_greeting" or Events._list(greeting["requires"].get("flag")).has("at_rusthold"), "one of Rusthold's: " + str(greeting.get("id", "")))
-	c.flags.erase("at_rusthold")  # (picking at other stations without travelling there)
+	eq(greeting.get("type", ""), "station", "afterwards Ma's barge greets you with a station event")
+	check(greeting.get("id", "") == "station_barge_greeting" or Events._list(greeting["requires"].get("flag")).has("at_gantry_barge"), "one of the barge's: " + str(greeting.get("id", "")))
+	c.flags.erase("at_gantry_barge")  # (picking at other stations without travelling there)
 	for place in ["meridian", "prism"]:
 		var ev := c.events.pick(c, {"id": place, "type": "station", "place": place}, ship)
 		eq(ev.get("id", ""), "station_%s_greeting" % place, place + " has its greeting")

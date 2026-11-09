@@ -128,7 +128,7 @@ In play mode (**B**) press **K** to meet the test pirate (`data/ships/pirate_rai
 | End | Shield balance back to even |
 | Esc | Leave, once the pirate is wrecked, captured, spared, gone or more than 4000 px away |
 | Y (fight) | Accept a surrender the enemy is offering (keep firing to refuse) |
-| Y (map, no fuel) | A hauler tows you to the region start: 2 fuel, and the tide moves 2 steps (so a run never gets stuck) |
+| Y (map, no fuel) | Ma's barge tows you in: 2 fuel, and the tide moves 2 steps (so a run never gets stuck) |
 | J | Spool the jump drive: after 10 s you escape the fight from any range (a fled fight gives no loot). The spool follows the same rule as an enemy's (`Morale.spool_hold`): it holds, and the banner says "Jump drive held: engines out" (or "helm down", "no crew"), while all your engines are out, your helm is down or all your crew are down; it goes on when one is back |
 | R | After your ship is wrecked: back to build mode with the empty starter hull reloaded (B, then N, picks a ship again) |
 

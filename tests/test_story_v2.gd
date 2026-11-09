@@ -3,6 +3,7 @@ extends "res://tests/base_test.gd"
 ## jump, Ma's barge, Ma's calls and the endings.
 
 const Campaign = preload("res://scripts/space/campaign.gd")
+const Regions = preload("res://scripts/space/regions.gd")
 const Ship = preload("res://scripts/ship/ship.gd")
 const Jobs = preload("res://scripts/crew/jobs.gd")
 
@@ -102,3 +103,55 @@ func test_rusthold_goes_hollow_on_the_first_jump_with_no_trade_and_a_chronicle_l
 	eq(back.load_dict(JSON.parse_string(JSON.stringify(c.to_dict()))), "", "saved and loaded")
 	check(back.is_hollow("rusthold"), "Rusthold is still Hollow")
 	check(back.arrive(ship)["event"].get("type", "") == "hollow" or back.current != "rusthold", "(a ghost place sends ghosts)")
+
+
+# --- Ma's barge ----------------------------------------------------------------------------------------------------
+
+func test_every_region_has_ma_barge_toward_its_exit_with_rustholds_services() -> void:
+	var ship := _ship()
+	var seen := 0
+	for r in Regions.all():
+		var c := Campaign.new(4)
+		c.enter_region(str(r["id"]))
+		check(c.drift.has("gantry_barge"), "%s has Ma's barge" % r["id"])
+		var n: Dictionary = c.node("gantry_barge")
+		eq([n["type"], c.label("gantry_barge")], ["station", "Ma's barge"], "%s: a station called Ma's barge" % r["id"])
+		var entry: Vector2 = c.node(c.drift.start_id())["pos"]
+		var far: Vector2 = c.node(c.drift.exit_id())["pos"] if c.drift.exit_id() != "" else Vector2(1600.0, 500.0)
+		check(n["pos"].distance_to(far) < n["pos"].distance_to(entry), "%s: the barge sits nearer the exit than the entry" % r["id"])
+		var st := c.station_cfg("gantry_barge")
+		for svc in ["sell", "stock", "repair", "recruit", "fuel"]:
+			check(svc in st["services"], "%s: the barge offers %s" % [r["id"], svc])
+		check(st["stock"].has("engine_scrap_mk1") and st["stock"].has("radiator"), "%s: it sells Rusthold's scrap-line stock" % r["id"])
+		c.tide.steps = 60
+		check(not c.is_hollow("gantry_barge"), "%s: she keeps ahead of the tide" % r["id"])
+		seen += 1
+	check(seen >= 15, "all the regions were checked: %d" % seen)
+
+
+func test_rusthold_events_that_needed_ma_now_happen_on_the_barge() -> void:
+	var ship := _ship()
+	var c := Campaign.new(2)
+	c.flags["met_ma"] = true
+	for id in ["station_barge_greeting", "station_barge_dock_queue", "station_barge_ma_board", "station_barge_scrap_market", "drakkin_bay_four", "quillback_satisfaction", "rattler_knock_in_the_wall"]:
+		var ev: Dictionary = c.events.get_event(id)
+		check(not ev.is_empty(), id + " exists")
+		var at := {"id": "gantry_barge", "type": "station", "place": "gantry_barge"}
+		c.flags.erase("at_rusthold")
+		c.flags["at_gantry_barge"] = true
+		check(c.events.eligible(ev, c, at, ship), id + " can happen at Ma's barge")
+		c.flags.erase("at_gantry_barge")
+		c.flags["at_rusthold"] = true
+		check(not c.events.eligible(ev, c, {"id": "rusthold", "type": "station", "place": "rusthold"}, ship), id + " no longer happens at Rusthold")
+	var dinner: Dictionary = c.events.get_event("station_ma_in_person")
+	c.flags.erase("at_rusthold")
+	c.flags["at_gantry_barge"] = true
+	c.rep["clans"] = 3
+	c.jumps = 9
+	c.enter_region("concord_space")
+	c.flags["at_gantry_barge"] = true
+	check(c.events.eligible(dinner, c, {"id": "gantry_barge", "type": "station", "place": "gantry_barge"}, ship), "Ma's dinner is on the barge in any region, not only Clan space")
+	var r: Dictionary = c.events.choose(dinner, 0, c, ship, {"id": "gantry_barge", "type": "station", "place": "gantry_barge"})
+	check(r["ok"], "the dinner is eaten")
+	eq(ship.inventory.count("reactor_scrap_kettle"), 1, "Ma's Kettle is the dinner's gift")
+	check(not c.events.eligible(dinner, c, {"id": "gantry_barge", "type": "station", "place": "gantry_barge"}, ship), "once")

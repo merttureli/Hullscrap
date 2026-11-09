@@ -74,6 +74,7 @@ const HOSTILES_TEXT := "hostiles too close to jump"
 const SPOOL_TEXT := "spool the jump drive first"
 const NOT_AT_EXIT := "not at the exit beacon"
 const RUSTHOLD := "rusthold"
+const BARGE := Regions.BARGE  ## Ma's barge: a station in every region (data/drift.json run.barge), where the tow takes you
 const RUSTHOLD_TEXT := "Rusthold's lights stay on. Its radio goes quiet."
 const TOW_STEPS := 2  ## the Hollow tide steps a tow home costs (the jump's own step and one more)
 const TOW_FUEL := 2
@@ -496,7 +497,7 @@ func wait(ship) -> Dictionary:
 	return {"ok": true, "why": "", "notes": notes, "event": ev}
 
 
-## Stranded with no fuel: a passing hauler tows you back to the region's start (Gantry Rusthold in Clan space) and
+## Stranded with no fuel: Ma's barge (else a passing hauler) tows you back to the barge, and
 ## tops the tank up with TOW_FUEL fuel. It costs time: the Hollow tide moves TOW_STEPS steps. Always possible with no fuel,
 ## so a run can't soft-lock.
 func tow(ship) -> Dictionary:
@@ -504,12 +505,13 @@ func tow(ship) -> Dictionary:
 		return {"ok": false, "why": "you still have fuel", "notes": []}
 	var notes := _advance(1)
 	notes.append_array(push_tide(TOW_STEPS - 1))
-	current = drift.start_id()
+	var barge := drift.has(BARGE)
+	current = BARGE if barge else drift.start_id()
 	visited[current] = true
 	spool = {}
 	_enter(current, ship)
 	ship.inventory.add("fuel", TOW_FUEL)
-	notes.append("A hauler drags you to %s: fuel +%d, and the tide moves %d steps." % [label(current), TOW_FUEL, TOW_STEPS])
+	notes.append(("Ma's barge hauls you in to %s" if barge else "A hauler drags you to %s") % label(current) + ": fuel +%d, and the tide moves %d steps." % [TOW_FUEL, TOW_STEPS])
 	return {"ok": true, "why": "", "notes": notes}
 
 

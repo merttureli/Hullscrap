@@ -1,7 +1,7 @@
 {"events": [
     {
-      "id": "station_rusthold_dock_queue", "type": "station", "weight": 10, "once": false, "requires": {"flag": ["at_rusthold", "met_ma"]},
-      "text": "The Rusthold's docking tower reads your name off a clipboard, wrongly, and waves you into Bay 4 with a flashlight. A fight is going on in the cargo bay. 'Mind the fight,' says the dockmaster, Hob, from behind a barricade of crates. 'It's mostly over.'",
+      "id": "station_barge_dock_queue", "type": "station", "weight": 10, "once": false, "requires": {"flag": ["at_gantry_barge", "met_ma"]},
+      "text": "The barge's docking tower reads your name off a clipboard, wrongly, and waves you into Bay 4 with a flashlight. A fight is going on in the cargo bay. 'Mind the fight,' says the dockmaster, Hob, from behind a barricade of crates. 'It's mostly over.'",
       "choices": [
         {"text": "Ask what the fight is about.", "outcomes": [
           {"weight": 100, "text": "'Whose turn it was with the good wrench,' says Hob. 'It's been going since Tuesday. I wasn't there on Tuesday. I'm pretty sure it was Tuesday.'", "effects": {}}
@@ -15,8 +15,8 @@
       ]
     },
     {
-      "id": "station_rusthold_ma_board", "type": "station", "weight": 10, "once": false, "requires": {"flag": ["at_rusthold", "met_ma"]},
-      "text": "On the dock wall, Ma Gantry's board: a slab of welded plate covered in chalk. WHO OWES, it says, and under that WHAT, and under that WHEN. Your hull is on the list, with a small drawing beside it. In smaller chalk, someone has added: 'Sweet kid. Pays late.'",
+      "id": "station_barge_ma_board", "type": "station", "weight": 10, "once": false, "requires": {"flag": ["at_gantry_barge", "met_ma"]},
+      "text": "On the barge's loading wall, Ma Gantry's board: a slab of welded plate covered in chalk. WHO'S ABOARD, it says, and under that WHO'S MISSING, and under that WHERE LAST SEEN. Your hull is on the list, with a small drawing beside it. In smaller chalk, someone has added: 'Sweet kid. Flies late.'",
       "choices": [
         {"text": "Read the board.", "outcomes": [
           {"weight": 100, "text": "The list is long, and every name has a little drawing beside it. Yours is a hull with a halo. It is not clear whether this is a compliment.", "effects": {}}
@@ -30,8 +30,8 @@
       ]
     },
     {
-      "id": "station_rusthold_scrap_market", "type": "station", "weight": 30, "once": false, "requires": {"flag": ["at_rusthold", "met_ma"]},
-      "text": "The scrap market runs three floors and one rumour. A boy tries to sell you your own bolts back. A woman tries to sell you a map of the market. Both, you realise, are correct.",
+      "id": "station_barge_scrap_market", "type": "station", "weight": 30, "once": false, "requires": {"flag": ["at_gantry_barge", "met_ma"]},
+      "text": "The barge's scrap market runs three decks and one rumour. A boy tries to sell you your own bolts back. A woman tries to sell you a map of the market. Both, you realise, are correct.",
       "choices": [
         {"text": "Buy the boy's bolts back (5 credits).", "requires": {"credits": 5}, "outcomes": [
           {"weight": 100, "text": "You pay for your own bolts, then find they are better than you remember. You decide not to ask where he got the rest.", "effects": {"items": {"credits": -5, "scrap": 20}}}

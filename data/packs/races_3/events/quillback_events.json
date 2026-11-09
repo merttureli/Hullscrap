@@ -1,7 +1,7 @@
 {"events": [
     {
-      "id": "quillback_satisfaction", "type": "station", "weight": 8, "once": true, "requires": {"flag": ["at_rusthold", "met_ma"]},
-      "text": "A Quillback in a long coat, quills combed flat for the occasion, stops in front of you on the Rusthold concourse and bows from exactly the correct angle. 'You looked at my Second,' she says, 'for slightly longer than courtesy allows. I must therefore ask for satisfaction.' Behind her stands a smaller Quillback in a waistcoat, holding a case of knives and looking mortified. This, evidently, is the Second. The concourse has gone quiet in a pleased way. Someone has started taking bets.",
+      "id": "quillback_satisfaction", "type": "station", "weight": 8, "once": true, "requires": {"flag": ["at_gantry_barge", "met_ma"]},
+      "text": "A Quillback in a long coat, quills combed flat for the occasion, stops in front of you on the barge's main concourse and bows from exactly the correct angle. 'You looked at my Second,' she says, 'for slightly longer than courtesy allows. I must therefore ask for satisfaction.' Behind her stands a smaller Quillback in a waistcoat, holding a case of knives and looking mortified. This, evidently, is the Second. The concourse has gone quiet in a pleased way. Someone has started taking bets.",
       "choices": [
         {"text": "Apologise handsomely.", "outcomes": [
           {"weight": 100, "text": "You apologise in the most elaborate terms you can think of, bowing at three different angles. The Quillback's quills rise by a degree, and fall. 'Accepted,' she says, with a faint regret, 'and honour is satisfied.' The Second lets out a breath. Someone in the crowd demands their money back.", "effects": {"rep": {"clans": 1}, "crew_hp": 5}}

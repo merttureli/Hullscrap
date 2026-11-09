@@ -414,7 +414,9 @@ This is the campaign loop that gives fights, salvage and trade a reason, FTL-sty
 - **No debt**: there is no creditor, no payment clock and no repo crew (save version 14). The pressure is the Hollow tide (`tide.gd`).
   - An old save loads and ignores the debt keys (`debt`, `paid`, `reminded`, `debt_stop`) and the flags `debt_missed` / `debt_free`.
   - Ma's Kettle (a unique Scrap reactor with a quirk, `reactor_scrap_kettle`) is a reward of Ma's dinner (the landmark `station_ma_in_person`), once.
-  - **The tow (Y)**: with no fuel a hauler tows you to the region start and gives 2 fuel. It costs time: the tide moves 2 steps (`Campaign.TOW_STEPS`), not 1. It always works, so a run can't soft-lock.
+  - **Ma's barge** (`gantry_barge`, `run.barge` in `data/drift.json`): a station in every region, toward the exit, that keeps ahead of the tide. It has Rusthold's menu (fuel, repairs, the scrap market, recruits) and the Rusthold events that need Ma or the Clan (the `met_ma` group and Ma's dinner). Rusthold itself goes Hollow on the first jump (`Tide.fallen`), a ghost station with no trade.
+  - **The opening**: `station_opening_blank` / `station_opening_hull` (event key `opening`: the survivors are never gated as rare crew) set `met_ma`; helping load the barge sets `helped_barge`.
+  - **The tow (Y)**: with no fuel Ma's barge tows you in and gives 2 fuel. It costs time: the tide moves 2 steps (`Campaign.TOW_STEPS`), not 1. It always works, so a run can't soft-lock.
   - **Calls** (event type `call`): Ma on the comm. The campaign offers one on arrival (`Campaign._call_event`), at most one every `calls.every` jumps (`data/drift.json`), and it pre-empts the node's own event.
 - **Stations** (for now a menu; walkable stations come with on-foot play):
   - trade (buy fuel, sell items at half value, buy listed items from the station's stock in `data/drift.json`), repair all blocks (2 credits per hp of damage missing), and recruit (2 recruits on offer, 150 credits each, species weighted by the station).

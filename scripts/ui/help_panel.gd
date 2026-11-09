@@ -73,7 +73,7 @@ const COLUMNS: Array = [
 			["Click a lit neighbour", "Spool the jump drive there (8 s, fuel when it fires; the same node again cancels)"],
 			["Shift+click", "Drift jump with no fuel (costs hull)"],
 			["T", "Wait for a passing trader (no fuel)"],
-			["Y", "No fuel: a hauler tows you to the region start (+2 fuel, the tide moves 2 steps)."],
+			["Y", "No fuel: Ma's barge tows you in (+2 fuel, the tide moves 2 steps)."],
 			["Enter", "Close to a station's beacon its menu opens; at the exit beacon, choose the next region (1 - 3) once its warden is dealt with"],
 			["Exit warden", "A warden holds each exit: pay, show standing, or break through."],
 			["Esc", "Close the map"],

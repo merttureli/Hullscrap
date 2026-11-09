@@ -156,8 +156,8 @@ func test_a_homeland_has_its_race_station_as_a_beacon_selling_and_recruiting_its
 		c.enter_region(id)
 		var r: Dictionary = c.region_data
 		eq(r["home_species"], HOMELANDS[id], id + ": its home race")
-		var places: Array = c.drift.nodes.filter(func(n): return n["type"] == "station")
-		eq(places.size(), 1, id + ": one station")
+		var places: Array = c.drift.nodes.filter(func(n): return n["type"] == "station" and n["id"] != Campaign.BARGE)  # (Ma's barge is in every region)
+		eq(places.size(), 1, id + ": one station besides Ma's barge")
 		var st: String = places[0]["id"]
 		check(c.is_known(st), id + ": the station is on the map from the start (a beacon)")
 		var menu := c.station_cfg(st)
@@ -189,7 +189,7 @@ func test_faction_regions_keep_their_stations() -> void:
 	for g in ["gate_1", "gate_2", "gate_3"]:
 		check(c.drift.has(g), g + " is in the Gate approaches")
 	c.enter_region("boneyard")
-	check(c.drift.has("dredgers_rest") and c.drift.nodes.filter(func(n): return n["type"] == "station").size() == 1, "the Boneyard has one station, Dredgers' Rest (the fuel stop it lacked)")
+	check(c.drift.has("dredgers_rest") and c.drift.nodes.filter(func(n): return n["type"] == "station" and n["id"] != Campaign.BARGE).size() == 1, "the Boneyard has one station besides Ma's barge, Dredgers' Rest (the fuel stop it lacked)")
 
 
 # --- crossing ---------------------------------------------------------------------------------------------------

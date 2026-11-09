@@ -1,6 +1,6 @@
 {"events": [
     {
-      "id": "drakkin_bay_four", "type": "station", "weight": 10, "once": false, "requires": {"flag": ["at_rusthold", "met_ma"]},
+      "id": "drakkin_bay_four", "type": "station", "weight": 10, "once": false, "requires": {"flag": ["at_gantry_barge", "met_ma"]},
       "text": "The fight in Bay 4 has a bookie now. A Fenn in a waistcoat is working the rail with a heat lamp and a chalk board, taking bets from a crowd that has been standing in the cold for three days. In the ring of cargo straps sits the champion, a vast Drakkin the colour of old rust, with an ochre crest and one eyelid that opens about once a minute. 'He warms up around lunch,' says Hob, from behind his barricade. 'It's mostly over.'",
       "choices": [
         {"text": "Bet 30 credits on the champion.", "requires": {"credits": 30}, "outcomes": [
