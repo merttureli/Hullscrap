@@ -3,7 +3,7 @@ extends SceneTree
 ## substep of tool_standoff-style fights: cooling (it fired), out (disabled, offline, unpowered) or why a ready gun does not fire (can_fire, out of
 ## range, out of gimbal and not lined on the hull, the shield hold, a turret out of arc or range), summed over the fights.
 ##   godot --headless --path . --script res://tests/tool_fire_probe.gd -- [stage=4] [build=7] [n=3] [secs=120] [factions=rustfangs,concord,wardens] [role=gunboat]
-##   ... -- race=<flagship race> [build=4] [side=1]: the flagship against the build, side 1 probes the flagship's guns.
+##   ... -- race=<flagship race> [build=4] [side=1]: the flagship against the build, side 1 probes the flagship's guns. plating=<x>: mount_plating.
 
 const Standoff = preload("res://tests/tool_standoff.gd")
 const Session = preload("res://scripts/combat/combat_session.gd")
@@ -49,6 +49,8 @@ func fight(e: Dictionary, build: int, secs: float) -> Dictionary:
 	Jobs.spawn_crew(player)
 	var sess := Session.new()
 	sess.start(player, enemy, 1 + int(e["seed"]) % 100000)
+	if args.has("plating"):
+		sess.arena.weapons.mount_plating = float(args["plating"])  # what-if: weapons.json mount_plating
 	var pilot := PilotAI.new(sess.arena, 0, 1, {"aim_skill": float(Threat.config()["player_aim"])})
 	pilot.foe_morale = sess.morale
 	var a = sess.arena

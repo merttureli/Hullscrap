@@ -165,7 +165,7 @@ func test_a_design_may_hold_at_its_own_share_of_the_range() -> void:  # (ai.hold
 	check(close.hold_distance(u, close._intact()) < plain.hold_distance(u, plain._intact()) - 200.0, "closer than the plain pilot")
 
 
-## One short gun among long ones does not pull the ship in: it holds the gap that the guns with 60% of the dps reach (docs/GUNS.md 13).
+## One short gun among long ones does not pull the ship in: it holds the gap that the guns with 80% of the dps reach (REACH_SHARE; 60% until fights-end C, docs/GUNS.md 13 and 15).
 func test_one_short_gun_does_not_set_the_hold_distance() -> void:
 	var a := Arena.new(1)
 	a.add_ship(Ship.from_design(COURIER), Vector2.ZERO)
@@ -181,8 +181,12 @@ func test_one_short_gun_does_not_set_the_hold_distance() -> void:
 	var d_short: float = ai.hold_distance(Vector2.UP, {1: short})
 	check(d_short < d_long - 100.0, "a flak gun alone holds a closer gap than a pulse gun (%d, %d)" % [d_short, d_long])
 	var w: Dictionary = a.weapons.def("pulse_mk1")
-	var mixed: Dictionary = {1: m, 2: short, 3: m.duplicate(), 4: m.duplicate()}
-	near(ai.hold_distance(Vector2.UP, mixed), d_long, "three pulse guns with a flak gun: the pulse range is held", 1.0)
+	var mixed: Dictionary = {2: short}  # (REACH_SHARE 0.8 since fights-end C, 0.6 before: three pulse guns with the flak held the pulse range then)
+	for k in 10:
+		mixed[10 + k] = m.duplicate()
+	near(ai.hold_distance(Vector2.UP, mixed), d_long, "ten pulse guns with a flak gun (under a fifth of the dps): the pulse range is held", 1.0)
+	var heavy: Dictionary = {1: m, 2: short, 3: m.duplicate(), 4: m.duplicate()}
+	near(ai.hold_distance(Vector2.UP, heavy), d_short, "three pulse guns with the flak (nearly half the dps): it closes for the flak too", 1.0)
 	check(float(w["range"]) > 1000.0, "and the gun ranges are the longer ones")
 
 

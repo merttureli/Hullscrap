@@ -63,7 +63,7 @@ const Hazards = preload("res://scripts/combat/hazards.gd")
 const Drones = preload("res://scripts/combat/drones.gd")
 
 const RANGE_FRACTION := 0.7  ## of a gun's range: the gap it keeps for it
-const REACH_SHARE := 0.6  ## it holds the longest gap at which guns of this share of its dps (or more) reach
+const REACH_SHARE := 0.8  ## it holds the longest gap at which guns of this share of its dps (or more) reach (0.6 until fights-end C: a ship with lasers held its turrets out of range)
 const HULL_MARGIN := 96.0  ## px kept between the two hulls, at least (three cells: an orbit at less clips the foe's hull)
 const DEFAULT_RANGE := 840.0
 const SNIPE_SKILL := 0.8  ## a pilot of this aim_skill or better aims at the foe's weapons first; a worse one at its hull
@@ -80,7 +80,7 @@ const CLOSE_MAX := 390.0  ## px/s it closes at, at most
 const BACK_MAX := 180.0  ## px/s it backs off at, at most
 const THROTTLE_BAND := 135.0  ## px/s of closing-speed error that asks for full throttle
 const HOLD_THROTTLE := 0.5  ## at the preferred range it still pushes this hard
-const HOLD_MAX := 1.5  ## seconds a weapon waits for a safer sector
+const HOLD_MAX := 0.5  ## seconds a weapon waits for a safer sector (1.5 until fights-end C: the foe always has a loaded gun on that sector, so every shot waited the whole of it)
 const SHIFT_BASE_S := 1.5  ## a shield balance step comes every this many seconds less the aim skill
 const RETARGET_S := 0.5
 const HOLD_EVERY_S := 0.25  ## seconds between two workings-out of the distance it holds
