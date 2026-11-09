@@ -535,7 +535,7 @@ func test_quest_sites_are_made_only_where_there_is_a_quest_and_often_enough_ther
 	for id in quests:
 		var with := 0
 		var total := 0
-		for seed in range(1, 5):
+		for seed in range(1, 9):  # (eight maps: Ma's barge, a station with no quest site, is one more node in each)
 			var c := Campaign.new(seed)
 			c.enter_region(id)
 			for n in c.drift.nodes:

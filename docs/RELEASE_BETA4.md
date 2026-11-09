@@ -150,6 +150,12 @@ Boarding, a rebuilt hull, the Ledger, and a balance pass measured by a playtest 
 - **Warnings in amber**: outgunned at a beacon, the stage 3 cliff, a toll you can't pay, low fuel, unspent scrap.
 - **Settings → Ledger**: Full, Warnings only or Off. After your first finished run it asks once whether to keep it on.
 
+### Story: the Hollow tide
+- **The debt is gone.** No creditor, no payments, no repo crews. The pressure is the Hollow tide that comes out of the gates; the tow (Y) now costs the tide 2 steps.
+- **A new opening.** The tide reaches Gantry Rusthold on the first night: take two survivors as crew, help load Ma Gantry's barge, or grab what you can. On your first jump Rusthold goes Hollow.
+- **Ma's barge** is a station in every region, toward the exit, with fuel, repairs and the scrap market. Ma calls at each new stage with who fell and where the harbour is.
+- **Endings:** Halcyon names who came with you; Retire is now Hold the Line, at Meridian from stage 3. The Ledger is the Rusthold dock office's guidance program. Old saves still load.
+
 ## Economy and balance
 - **Longer fights, room to flank.** Every ship gun reaches 1.4x as far and its shots fly 1.2x as fast (point defence 1.15x). A pilot holds the range that most of its firepower reaches, not that of its shortest gun, so a wide many-gun ship no longer creeps in for one flak turret. Hulls over 1000 mass turn slower (a 2000-mass ship takes about three times as long to turn 90 degrees), so a quick ship can work round a big one. Flagships yield later (fights of 110 to 150 s).
 - **Fuel**: you start with 22. It costs 14 credits, at 24 of 33 stations (6–10 units a visit). Canisters drift by now and then.

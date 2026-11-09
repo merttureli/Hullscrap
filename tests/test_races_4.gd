@@ -168,8 +168,8 @@ func test_a_homeland_has_its_station_and_is_offered_in_its_band() -> void:
 	for id in HOMES:
 		var c := Campaign.new(3)
 		c.enter_region(HOMES[id])
-		var places: Array = c.drift.nodes.filter(func(n): return n["type"] == "station")
-		eq(places.size(), 1, HOMES[id] + ": one station")
+		var places: Array = c.drift.nodes.filter(func(n): return n["type"] == "station" and n["id"] != Campaign.BARGE)  # (Ma's barge is in every region)
+		eq(places.size(), 1, HOMES[id] + ": one station besides Ma's barge")
 		var menu := c.station_cfg(places[0]["id"])
 		check(not menu.is_empty() and menu["services"].has("stock") and menu["services"].has("recruit"), HOMES[id] + ": it trades and recruits")
 		eq(menu["stock"], Homelands.menu(str(places[0]["place"]), Regions.station(str(places[0]["place"]), cfg))["stock"], HOMES[id] + ": its stock is the region's, leaned to its race in the capital (homelands.gd)")

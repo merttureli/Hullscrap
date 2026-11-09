@@ -140,10 +140,11 @@ func test_fog_at_the_start_shows_only_rusthold_and_its_neighbours() -> void:
 				known.append(id)
 		known.sort()
 		var want: Array = ["rusthold"] + c.neighbours("rusthold")
-		if not want.has(c.drift.exit_id()):
-			want.append(c.drift.exit_id())
+		for beacon in [c.drift.exit_id(), Campaign.BARGE]:  # (the exit beacon and Ma's barge are always on the map)
+			if not want.has(beacon):
+				want.append(beacon)
 		want.sort()
-		eq(known, want, "seed %d: only Rusthold, its lanes and the exit beacon show a type" % seed_value)
+		eq(known, want, "seed %d: only Rusthold, its lanes, the exit beacon and Ma's barge show a type" % seed_value)
 		for id in c.drift.ids():
 			if not c.is_known(id) and not c.is_hidden(id):
 				eq(c.label(id), "?", "an unknown node shows ?")
