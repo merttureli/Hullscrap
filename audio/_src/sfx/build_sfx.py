@@ -10,7 +10,7 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from dsp import *       # noqa: E402
-from sounds import REG, FAMILY_RMS   # noqa: E402
+from sounds import REG, FAMILY_RMS, LAYER_NOTES   # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 OUT = os.path.join(ROOT, "assets", "audio", "sfx")
@@ -117,7 +117,8 @@ def write_assets_rows():
     keep = [l for l in open(p).read().splitlines() if "assets/audio/sfx/" not in l]
     while keep and keep[-1] == "":
         keep.pop()
-    rows = ["| `assets/audio/sfx/%s.wav` | %s | %s |" % (n, SRC_NOTE, LICENCE) for n in sorted(file_names())]
+    rows = ["| `assets/audio/sfx/%s.wav` | %s | %s |" % (n, SRC_NOTE + ("; layer: `%s`" % LAYER_NOTES[n] if n in LAYER_NOTES else ""), LICENCE)
+            for n in sorted(file_names())]
     at = next((i for i, l in enumerate(keep) if l.startswith("| `tests/")), len(keep))
     open(p, "w").write("\n".join(keep[:at] + rows + keep[at:]) + "\n")
 

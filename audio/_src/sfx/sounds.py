@@ -4,6 +4,7 @@ array (mono, or stereo for loops; a loop returns length + tail seconds, build_sf
 Each sound seeds its own noise from its name, so the output never changes."""
 import numpy as np
 from dsp import *
+from samp_impacts import samp
 
 REG = {}   # name -> {fn, variants, family, loop: (length, tail) or None}
 
@@ -12,6 +13,11 @@ FAMILY_RMS = {"weapon": -17.0, "rapid": -24.0, "hit": -15.0, "boom": -13.0, "shi
               "build": -20.0, "crew": -22.0, "ui": -23.0, "alarm": -15.0,
               # round 2: the ambience sits far under the effects (beds -30, hazards -26, footsteps and hums -32 dBFS RMS)
               "bed": -30.0, "hazard": -26.0, "foot": -32.0, "hum": -32.0, "machine": -29.0}
+
+# sounds that carry a recorded layer: output file -> the layer's repo path (ASSETS.md says so in the sound's row)
+SD = "audio/_src/sfx/samples/impacts/"
+LAYER_NOTES = {"hit_hull_1": SD + "metal_hit_02.wav", "hit_hull_2": SD + "metal_hit_04.wav", "hit_hull_3": SD + "metal_hit_05.wav",
+               "shield_down": SD + "glass_breaking_02.wav", "part_destroyed": SD + "metal_falling_02.wav", "breach": SD + "breaking_01.wav"}
 
 
 def sound(name, family, variants=1, loop=None):
@@ -126,95 +132,111 @@ def rapid_tick(k):
 
 @sound("hit_hull", "hit", 3)
 def hit_hull(k):
-    r, dur = R("hit_hull", k), 0.7
+    """Got through: a dull metal crunch. A click, a low thud, a recorded metal hit pulled under 2.4 kHz, a debris rattle."""
+    r, dur = R("hit_hull", k), 0.5
     n = n_of(dur)
-    base = [300, 255, 350][k]
-    ring = modal(BAR * base, [0.26, 0.18, 0.12, 0.08, 0.05, 0.03], [1.0, 0.7, 0.5, 0.35, 0.2, 0.12], dur, r, 0.01)
-    thud = place((sine(sweep(130, 55, 0.14)) * ad(0.14, 0.001, 0.045), 0.0, 1.0), length=dur)
-    strike = bp(white(r, n), 2200, 0.9) * ad(dur, 0.0003, 0.012)
-    return lp(crush(ring * 0.55 + thud * 1.1 + strike * 0.7, 10, 1), 6000)
+    base = [190, 165, 220][k]
+    ring = modal(BAR[:4] * base, [0.09, 0.06, 0.04, 0.025], [1.0, 0.6, 0.35, 0.2], dur, r, 0.01)
+    thud = place((sine(sweep([150, 125, 170][k], 48, 0.15)) * ad(0.15, 0.001, 0.05), 0.0, 1.0), length=dur)
+    click = bp(white(r, n), 1800, 0.9) * ad(dur, 0.0003, 0.008)
+    crunch = lp(samp(["metal_hit_02", "metal_hit_04", "metal_hit_05"][k], [0.8, 0.7, 0.9][k]), 2400)
+    rattle = lp(crackle(r, n, 40, 0.004, 1.0), 2600) * env(dur, [(0, 0), (0.06, 1), (0.5, 0)]) * 0.35
+    return lp(crush(ring * 0.4 + thud * 1.0 + click * 0.6 + place((crunch, 0.0, 0.9), length=dur) + rattle, 10, 1), 3600)
 
 
 @sound("hit_shield", "hit", 3)
 def hit_shield(k):
-    r, dur = R("hit_shield", k), 0.55
+    """Blocked: bright and glassy, a ping that bends upward as the hit is deflected, a glass tick on top, a small shimmer room."""
+    r, dur = R("hit_shield", k), 0.42
     n = n_of(dur)
-    f0 = [1200, 1500, 1000][k]
-    a = fm(f0, 1.5, env(dur, [(0, 5.0), (0.25, 1.5), (0.55, 0.5)]), n) * ad(dur, 0.004, 0.13)
-    b = fm(f0 * 1.5, 2.0, 2.0, n) * ad(dur, 0.004, 0.09) * 0.5
-    up = place((sine(sweep(500, 2200, 0.12)) * ad(0.12, 0.002, 0.04), 0.0, 0.6), length=dur)
-    x = chorus(a + b + up, 0.004, 5.0, 0.6)
-    return reverb(lp(lp(x, 5000), 5000), 0.3, 0.2, 11 + k)
+    f0 = [1900, 2300, 1650][k]
+    a = fm(f0, 1.5, env(dur, [(0, 4.0), (0.2, 1.2), (0.42, 0.3)]), n) * ad(dur, 0.002, 0.09)
+    b = fm(f0 * 1.5, 2.0, 2.0, n) * ad(dur, 0.002, 0.06) * 0.5
+    up = place((sine(sweep(900, 3600, 0.09)) * ad(0.09, 0.001, 0.03), 0.0, 0.7), length=dur)
+    tick = hp(white(r, n), 4500) * ad(dur, 0.0002, 0.006) * 0.6
+    x = chorus(a + b + up + tick, 0.004, 5.0, 0.6)
+    return reverb(hp(lp(x, 8500), 500), 0.25, 0.18, 11 + k)
 
 
 @sound("shield_down", "hit", 1)
 def shield_down(k):
-    r, dur = R("shield_down", k), 1.1
+    """The shield fails: a glass shatter, a falling saw as the field collapses, a spark spray and a low thump."""
+    r, dur = R("shield_down", k), 1.0
     n = n_of(dur)
-    f = sweep(700, 45, dur)
-    s = (0.5 * saw(f) + 0.3 * square(f * 0.5)) * env(dur, [(0, 0), (0.02, 1), (0.7, 0.6), (1.1, 0)])
-    s = lp(s, sweep(4000, 150, dur), 1.0)
-    sparks = lp(crackle(r, n, 120, 0.001), 5000) * decay(dur, 0.2) * 0.8
-    boom = place((sine(sweep(80, 35, 0.5)) * ad(0.5, 0.004, 0.14), 0.45, 0.9), length=dur)
-    return crush(s * 0.9 + sparks + boom, 10, 2)
+    f = sweep(900, 55, dur)
+    s = (0.5 * saw(f) + 0.3 * square(f * 0.5)) * env(dur, [(0, 0), (0.02, 1), (0.6, 0.5), (1.0, 0)])
+    s = lp(s, sweep(5000, 180, dur), 1.0)
+    sparks = hp(lp(crackle(r, n, 140, 0.001), 6500), 1500) * decay(dur, 0.22) * 0.7
+    shatter = hp(samp("glass_breaking_02", 0.9), 900)
+    boom = place((sine(sweep(85, 34, 0.5)) * ad(0.5, 0.004, 0.14), 0.0, 1.0), length=dur)
+    return crush(s * 0.8 + sparks + place((shatter, 0.0, 0.9), length=dur) + boom, 10, 2)
 
 
 @sound("shield_up", "hit", 1)
 def shield_up(k):
+    """The shield returns: a rising charge sweep under a four-note glassy rise, ending in a bright settle."""
+    r = R("shield_up", k)
     notes = [523.25, 659.25, 783.99, 1046.5]
     layers = []
     for i, f in enumerate(notes):
         layers.append((fm(f, 3.5, env(0.6, [(0, 2.0), (0.4, 0.2)]), n_of(0.6)) * ad(0.6, 0.002, 0.16 + 0.04 * i), 0.07 * i, 0.7))
+    charge = lp(sine(sweep(160, 1400, 0.35)) + 0.4 * saw(sweep(160, 1400, 0.35)), 3000) * env(0.35, [(0, 0), (0.3, 1), (0.35, 0)])
+    layers.append((charge, 0.0, 0.35))
+    layers.append((hp(white(r, n_of(0.3)), 5000) * ad(0.3, 0.05, 0.08), 0.2, 0.12))
     x = place(*layers, length=0.9)
-    return reverb(lp(x, 6000), 0.6, 0.3, 21)
+    return reverb(lp(x, 7000), 0.6, 0.3, 21)
 
 
 @sound("explosion_s", "boom", 2)
 def explosion_s(k):
-    r, dur = R("explosion_s", k), 0.85
+    """A small blast: a crack, a 60-90 Hz punch and a short burst of rubble."""
+    r, dur = R("explosion_s", k), 0.7
     n = n_of(dur)
-    body = lp(white(r, n), sweep([2400, 2000][k], 160, dur), 0.9) * ad(dur, 0.002, 0.2)
-    thump = sine(sweep(90 - 15 * k, 28, dur)) * ad(dur, 0.002, 0.24)
-    crunch = lp(crackle(r, n, 45, 0.003), 3500) * decay(dur, 0.25) * 0.5
-    return lp(crush(body * 2.0 + thump * 1.0 + crunch * 1.2, 9, 2), 5000)
+    body = lp(white(r, n), sweep([2600, 2100][k], 150, dur), 0.9) * ad(dur, 0.001, 0.14)
+    punch = sine(sweep([95, 80][k], 30, dur)) * ad(dur, 0.002, 0.2)
+    crack = bp(white(r, n), 2500, 0.8) * ad(dur, 0.0002, 0.01)
+    crunch = lp(crackle(r, n, 50, 0.003), 3200) * decay(dur, 0.2) * 0.5
+    return lp(crush(body * 1.6 + punch * 1.3 + crack * 0.8 + crunch * 1.1, 9, 2), 4800)
 
 
 @sound("explosion_l", "boom", 1)
 def explosion_l(k):
-    r, dur = R("explosion_l", k), 2.0
+    """A big blast: a sub-bass punch, a double roar, rubble raining down and a short room."""
+    r, dur = R("explosion_l", k), 1.7
     n = n_of(dur)
-    body = lp(white(r, n), sweep(3200, 90, dur), 0.9) * ad(dur, 0.003, 0.55)
-    sub = sine(sweep(62, 22, dur)) * ad(dur, 0.003, 0.7)
-    debris = lp(crackle(r, n, 60, 0.004, 1.5), 3000) * env(dur, [(0, 0), (0.3, 1), (1.5, 0.3), (2.0, 0)])
-    boom2 = place((lp(white(r, n_of(0.5)), 600) * ad(0.5, 0.002, 0.12), 0.18, 0.6), length=dur)
-    x = lp(crush(body * 1.7 + sub * 1.1 + debris * 0.9 + boom2 * 1.3, 9, 2), 4800)
-    return reverb(x, 1.0, 0.22, 31)
+    body = lp(white(r, n), sweep(3000, 80, dur), 0.9) * ad(dur, 0.002, 0.42)
+    sub = sine(sweep(58, 20, dur)) * ad(dur, 0.002, 0.55)
+    crack = bp(white(r, n), 2200, 0.8) * ad(dur, 0.0002, 0.015)
+    debris = lp(crackle(r, n, 55, 0.004, 1.5), 2800) * env(dur, [(0, 0), (0.25, 1), (1.3, 0.25), (1.7, 0)])
+    boom2 = place((lp(white(r, n_of(0.5)), 500) * ad(0.5, 0.002, 0.12), 0.16, 0.6), length=dur)
+    x = lp(crush(body * 1.5 + sub * 1.5 + crack * 0.8 + debris * 0.9 + boom2 * 1.3, 9, 2), 4200)
+    return reverb(x, 0.8, 0.2, 31)
 
 
 @sound("part_destroyed", "boom", 1)
 def part_destroyed(k):
-    r, dur = R("part_destroyed", k), 1.2
+    """A system dies: a metal crunch with falling scrap (recorded), a thump, then electrical sputters that gutter out."""
+    r, dur = R("part_destroyed", k), 1.0
     n = n_of(dur)
-    body = lp(white(r, n), sweep(2200, 200, dur), 0.9) * ad(dur, 0.002, 0.2)
-    thump = sine(sweep(100, 32, dur)) * ad(dur, 0.002, 0.2)
-    hits = []
-    for i in range(5):
-        base = 200 + r.random() * 400
-        hits.append((modal(BAR[:5] * base, [0.12, 0.08, 0.05, 0.03, 0.02], [0.6, 0.4, 0.25, 0.15, 0.08], 0.4, r, 0.01), 0.04 + i * 0.09 + r.random() * 0.04, 0.35))
-    clanks = place(*hits, length=dur)
-    fizz = hp(white(r, n), 3000) * env(dur, [(0, 0), (0.1, 1), (0.9, 0)]) * decay(dur, 0.4) * 0.15
-    return lp(crush(body * 1.7 + thump * 0.9 + clanks * 1.3 + fizz, 9, 2), 5500)
+    thump = sine(sweep(110, 36, dur)) * ad(dur, 0.002, 0.16)
+    body = lp(white(r, n), sweep(2000, 220, dur), 0.9) * ad(dur, 0.002, 0.12)
+    crunch = lp(samp("metal_falling_02", 0.85), 3500)
+    gate = (np.sin(TAU * np.cumsum(np.linspace(26, 6, n)) / SR) > 0.2).astype(float) * decay(dur, 0.35)   # irregular on-off sputter
+    sputter = hp(lp(crackle(r, n, 260, 0.0008, 1.0, 0.7), 6000), 1400) * lp1(gate, 200) * env(dur, [(0, 0), (0.12, 1), (1.0, 0)])
+    return lp(crush(body * 1.2 + thump * 1.0 + place((crunch, 0.02, 1.0), length=dur) + sputter * 1.4, 9, 2), 5500)
 
 
 @sound("breach", "hit", 1)
 def breach(k):
-    r, dur = R("breach", k), 1.7
+    """The hull opens: a whump, a metal tear (recorded, dropped in pitch), then a long air hiss that thins out and a low creak."""
+    r, dur = R("breach", k), 1.6
     n = n_of(dur)
-    hiss = bp(white(r, n), env(dur, [(0, 3400), (1.7, 1100)]), 0.7) * env(dur, [(0, 0), (0.03, 1), (0.5, 0.8), (1.7, 0)])
-    whump = place((sine(sweep(80, 38, 0.3)) * ad(0.3, 0.003, 0.09), 0.0, 1.2), length=dur)
-    rumble = lp(coloured(r, n, 2.0), 220) * env(dur, [(0, 0), (0.1, 1), (1.7, 0)]) * 0.5
+    hiss = bp(white(r, n), env(dur, [(0, 3600), (1.6, 1300)]), 0.7) * env(dur, [(0, 0), (0.12, 0.5), (0.3, 1), (0.6, 0.8), (1.6, 0)])
+    whump = place((sine(sweep(85, 38, 0.3)) * ad(0.3, 0.003, 0.09), 0.0, 1.2), length=dur)
+    tear = lp(samp("breaking_01", 0.7), 2600)
+    rumble = lp(coloured(r, n, 2.0), 220) * env(dur, [(0, 0), (0.1, 1), (1.6, 0)]) * 0.5
     creak = modal([140, 211, 337, 508], [0.5, 0.35, 0.3, 0.2], [0.5, 0.3, 0.2, 0.1], dur, r, 0.02) * env(dur, [(0, 0), (0.15, 1), (0.8, 0)]) * 0.25
-    return lp(crush(hiss * 0.55 + whump + rumble + creak, 10, 2), 5500)
+    return lp(crush(hiss * 0.6 + whump + place((tear, 0.0, 0.8), length=dur) + rumble + creak, 10, 2), 5500)
 
 
 @sound("collision", "boom", 1)
