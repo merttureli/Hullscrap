@@ -60,28 +60,34 @@ def bolt(k):
 
 @sound("flak", "weapon", 2)
 def flak(k):
+    """Flak: a breech crack, a low boom (60-120 Hz punch), a metal clank of the mount and a scatter of shrapnel."""
     r, dur = R("flak", k), 0.6
     n = n_of(dur)
-    boom = sine(sweep([115, 95][k], 38, dur)) * ad(dur, 0.002, 0.13)
+    click = bp(white(r, n), 3200, 0.8) * ad(dur, 0.0003, 0.006)
+    boom = sine(sweep([125, 105][k], 45, dur)) * ad(dur, 0.002, 0.11)
+    clank = place((sample("heavy/metal_clink", [0.62, 0.55][k]), 0.012, 1.0), length=dur) * ad(dur, 0.001, 0.2)
     grains = np.zeros(n)
-    for off in ([0, 16, 33, 51, 72] if k == 0 else [0, 22, 38, 64, 80]):
-        g = lp(white(r, n_of(0.1)), 1700) * ad(0.1, 0.0005, 0.022)
+    for off in ([14, 30, 49, 70, 94, 121] if k == 0 else [12, 26, 44, 66, 87, 115]):
+        g = lp(white(r, n_of(0.1)), 2600) * ad(0.1, 0.0005, 0.02)
         i = n_of(off / 1000.0)
         grains[i:i + len(g)] += g * (0.6 + 0.4 * r.random())
-    rattle = modal(PLATE * [900, 760][k], [0.05] * 7, [0.2, 0.18, 0.15, 0.12, 0.1, 0.08, 0.06], dur, r, 0.02) * decay(dur, 0.06) * 0.5
-    return lp(crush(boom * 0.8 + grains * 1.9 + rattle * 1.2, 9, 2), 5500)
+    rattle = modal(PLATE * [900, 760][k], [0.05] * 7, [0.2, 0.18, 0.15, 0.12, 0.1, 0.08, 0.06], dur, r, 0.02) * decay(dur, 0.06) * 0.4
+    return lp(crush(click * 1.0 + boom * 1.1 + clank * 0.55 + grains * 1.3 + rattle, 9, 2), 5500)
 
 
 @sound("missile_launch", "weapon", 2)
 def missile_launch(k):
-    r, dur = R("missile_launch", k), 1.2
+    """Missile launch: an ignition pop and a rail clack, then a rocket hiss that rushes up and away."""
+    r, dur = R("missile_launch", k), 1.0
     n = n_of(dur)
-    fc = env(dur, [(0, 380), (0.35, [2600, 2200][k]), (1.2, 650)])
-    whoosh = bp(white(r, n), fc, 1.4) * swell(dur, 0.3, 0.8)
-    thump = place((sine(sweep(95, 42, 0.3)) * ad(0.3, 0.002, 0.08), 0.0, 1.2), length=dur)
-    hiss = hp(white(r, n), 2200) * ad(dur, 0.01, 0.4) * 0.12
-    latch = place((modal(BAR[:4] * [310, 270][k], [0.07, 0.05, 0.03, 0.02], [0.6, 0.4, 0.2, 0.1], 0.2, r, 0.01), 0.0, 0.5), length=dur)
-    return lp(crush(whoosh * 1.4 + thump + hiss + latch, 10, 2), 5800)
+    pop = bp(white(r, n), 900, 0.9) * ad(dur, 0.0005, 0.03)
+    thump = sine(sweep([150, 128][k], 48, dur)) * ad(dur, 0.002, 0.07)
+    clack = place((sample("heavy/metal_clink", [1.0, 0.85][k]), 0.03, 1.0), length=dur) * ad(dur, 0.001, 0.12)
+    fc = env(dur, [(0, 300), (0.12, 900), (0.3, [2600, 2200][k]), (1.0, 600)])
+    whoosh = bp(white(r, n), fc, 1.4) * env(dur, [(0, 0), (0.05, 0.25), (0.3, 1), (0.6, 0.6), (1.0, 0)])
+    whoosh = np.concatenate([np.zeros(n_of(0.03)), whoosh])[:n]
+    hiss = hp(white(r, n), 2200) * ad(dur, 0.04, 0.3) * 0.1
+    return lp(crush(pop * 1.0 + thump * 1.0 + clack * 0.45 + whoosh * 1.4 + hiss, 10, 2), 5800)
 
 
 @sound("beam_loop", "loop", 1, loop=(2.0, 0.25))
@@ -219,13 +225,15 @@ def breach(k):
 
 @sound("collision", "boom", 1)
 def collision(k):
-    r, dur = R("collision", k), 0.9
+    """A glancing collision: a hull thud, a short crunch, a clang of struck plate and a scrape that dies away."""
+    r, dur = R("collision", k), 0.8
     n = n_of(dur)
-    thud = sine(sweep(105, 38, dur)) * ad(dur, 0.002, 0.14)
+    thud = sine(sweep(105, 38, dur)) * ad(dur, 0.002, 0.13)
     crunch = lp(white(r, n), 900) * ad(dur, 0.001, 0.07)
-    clunks = modal(BAR * 175, [0.3, 0.2, 0.14, 0.1, 0.06, 0.04], [0.9, 0.6, 0.45, 0.3, 0.2, 0.1], dur, r, 0.02)
-    scrape = bp(white(r, n), sweep(900, 350, dur), 2.0) * env(dur, [(0, 0), (0.05, 1), (0.5, 0.2), (0.9, 0)]) * 0.5
-    return lp(crush(thud * 1.0 + crunch * 1.2 + clunks * 0.7 + scrape * 1.2, 9, 2), 5200)
+    clang = place((sample("heavy/metal_bong", 0.85), 0.0, 1.0), length=dur) * ad(dur, 0.001, 0.2)
+    clunks = modal(BAR * 175, [0.2, 0.14, 0.1, 0.07, 0.05, 0.03], [0.9, 0.6, 0.45, 0.3, 0.2, 0.1], dur, r, 0.02)
+    scrape = bp(white(r, n), sweep(900, 350, dur), 2.0) * env(dur, [(0, 0), (0.05, 1), (0.5, 0.2), (0.8, 0)]) * 0.5
+    return lp(crush(thud * 1.0 + crunch * 1.2 + clang * 0.5 + clunks * 0.4 + scrape * 1.1, 9, 2), 5200)
 
 
 # --- ship ---------------------------------------------------------------------------------------------------------------

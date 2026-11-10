@@ -57,14 +57,14 @@ def drone_hum(k):
 
 @sound("missile_flight", "loop", 1, loop=(2.0, 0.0))
 def missile_flight(k):
-    """A missile in flight: a rocket motor's steady rush, a low buzz and a hiss."""
+    """A missile in flight: a rocket motor's rush with a low flutter, heard through the hull, and a thin hiss."""
     L = 2.0
     n = n_of(L)
     r = R("missile_flight", 0)
-    rush = band_noise(r, n, 160, 2600, 1.0) * (0.8 + 0.2 * per(n, 7))
-    buzz = fft_filter(saw(snap(92, L), n), None, 520) * (0.7 + 0.3 * per(n, 5, 0.2))
-    hiss = band_noise(r, n, 3000, 8000, 0.0)
-    return rush * 0.7 + buzz * 0.35 + hiss * 0.15
+    rush = band_noise(r, n, 140, 1900, 1.0) * (0.75 + 0.25 * per(n, 9) * per(n, 2, 0.1))
+    buzz = fft_filter(saw(snap(80, L), n), None, 480) * (0.7 + 0.3 * per(n, 5, 0.2))
+    hiss = band_noise(r, n, 3000, 7000, 0.0)
+    return rush * 0.75 + buzz * 0.45 + hiss * 0.07
 
 
 @sound("medbay_hum", "machine", 1, loop=(2.0, 0.0))

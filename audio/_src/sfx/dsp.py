@@ -1,5 +1,6 @@
 """DSP building blocks for the Hullscrap SFX pipeline. numpy only, deterministic (every random source takes a seeded Generator).
 Signals are float64 arrays in -1..1 at 44.1 kHz: mono (n,) or stereo (n, 2)."""
+import os
 import zlib
 import wave
 import numpy as np
@@ -461,3 +462,10 @@ def wcrackle(rng, n, rate, tau=0.002, amp=1.0, pitch=0.45, power=2.0):
     for p, g, s in zip(pos, mag, sign):
         wrap_add(out, kern * g * s, p)
     return out
+
+
+def sample(name, ratio=1.0, gain=1.0):
+    """A committed sample (audio/_src/sfx/samples/<name>.wav, mono 44.1 kHz 16-bit) as floats, played back `ratio` times as fast."""
+    with wave.open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "samples", name + ".wav")) as w:
+        x = np.frombuffer(w.readframes(w.getnframes()), dtype="<i2").astype(float) / 32768.0
+    return (resample(x, ratio) if ratio != 1.0 else x) * gain

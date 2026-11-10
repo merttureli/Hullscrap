@@ -118,14 +118,15 @@ def hull_creak(k):
 
 @sound("missile_pop", "hit", 1)
 def missile_pop(k):
-    """A missile shot down: a hard pop, a puff of fragments and a tick of sparkle."""
-    r, dur = R("missile_pop", k), 0.4
+    """A missile shot down: a sharp crack, a hard pop, a puff of fragments and a tick of sparkle."""
+    r, dur = R("missile_pop", k), 0.3
     n = n_of(dur)
+    crack = hp(white(r, n), 2500) * ad(dur, 0.0003, 0.008)
     pop = sine(sweep(700, 150, dur)) * ad(dur, 0.0008, 0.03)
-    puff = bp(white(r, n), sweep(3200, 900, dur), 0.9) * ad(dur, 0.0004, 0.05)
-    frags = lp(crackle(r, n, 90, 0.0012, 1.0, 0.7), 5000) * decay(dur, 0.07) * 0.7
+    puff = bp(white(r, n), sweep(3200, 900, dur), 0.9) * ad(dur, 0.0004, 0.045)
+    frags = lp(crackle(r, n, 110, 0.0012, 1.0, 0.7), 5000) * decay(dur, 0.06) * 0.8
     thump = sine(sweep(110, 50, dur)) * ad(dur, 0.001, 0.05) * 0.8
-    return lp(crush(pop * 0.9 + puff * 1.1 + frags + thump, 10, 2), 5800)
+    return lp(crush(crack * 0.5 + pop * 0.9 + puff * 1.0 + frags + thump, 10, 2), 6000)
 
 
 @sound("shield_shift", "ship", 1)
@@ -167,15 +168,16 @@ def ion_lock(k):
 
 @sound("ram_impact", "boom", 1)
 def ram_impact(k):
-    """Two hulls drive into each other: a deep boom, a grinding crunch, a long ring of buckled plate and a rain of debris."""
-    r, dur = R("ram_impact", k), 1.5
+    """Two hulls drive into each other: a deep boom, a grinding crunch, a deep ring of buckled plate and a rain of debris."""
+    r, dur = R("ram_impact", k), 1.3
     n = n_of(dur)
-    boom = sine(sweep(80, 26, dur)) * ad(dur, 0.002, 0.35)
-    crunch = lp(white(r, n), sweep(1500, 200, dur), 0.9) * ad(dur, 0.001, 0.2)
-    ring = modal(BAR * 95, [0.7, 0.5, 0.35, 0.25, 0.15, 0.1], [0.8, 0.6, 0.45, 0.3, 0.2, 0.1], dur, r, 0.02)
-    scrape = bp(white(r, n), sweep(1200, 300, dur), 2.0) * env(dur, [(0, 0), (0.08, 1), (0.8, 0.3), (1.5, 0)]) * 0.5
-    debris = lp(crackle(r, n, 55, 0.003, 1.4), 3200) * env(dur, [(0, 0), (0.2, 1), (1.1, 0.2), (1.5, 0)])
-    return lp(crush(boom * 1.2 + crunch * 1.2 + ring * 0.6 + scrape + debris * 0.8, 9, 2), 4800)
+    boom = sine(sweep(80, 26, dur)) * ad(dur, 0.002, 0.3)
+    crunch = lp(white(r, n), sweep(1500, 200, dur), 0.9) * ad(dur, 0.001, 0.18)
+    ring = place((sample("heavy/metal_bong", 0.55), 0.0, 1.0), length=dur) * ad(dur, 0.001, 0.4)
+    ring += modal(BAR * 95, [0.5, 0.35, 0.25, 0.15, 0.1, 0.06], [0.8, 0.6, 0.45, 0.3, 0.2, 0.1], dur, r, 0.02) * 0.5
+    scrape = bp(white(r, n), sweep(1200, 300, dur), 2.0) * env(dur, [(0, 0), (0.08, 1), (0.7, 0.3), (1.3, 0)]) * 0.5
+    debris = lp(crackle(r, n, 55, 0.003, 1.4), 3200) * env(dur, [(0, 0), (0.2, 1), (0.95, 0.2), (1.3, 0)])
+    return lp(crush(boom * 1.2 + crunch * 1.2 + ring * 0.55 + scrape + debris * 0.8, 9, 2), 4800)
 
 
 @sound("fire_whoomph", "boom", 1)
