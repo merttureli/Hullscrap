@@ -204,10 +204,11 @@ def bolt_sizzle(k):
     """A bolt biting into a wall: a short hiss with a few sparks popping in it."""
     r, dur = R("bolt_sizzle", k), 0.34
     n = n_of(dur)
-    hiss = bp(white(r, n), [3200, 2700][k], 0.8) * ad(dur, 0.0005, 0.07)
-    sparks = lp(crackle(r, n, [60, 48][k], 0.0016, 1.4), 5200) * decay(dur, 0.1)
+    hiss = bp(white(r, n), [3200, 2700][k], 0.8) * ad(dur, 0.0005, 0.06)
+    sparks = lp(crackle(r, n, [70, 56][k], 0.0014, 1.5), 5200) * decay(dur, 0.09)
     body = sine(sweep(420, 140, dur)) * ad(dur, 0.001, 0.03) * 0.4
-    return lp(crush(hiss * 0.8 + sparks * 1.2 + body, 10, 1), 6000)
+    sear = lp(white(r, n), 900) * ad(dur, 0.0005, 0.02) * 0.6
+    return lp(crush(hiss * 0.8 + sparks * 1.2 + body + sear, 10, 1), 6000)
 
 
 @sound("flare_pop", "weapon", 1)
@@ -237,7 +238,8 @@ def arc_crackle(k):
     """An arc pistol: a crackling blue snap, a burst of electric noise with a buzz under it that stutters out."""
     r, dur = R("arc_crackle", k), 0.42
     n = n_of(dur)
-    zap = hp(white(r, n), 1800) * ad(dur, 0.0004, 0.05) * 0.8
-    stutter = lp(crackle(r, n, [110, 90][k], 0.0012, 1.6), 6500) * decay(dur, 0.12)
-    buzz = fft_filter(saw(sweep([160, 140][k], 90, dur), n), None, 1400) * ad(dur, 0.001, 0.09) * 0.5
-    return lp(crush(zap + stutter * 1.2 + buzz, 10, 1), 6200)
+    zap = hp(white(r, n), 1800) * ad(dur, 0.0003, 0.04) * 0.9
+    stutter = lp(crackle(r, n, [120, 100][k], 0.0011, 1.8), 6500) * decay(dur, 0.1) * (0.5 + 0.5 * square(38, n))
+    buzz = fft_filter(saw(sweep([160, 140][k], 90, dur), n), None, 1400) * ad(dur, 0.001, 0.08) * 0.5
+    snap = sine(sweep(240, 90, dur)) * ad(dur, 0.001, 0.03) * 0.5
+    return lp(crush(zap + stutter * 1.2 + buzz + snap, 10, 1), 6200)

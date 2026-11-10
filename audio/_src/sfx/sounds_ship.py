@@ -160,9 +160,10 @@ def ion_lock(k):
     r, dur = R("ion_lock", k), 0.75
     n = n_of(dur)
     fizz = hp(white(r, n), 1800) * ad(dur, 0.002, 0.2) * (0.6 + 0.4 * square(48, n))
+    buzz = lp(saw(sweep(120, 60, dur), n), 1500) * ad(dur, 0.002, 0.25) * 0.35
     sag = fm(sweep(1400, 200, dur), 1.41, env(dur, [(0, 5.0), (0.6, 1.0)]), n) * ad(dur, 0.002, 0.2) * 0.5
     sparks = lp(crackle(r, n, 110, 0.001, 1.2), 5200) * decay(dur, 0.25) * 0.9
-    return lp(crush(fizz * 0.35 + sag + sparks, 9, 2), 5600)
+    return lp(crush(fizz * 0.35 + sag + sparks + buzz, 9, 2), 5600)
 
 
 @sound("ram_impact", "boom", 1)

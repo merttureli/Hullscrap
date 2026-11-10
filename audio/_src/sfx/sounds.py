@@ -38,24 +38,27 @@ def mix(*parts):
 
 @sound("laser", "weapon", 3)
 def laser(k):
-    r, dur = R("laser", k), 0.30
+    """A snappy bright zap: a click, a fast downward sweep and a small capacitor thump under it. Short, so volleys stay clear."""
+    r, dur = R("laser", k), 0.24
     n = n_of(dur)
-    f = sweep([2000, 2400, 1700][k], [260, 330, 220][k], dur)
-    core = lp(0.6 * saw(f) + 0.4 * square(f * 0.5), 4200) * ad(dur, 0.002, [0.075, 0.065, 0.09][k])
-    base = [380, 430, 350][k]
-    clank = modal(BAR[:5] * base, [0.05, 0.04, 0.03, 0.02, 0.012], [0.5, 0.3, 0.2, 0.1, 0.05], dur, r, 0.01) * 0.4
-    tick = bp(white(r, n), 3000, 1.0) * ad(dur, 0.0003, 0.006) * 0.5
-    return lp(crush(core + clank + tick, 10, 2), 6000)
+    f = env(dur, [(0, [3400, 3800, 3000][k]), (0.035, [1300, 1500, 1100][k]), (dur, [380, 430, 330][k])])
+    zap = lp(0.65 * saw(f) + 0.35 * square(f * 0.5), 5000) * ad(dur, 0.0008, [0.05, 0.045, 0.06][k])
+    thump = sine(sweep([105, 95, 120][k], 48, dur)) * ad(dur, 0.002, 0.045) * 0.9
+    click = bp(white(r, n), 4200, 0.9) * ad(dur, 0.0002, 0.004) * 0.9
+    ring = modal(BAR[:3] * [620, 700, 560][k], [0.03, 0.02, 0.012], [0.3, 0.18, 0.1], dur, r, 0.01) * 0.3
+    return lp(crush(zap + thump + click + ring, 10, 1), 6200)
 
 
 @sound("bolt", "weapon", 3)
 def bolt(k):
-    r, dur = R("bolt", k), 0.34
+    """A kinetic slug: a breech chunk and a thick mid tone, duller than the laser, with a short metal clack."""
+    r, dur = R("bolt", k), 0.3
     n = n_of(dur)
-    thump = sine(sweep([170, 150, 195][k], 55, dur)) * ad(dur, 0.001, 0.07)
-    crack = bp(white(r, n), sweep(2400, 900, dur), 1.2) * ad(dur, 0.0005, 0.035)
-    ping = modal(BAR[:4] * [520, 610, 470][k], [0.09, 0.06, 0.04, 0.03], [0.4, 0.25, 0.15, 0.08], dur, r, 0.01)
-    return lp(crush(thump * 1.1 + crack * 0.9 + ping * 0.4, 9, 2), 6000)
+    thump = sine(sweep([150, 130, 175][k], 52, dur)) * ad(dur, 0.001, 0.06)
+    chunk = lp(white(r, n), 1400) * ad(dur, 0.0004, 0.014) * 1.3
+    tone = tri(sweep([430, 380, 480][k], 250, dur), n) * ad(dur, 0.001, 0.05) * 0.6
+    clack = modal(BAR[:4] * [700, 800, 640][k], [0.03, 0.02, 0.014, 0.01], [0.35, 0.25, 0.15, 0.08], dur, r, 0.01) * 0.45
+    return lp(crush(thump * 1.1 + chunk + tone + clack, 9, 2), 3800)
 
 
 @sound("flak", "weapon", 2)
@@ -88,38 +91,41 @@ def missile_launch(k):
 def beam_loop(k):
     tot = 2.25
     n, t = n_of(tot), tt(tot)
+    wob = np.sin(TAU * 1.5 * t)      # the slow wobble: 3 whole cycles per loop
     chans = []
     for c in range(2):
         r = R("beam_loop", c)
-        hum = 0.5 * saw(110, n, 0.25 * c) + 0.25 * saw(165, n) + 0.4 * sine(220, n, 0.1 * c)
-        hum = lp(hum, 1400)
-        shim = fm(660, 2.0, 2.0 + 1.5 * np.sin(TAU * 3 * t), n) * 0.18
+        f0 = 110 * (1.0 + 0.012 * wob)
+        hum = 0.5 * saw(f0, n, 0.25 * c) + 0.25 * saw(f0 * 1.5, n) + 0.4 * sine(f0 * 2, n, 0.1 * c) + 0.5 * sine(55, n)
+        hum = lp(hum, 1000)
+        shim = fm(660, 2.0, 1.5 + 1.0 * np.sin(TAU * 3 * t), n) * 0.1
         sizz = bp(white(r, n), 3200, 1.0) * (0.55 + 0.45 * np.sin(TAU * 6 * t + c)) * 0.22
-        chans.append((hum + shim + sizz) * (1.0 + 0.15 * np.sin(TAU * 4 * t)))
+        spit = lp(crackle(r, n, 45, 0.0012, 1.2), 5000) * 0.35
+        chans.append((hum + shim + sizz + spit) * (1.0 + 0.2 * wob))
     return stereo(*chans)
 
 
 @sound("ion", "weapon", 2)
 def ion(k):
-    r, dur = R("ion", k), 0.5
+    """A buzzy electric zap: a 60 Hz-ish buzz, crackle spikes and a short falling whine."""
+    r, dur = R("ion", k), 0.42
     n = n_of(dur)
-    f = sweep([1900, 1500][k], 190, dur)
-    zap = fm(f, 1.41, env(dur, [(0, 6.0), (0.4, 1.0), (0.5, 0.5)]), n) * ad(dur, 0.002, 0.13)
-    trem = 0.65 + 0.35 * square(55, n)
-    zap = lp(zap * trem, 5200)
-    spit = lp(crackle(r, n, 70, 0.0012), 5000) * decay(dur, 0.18) * 0.7
-    low = sine(sweep(180, 70, dur)) * ad(dur, 0.002, 0.08) * 0.6
-    return lp(crush(zap + spit + low, 10, 2), 5200)
+    whine = fm(sweep([2300, 1800][k], 260, dur), 1.41, env(dur, [(0, 6.0), (0.3, 1.0), (dur, 0.4)]), n) * ad(dur, 0.001, 0.09)
+    buzz = lp(saw(sweep([110, 95][k], 70, dur), n) * (0.6 + 0.4 * square(50, n)), 2200) * ad(dur, 0.001, 0.14) * 0.8
+    spit = lp(crackle(r, n, 130, 0.0010, 1.6), 5500) * decay(dur, 0.14)
+    low = sine(sweep(170, 65, dur)) * ad(dur, 0.002, 0.06) * 0.6
+    return lp(crush(whine * 0.8 + buzz + spit * 0.9 + low, 10, 2), 5200)
 
 
 @sound("rapid_tick", "rapid", 3)
 def rapid_tick(k):
-    r, dur = R("rapid_tick", k), 0.08
+    """A tight click with no tail: it is over in 50 ms, so a burst reads as separate ticks."""
+    r, dur = R("rapid_tick", k), 0.05
     n = n_of(dur)
-    click = bp(white(r, n), 2800 + 300 * k, 1.5) * ad(dur, 0.0003, 0.009)
-    tone = sine(sweep(1100 - 100 * k, 600, dur)) * ad(dur, 0.0005, 0.014) * 0.5
-    ting = modal([1900 + 200 * k, 3100], [0.007, 0.005], [0.3, 0.2], dur) * 0.4
-    return lp(crush(click + tone + ting, 8, 2), 5500)
+    click = bp(white(r, n), 3000 + 300 * k, 1.6) * ad(dur, 0.0002, 0.005)
+    tone = sine(sweep(1300 - 100 * k, 700, dur)) * ad(dur, 0.0004, 0.008) * 0.5
+    knock = sine(sweep(260, 150, dur)) * ad(dur, 0.0005, 0.008) * 0.5
+    return lp(crush(click + tone + knock, 8, 2), 5500)
 
 
 # --- impacts ------------------------------------------------------------------------------------------------------------
